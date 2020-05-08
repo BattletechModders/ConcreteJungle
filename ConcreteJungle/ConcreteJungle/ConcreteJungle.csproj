@@ -58,11 +58,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Helper\SpawnHelper.cs" />
     <Compile Include="ModConfig.cs" />
     <Compile Include="ModInit.cs" />
     <Compile Include="ModState.cs" />
     <Compile Include="Patches\AbstractActorPatches.cs" />
     <Compile Include="Patches\CombatGameStatePatches.cs" />
+    <Compile Include="Patches\PilotableActorRepresentationPatches.cs" />
     <Compile Include="Patches\TurnDirectorPatches.cs" />
     <Compile Include="Patches\TeamPatches.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

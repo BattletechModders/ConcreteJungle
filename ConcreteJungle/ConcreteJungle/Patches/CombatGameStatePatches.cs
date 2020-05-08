@@ -1,169 +1,51 @@
 ﻿using BattleTech;
-using BattleTech.Data;
 using Harmony;
-using System.Linq;
-using us.frostraptor.modUtils;
 
 namespace ConcreteJungle.Patches
 {
-    //[HarmonyPatch(typeof(CombatGameState), "_Init")]
-    //public static class CombatGameState__Init
-    //{
-    //    public static void Postfix(CombatGameState __instance)
-    //    {
-    //        Mod.Log.Trace("CGS:_I - entered.");
-
-    //        // Look for target buildings?
-    //        ModState.TargetableBuildings = __instance.GetAllCombatants()
-    //            .Where(x => x is BattleTech.Building)
-    //            .Select(x => x as BattleTech.Building)
-    //            .Where(x => x.BuildingDef != null 
-    //                && x.BuildingDef.Destructible
-    //                // && !x.IsTabTarget // ! isTabTarget should avoid buildings that are mission objectives
-    //                && x.UrbanDestructible != null  
-    //                //&& x.UrbanDestructible.CanBeDesolation // x.UrbanDestructible.CanBeDesolation ensures the building can become rubble
-    //                )
-    //            .ToList();
-    //        Mod.Log.Debug($"Map has: {ModState.TargetableBuildings.Count} buildings");
-
-    //        // Load the necessary turret defs
-    //        Mod.Log.Debug($"DM TurretDefs are: {__instance.DataManager.TurretDefs.Count}");
-    //        LoadRequest asyncSpawnReq = __instance.DataManager.CreateLoadRequest(delegate (LoadRequest loadRequest)
-    //        {
-    //            OnLoadComplete(__instance);
-    //        }, false);
-    //        asyncSpawnReq.AddBlindLoadRequest(BattleTechResourceType.TurretDef, "turretdef_Light_Shredder", new bool?(false));
-    //        asyncSpawnReq.AddBlindLoadRequest(BattleTechResourceType.PilotDef, "pilot_d7_turret", new bool?(false));
-    //        asyncSpawnReq.ProcessRequests(1000U);
-    //    }
-
-    //    private static void OnLoadComplete(CombatGameState cgs)
-    //    {
-    //        Mod.Log.Debug($"TurretDef load complete!");
-    //        Mod.Log.Debug($"DM TurretDefs are: {cgs.DataManager.TurretDefs.Count}");
-    //    }
-    //}
-
-    // TODO: Similar patch for FirstTimeInit, for the same reason
-    // Invoke after _Init() methods, as that is where the Destructible objects are associated to buildings
-    [HarmonyPatch(typeof(CombatGameState), "InitFromSave")]
-    public static class CombatGameState_InitFromSave
+    [HarmonyPatch(typeof(CombatGameState), "_Init")]
+    public static class CombatGameState__Init
     {
         public static void Postfix(CombatGameState __instance)
         {
-            Mod.Log.Trace("CGS:IFS - entered.");
+            Mod.Log.Trace("CGS:_I - entered.");
 
-            //// Look for target buildings?
-            //ModState.TargetableBuildings = __instance.GetAllCombatants()
-            //    .Where(x => x is BattleTech.Building)
-            //    .Select(x => x as BattleTech.Building)
-            //    .Where(x => x.BuildingDef != null
-            //        && x.BuildingDef.Destructible
-            //        // && !x.IsTabTarget // ! isTabTarget should avoid buildings that are mission objectives
-            //        && x.UrbanDestructible != null
-            //        && x.UrbanDestructible.CanBeDesolation // x.UrbanDestructible.CanBeDesolation ensures the building can become rubble
-            //        )
-            //    .ToList();
-            //Mod.Log.Debug($"Map has: {ModState.TargetableBuildings.Count} buildings");
-
-            //// Load the necessary turret defs
-            //Mod.Log.Debug($"DM TurretDefs are: {__instance.DataManager.TurretDefs.Count}");
-            //LoadRequest asyncSpawnReq = __instance.DataManager.CreateLoadRequest(delegate (LoadRequest loadRequest)
-            //{
-            //    OnLoadComplete(__instance);
-            //}, false);
-            //asyncSpawnReq.AddBlindLoadRequest(BattleTechResourceType.TurretDef, "turretdef_Light_Shredder", new bool?(false));
-            //asyncSpawnReq.AddBlindLoadRequest(BattleTechResourceType.PilotDef, "pilot_d7_turret", new bool?(false));
-            //asyncSpawnReq.ProcessRequests(1000U);
-        }
-
-        private static void OnLoadComplete(CombatGameState cgs)
-        {
-            Mod.Log.Debug($"TurretDef load complete!");
-            Mod.Log.Debug($"DM TurretDefs are: {cgs.DataManager.TurretDefs.Count}");
-        }
-    }
-
-    // TODO: Similar patch for FirstTimeInit, for the same reason
-    // Invoke after _Init() methods, as that is where the Destructible objects are associated to buildings
-    [HarmonyPatch(typeof(TurnDirector), "OnInitializeContractComplete")]
-    public static class TurnDirector_OnInitializeContractComplete
-    {
-        public static void Postfix(TurnDirector __instance, MessageCenterMessage message)
-        {
-            Mod.Log.Trace("ELP:IC - entered.");
-
-            InitializeContractCompleteMessage initializeContractMessage = message as InitializeContractCompleteMessage;
-            CombatGameState combat = __instance.Combat;
-            Contract activeContract = combat.ActiveContract;
-
-            foreach (ICombatant combatant in combat.GetAllCombatants())
+            foreach (Team team in __instance.Teams)
             {
-                if (combatant is BattleTech.Building building) {
-                    Mod.Log.Debug($" Found building {CombatantUtils.Label(building)}");
-                    Mod.Log.Debug($"  -- isTabTarget: {building.IsTabTarget}");
-
-                    if (building.BuildingDef != null)
+                Mod.Log.Debug($" Found Team with displayName: {team.DisplayName}  name:{team.Name}  unitCount: {team.unitCount}  has_supportTeam: {team.SupportTeam != null}");
+                //if (team.IsEnemy(__instance.LocalPlayerTeam) && team.unitCount > 0)
+                //{
+                //    ModState.CandidateTeams.Add(team);
+                //    Mod.Log.Debug($"  - Adding as candidate for traps.");
+                //}
+                if (team.GUID == TeamDefinition.TargetsAllyTeamDefinitionGuid)
+                {
+                    ModState.CandidateTeams.Add(team);
+                    Mod.Log.Debug($"  team has: {team?.lances?.Count} lances");
+                    if (team?.lances?.Count == 0)
                     {
-                        Mod.Log.Debug($"   -- BuildingDef: " +
-                            $"description: '{building.BuildingDef.Description}' " +
-                            $"isDestructible: {building.BuildingDef.Destructible} " +
-                            $"structurePoints: {building.BuildingDef.StructurePoints} ");
+                        Lance newLance = new Lance(team);
+                        team.lances.Add(newLance);
                     }
-                    if (building.UrbanDestructible != null)
-                    {
-                        Mod.Log.Debug($"   -- UrbanDestructible: " +
-                            $"name: {building.UrbanDestructible.name} " +
-                            $"canBeDesolation: {building.UrbanDestructible.CanBeDesolation} " +
-                            $"currentDesolationState: {building.UrbanDestructible.CurDesolationState}"
-                            );
-                    }
-
                 }
             }
-            // Look for target buildings
-            ModState.TargetableBuildings = combat.GetAllCombatants()
-                .Where(x => x is BattleTech.Building)
-                .Cast<BattleTech.Building>()
-                //.Select(x => x as BattleTech.Building)
-                .Where(b =>
-                //    b.BuildingDef != null
-                    //b.BuildingDef.Destructible
-                //      && !b.IsTabTarget // ! isTabTarget should avoid buildings that are mission objectives
-                    b.UrbanDestructible != null
-                    && b.UrbanDestructible.CanBeDesolation // x.UrbanDestructible.CanBeDesolation ensures the building can become rubble
-                    )
 
-                .ToList();
-            Mod.Log.Debug($"Map has: {ModState.TargetableBuildings.Count} buildings"); 
-
-            // Load the necessary turret defs
-            Mod.Log.Debug($"DM TurretDefs are: {combat.DataManager.TurretDefs.Count}");
-            LoadRequest asyncSpawnReq = combat.DataManager.CreateLoadRequest(delegate (LoadRequest loadRequest)
-            {
-                OnLoadComplete(combat);
-            }, false);
-            asyncSpawnReq.AddBlindLoadRequest(BattleTechResourceType.TurretDef, "turretdef_Light_Shredder", new bool?(false));
-            asyncSpawnReq.AddBlindLoadRequest(BattleTechResourceType.PilotDef, "pilot_d7_turret", new bool?(false));
-            asyncSpawnReq.ProcessRequests(1000U);
-        }
-
-        private static void OnLoadComplete(CombatGameState cgs)
-        {
-            Mod.Log.Debug($"TurretDef load complete!");
-            Mod.Log.Debug($"DM TurretDefs are: {cgs.DataManager.TurretDefs.Count}");
+            ModState.Combat = __instance;
         }
     }
 
     [HarmonyPatch(typeof(CombatGameState), "OnCombatGameDestroyed")]
     public static class CombatGameState_OnCombatGameDestroyed
     {
-        //public static bool Prepare() { return Mod.Config.Features.BiomeBreaches; }
 
         public static void Postfix(CombatGameState __instance)
         {
             Mod.Log.Trace("CGS:OCGD - entered.");
-      
+
+            ModState.Reset();
         }
     }
+
+
+
 }

@@ -10,6 +10,8 @@ namespace ConcreteJungle {
 
     public class ModConfig {
 
+        public string TurretDef = "turretdef_Light_Shredder";
+        public string TurretPilotDef = "pilot_d7_turret";
 
         // If true, many logs will be printed
         public bool Debug = false;
