@@ -22,7 +22,7 @@ namespace ConcreteJungle
             turret.AddToLance(team.lances.First<Lance>());
 
             ModState.TrapBuildingsToTurrets.Add(parentBuilding.GUID, turret);
-            ModState.TrapTurretIds.Add(turret.GUID);
+            ModState.TrapTurretToBuildingIds.Add(turret.GUID, parentBuilding.GUID);
 
             return turret;
         }

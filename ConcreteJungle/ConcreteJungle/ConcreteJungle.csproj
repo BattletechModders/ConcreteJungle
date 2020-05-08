@@ -64,6 +64,7 @@
     <Compile Include="ModState.cs" />
     <Compile Include="Patches\AbstractActorPatches.cs" />
     <Compile Include="Patches\CombatGameStatePatches.cs" />
+    <Compile Include="Patches\LOSPatches.cs" />
     <Compile Include="Patches\PilotableActorRepresentationPatches.cs" />
     <Compile Include="Patches\TurnDirectorPatches.cs" />
     <Compile Include="Patches\TeamPatches.cs" />

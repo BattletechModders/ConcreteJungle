@@ -1,5 +1,6 @@
 ﻿using BattleTech;
 using Harmony;
+using System.Linq;
 
 namespace ConcreteJungle.Patches
 {
@@ -13,7 +14,7 @@ namespace ConcreteJungle.Patches
 
             Traverse parentT = Traverse.Create(__instance).Property("parentActor");
             AbstractActor parentActor = parentT.GetValue<AbstractActor>();
-            if (ModState.TrapTurretIds.Contains(parentActor.GUID))
+            if (ModState.TrapTurretToBuildingIds.Keys.Contains(parentActor.GUID))
             {
                 Turret turret = parentActor as Turret;
                 if (newLevel == VisibilityLevel.LOSFull)
