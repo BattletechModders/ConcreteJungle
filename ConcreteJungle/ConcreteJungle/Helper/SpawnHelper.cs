@@ -1,4 +1,5 @@
 ﻿using BattleTech;
+using Harmony;
 using System.Linq;
 
 namespace ConcreteJungle
@@ -23,6 +24,16 @@ namespace ConcreteJungle
 
             ModState.TrapBuildingsToTurrets.Add(parentBuilding.GUID, turret);
             ModState.TrapTurretToBuildingIds.Add(turret.GUID, parentBuilding.GUID);
+
+            Mod.Log.Debug($" Parent building associated with team: {parentBuilding.TeamId}, adding to team: {team.GUID}");
+            parentBuilding.AddToTeam(team);
+            parentBuilding.BuildingRep.IsTargetable = true;
+            parentBuilding.BuildingRep.SetHighlightColor(ModState.Combat, team);
+            parentBuilding.BuildingRep.RefreshEdgeCache();
+
+            Mod.Log.Debug($" Parent building: " +
+                $"bRep.IsTargetable: {parentBuilding.BuildingRep.IsTargetable} " +
+                $"gRep.IsTargetable: {parentBuilding.GameRep.IsTargetable} ");
 
             return turret;
         }

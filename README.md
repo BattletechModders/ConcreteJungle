@@ -18,4 +18,11 @@ Interesting methods
 * DropshipGameLogic.SpawnDropshipForFlyby
 * Ability.ActivateSpawnTurret
 * Ability.ActivateStrafe
-* 
+
+Todo: 
+
+* Remove turrets when you move more than N meters away / lose LoS to the building
+* Make trap shells tab selectable
+* Roll for trap, deploy X traps of a single type?
+* Need to store association of turret -> building in a stat for save loading purposes
+* Verify AI can't attack/destroy a trap turret directly

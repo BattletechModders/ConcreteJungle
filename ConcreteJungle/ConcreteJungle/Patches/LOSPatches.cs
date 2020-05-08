@@ -1,10 +1,7 @@
 ﻿using BattleTech;
 using Harmony;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using us.frostraptor.modUtils;
 
 namespace ConcreteJungle.Patches
@@ -17,7 +14,7 @@ namespace ConcreteJungle.Patches
         {
             if (source is Turret turret && ModState.TrapTurretToBuildingIds.Keys.Contains(turret.GUID))
             {
-                Mod.Log.Debug($"Turret {CombatantUtils.Label(turret)} is calculating it's LOF");
+                Mod.Log.Trace($"Turret {CombatantUtils.Label(turret)} is calculating it's LOF");
                 ModState.CurrentTurretForLOF = turret;
             }
         }

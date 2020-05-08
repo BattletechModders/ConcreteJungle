@@ -12,6 +12,10 @@ namespace ConcreteJungle {
 
         public string TurretDef = "turretdef_Light_Shredder";
         public string TurretPilotDef = "pilot_d7_turret";
+        public string VehicleDef = "vehicledef_DEMOLISHER";
+        public string VehiclePilotDef = "pilot_d9_brawler";
+
+        public int MaxAmbushTurrets = 3;
 
         // If true, many logs will be printed
         public bool Debug = false;

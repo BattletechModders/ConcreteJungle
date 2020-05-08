@@ -14,8 +14,14 @@ namespace ConcreteJungle.Patches
             // TODO: Allow spawn on ally as well
             if (__instance.team.IsLocalPlayer)
             {
-                // TODO: Random chance to spawn
 
+                Mod.Log.Debug($"Tab targets available to: {CombatantUtils.Label(__instance)}");
+                foreach (ICombatant combatant in __instance.Combat.GetAllTabTargets(__instance))
+                {
+                    Mod.Log.Debug($"  -- {CombatantUtils.Label(combatant)}");
+                }
+                
+                // TODO: Random chance to spawn
                 List<BattleTech.Building> candidates = new List<BattleTech.Building>();
                 Mod.Log.Debug($"Comparing distance from actor: {CombatantUtils.Label(__instance)} at position: {__instance.CurrentPosition}");
                 foreach (BattleTech.Building building in ModState.CandidateBuildings)
@@ -37,9 +43,11 @@ namespace ConcreteJungle.Patches
                     BattleTech.Building trapBuilding = candidates.ElementAt(idx);
                     Mod.Log.Debug($" -- using building: {CombatantUtils.Label(trapBuilding)} as trap.");
                     float surfaceArea = trapBuilding.DestructibleObjectGroup.footprint.x * trapBuilding.DestructibleObjectGroup.footprint.y;
-                    Mod.Log.Debug($" -- building has dimensions: {surfaceArea}");
+                    Mod.Log.Debug($" -- building has dimensions: {surfaceArea}  team: {trapBuilding.TeamId}");
 
-                    if (ModState.TrapBuildingsToTurrets.ContainsKey(trapBuilding.GUID)) return;
+                    if (ModState.TrapBuildingsToTurrets.ContainsKey(trapBuilding.GUID)) return; // skip turret creation if this building already has one
+                    if (ModState.TrapTurretToBuildingIds.Keys.Count >= Mod.Config.MaxAmbushTurrets) return; // skip turrets if we're already maxed out on the count
+
 
                     idx = ModState.CandidateTeams.Count > 0 ? Mod.Random.Next(0, ModState.CandidateTeams.Count - 1) : 0;
                     Team trapTeam = ModState.CandidateTeams.ElementAt<Team>(idx);

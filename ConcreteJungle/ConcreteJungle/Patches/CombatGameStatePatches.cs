@@ -1,12 +1,13 @@
 ﻿using BattleTech;
 using Harmony;
+using System.Collections.Generic;
 
 namespace ConcreteJungle.Patches
 {
     [HarmonyPatch(typeof(CombatGameState), "_Init")]
-    public static class CombatGameState__Init
+    static class CombatGameState__Init
     {
-        public static void Postfix(CombatGameState __instance)
+        static void Postfix(CombatGameState __instance)
         {
             Mod.Log.Trace("CGS:_I - entered.");
 
@@ -24,6 +25,7 @@ namespace ConcreteJungle.Patches
                     Mod.Log.Debug($"  team has: {team?.lances?.Count} lances");
                     if (team?.lances?.Count == 0)
                     {
+                        Mod.Log.Debug($"  -- adding lance to team.");
                         Lance newLance = new Lance(team);
                         team.lances.Add(newLance);
                     }
@@ -35,10 +37,9 @@ namespace ConcreteJungle.Patches
     }
 
     [HarmonyPatch(typeof(CombatGameState), "OnCombatGameDestroyed")]
-    public static class CombatGameState_OnCombatGameDestroyed
+    static class CombatGameState_OnCombatGameDestroyed
     {
-
-        public static void Postfix(CombatGameState __instance)
+        static void Postfix(CombatGameState __instance)
         {
             Mod.Log.Trace("CGS:OCGD - entered.");
 
@@ -46,6 +47,17 @@ namespace ConcreteJungle.Patches
         }
     }
 
+    // Remove any trap turrets as possible tab targets
+    static class CombatGameState_GetAllTabTargets
+    {
+        static void Postfix(CombatGameState __instance, List<ICombatant> __result)
+        {
+            if (__result != null && __result.Count > 0)
+            {
+                __result.RemoveAll(x => ModState.TrapTurretToBuildingIds.ContainsKey(x.GUID));
+            }
+        }
+    }
 
 
 }

@@ -19,6 +19,7 @@ namespace ConcreteJungle.Patches
             Contract activeContract = combat.ActiveContract;
 
             // Find candidate buildings
+            Mod.Log.Debug("Filtering candidate buidlings:");
             ModState.CandidateBuildings.Clear();
             foreach (ICombatant combatant in combat.GetAllCombatants())
             {
@@ -42,17 +43,18 @@ namespace ConcreteJungle.Patches
                             $"currentDesolationState: {building.UrbanDestructible.CurDesolationState}"
                             );
                     }
+
                     if (building.BuildingDef != null && building.BuildingDef.Destructible &&
                         building.UrbanDestructible != null && building.UrbanDestructible.CanBeDesolation &&
                         !building.IsTabTarget)
                     {
-                        Mod.Log.Debug($"Building {CombatantUtils.Label(building)} meets criteria, adding as trap candidate.");
+                        Mod.Log.Trace($"  -- Building {CombatantUtils.Label(building)} meets criteria, adding as trap candidate.");
                         ModState.CandidateBuildings.Add(building);
                     }
 
                 }
             }
-            Mod.Log.Debug($"Map has: {ModState.CandidateBuildings.Count} buildings");
+            Mod.Log.Debug($"Map has: {ModState.CandidateBuildings.Count} buildings suitable for traps");
 
             // Load the necessary turret defs
             Mod.Log.Debug($"DM TurretDefs are: {combat.DataManager.TurretDefs.Count}");
