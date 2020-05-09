@@ -41,9 +41,6 @@ namespace ConcreteJungle.Patches
                 {
                     int idx = Mod.Random.Next(0, candidates.Count - 1);
                     BattleTech.Building trapBuilding = candidates.ElementAt(idx);
-                    Mod.Log.Debug($" -- using building: {CombatantUtils.Label(trapBuilding)} as trap.");
-                    float surfaceArea = trapBuilding.DestructibleObjectGroup.footprint.x * trapBuilding.DestructibleObjectGroup.footprint.y;
-                    Mod.Log.Debug($" -- building has dimensions: {surfaceArea}  team: {trapBuilding.TeamId}");
 
                     if (ModState.TrapBuildingsToTurrets.ContainsKey(trapBuilding.GUID)) return; // skip turret creation if this building already has one
                     if (ModState.TrapTurretToBuildingIds.Keys.Count >= Mod.Config.MaxAmbushTurrets) return; // skip turrets if we're already maxed out on the count

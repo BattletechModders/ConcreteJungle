@@ -1,4 +1,5 @@
-﻿using Harmony;
+﻿using BattleTech;
+using Harmony;
 
 namespace ConcreteJungle.Patches
 {
@@ -28,13 +29,16 @@ namespace ConcreteJungle.Patches
     }
 
     [HarmonyPatch(typeof(BattleTech.Building), "HandleDeath")]
-    static class Building_ShouldShowFlags_Getter
+    static class Building_HandleDeath
     {
-        static void Postfix(BattleTech.Building __instance, ref bool __result)
+        static void Prefix(BattleTech.Building __instance)
         {
             if (ModState.TrapBuildingsToTurrets.ContainsKey(__instance.GUID))
             {
-                __result = true;
+                // Despawn the associated turret
+                Turret turret = ModState.TrapBuildingsToTurrets[__instance.GUID];
+                turret.FlagForDeath("Shell Building Destroyed", DeathMethod.VitalComponentDestroyed, DamageType.Enemy, -1, -1, "", false);
+                turret.HandleDeath(__instance.GUID);
             }
         }
     }

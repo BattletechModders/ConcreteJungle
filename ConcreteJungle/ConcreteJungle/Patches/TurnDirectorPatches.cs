@@ -5,7 +5,7 @@ using us.frostraptor.modUtils;
 
 namespace ConcreteJungle.Patches
 {
-    // We need to defer until after the buildings are initialized in pass 2, because the UrbanDestrible elements aren't
+    // We need to defer until after the buildings are initialized in pass 2, because the UrbanDestructible elements aren't
     //   added until then. 
     [HarmonyPatch(typeof(TurnDirector), "OnInitializeContractComplete")]
     public static class TurnDirector_OnInitializeContractComplete

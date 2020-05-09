@@ -26,3 +26,8 @@ Todo:
 * Roll for trap, deploy X traps of a single type?
 * Need to store association of turret -> building in a stat for save loading purposes
 * Verify AI can't attack/destroy a trap turret directly
+* Debug will kill turrets directly
+* Test AoE effect ordering
+  * How to prevent the turrets from taking damage
+* WTF won't building highlighting work? Probably not a huge deal
+

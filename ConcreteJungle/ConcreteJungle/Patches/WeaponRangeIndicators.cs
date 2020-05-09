@@ -4,32 +4,11 @@ using Harmony;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using us.frostraptor.modUtils;
 
 namespace ConcreteJungle.Patches
 {
-    [HarmonyPatch(typeof(WeaponRangeIndicators), "ShowLinesToAllEnemies")]
-    static class WeaponRangeIndicators_ShowLinesToAllEnemies
-    {
-        static void Postfix(WeaponRangeIndicators __instance, AbstractActor selectedActor)
-        {
-            //Mod.Log.Debug($"Iterating all enemies of selected actor: {CombatantUtils.Label(selectedActor)}");
-            //List<AbstractActor> allEnemies = selectedActor.Combat.AllEnemies;
-            //foreach(AbstractActor enemyActor in allEnemies)
-            //{
-            //    Mod.Log.Debug($"  -- enemy: {CombatantUtils.Label(enemyActor)}");
-            //}
 
-            //Mod.Log.Debug($"Iterating all possible targets");
-            //Traverse HUDT = Traverse.Create(__instance).Property("HUD");
-            //CombatHUD HUD = HUDT.GetValue<CombatHUD>();
-            //foreach (ICombatant target in HUD.SelectionHandler.ActiveState.FiringPreview.AllPossibleTargets)
-            //{
-            //    Mod.Log.Debug($"  -- target: {CombatantUtils.Label(target)}");
-            //}
-        }
-    }
-
+    // HBS draws a line-of-fire to target buildings, but when you target them it goes away. This ensures they persist. 
     [HarmonyPatch(typeof(WeaponRangeIndicators), "UpdateTargetingLines")]
     static class WeaponRangeIndicators_UpdateTargetingLines
     {
@@ -61,16 +40,6 @@ namespace ConcreteJungle.Patches
                     }
                 }
             }
-        }
-    }
-
-
-    [HarmonyPatch(typeof(WeaponRangeIndicators), "DrawLine")]
-    static class WeaponRangeIndicator_DrawLine
-    {
-        static void Postfix(WeaponRangeIndicators __instance, bool isPositionLocked, AbstractActor selectedActor, ICombatant target, bool usingMultifire, bool isLocked, bool isMelee)
-        {
-            Mod.Log.Debug($" === Drawing line from {CombatantUtils.Label(selectedActor)} to target: {CombatantUtils.Label(target)}");
         }
     }
 }

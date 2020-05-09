@@ -69,6 +69,7 @@
     <Compile Include="ModInit.cs" />
     <Compile Include="ModState.cs" />
     <Compile Include="Patches\AbstractActorPatches.cs" />
+    <Compile Include="Patches\ATUtilPatches.cs" />
     <Compile Include="Patches\BuildingPatches.cs" />
     <Compile Include="Patches\CombatGameStatePatches.cs" />
     <Compile Include="Patches\CombatHUDPatches.cs" />

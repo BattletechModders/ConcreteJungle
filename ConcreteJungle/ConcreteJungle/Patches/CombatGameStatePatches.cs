@@ -22,6 +22,8 @@ namespace ConcreteJungle.Patches
                 if (team.GUID == TeamDefinition.TargetsAllyTeamDefinitionGuid)
                 {
                     ModState.CandidateTeams.Add(team);
+
+                    Mod.Log.Debug($" IS TEAM PLAYER ENEMY: {__instance.HostilityMatrix.IsLocalPlayerEnemy(team)}");
                     Mod.Log.Debug($"  team has: {team?.lances?.Count} lances");
                     if (team?.lances?.Count == 0)
                     {
