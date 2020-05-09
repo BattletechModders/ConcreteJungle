@@ -13,7 +13,8 @@ namespace ConcreteJungle {
         public static Dictionary<string, string> TrapTurretToBuildingIds = new Dictionary<string, string>();
         
         public static Turret CurrentTurretForLOF = null;
-        
+        public static Turret CurrentTurretForLOS = null;
+
         public static CombatGameState Combat = null;
 
         public static void Reset() {
@@ -25,6 +26,7 @@ namespace ConcreteJungle {
             TrapTurretToBuildingIds.Clear();
 
             CurrentTurretForLOF = null;
+            CurrentTurretForLOS = null;
             Combat = null;
         }
 
