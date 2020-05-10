@@ -1,7 +1,10 @@
 ﻿using BattleTech;
+using ConcreteJungle.Helper;
+using ConcreteJungle.Objects;
 using Harmony;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 using us.frostraptor.modUtils;
 
 namespace ConcreteJungle.Patches
@@ -15,63 +18,32 @@ namespace ConcreteJungle.Patches
             if (__instance.team.IsLocalPlayer)
             {
 
-                Mod.Log.Debug($"Tab targets available to: {CombatantUtils.Label(__instance)}");
-                foreach (ICombatant combatant in __instance.Combat.GetAllTabTargets(__instance))
+                //Mod.Log.Debug($"Tab targets available to: {CombatantUtils.Label(__instance)}");
+                //foreach (ICombatant combatant in __instance.Combat.GetAllTabTargets(__instance))
+                //{
+                //    Mod.Log.Debug($"  -- {CombatantUtils.Label(combatant)}");
+                //}
+
+                // Check that we haven't exhausted the max traps for this mission
+                if (ModState.TrapsSpawned >= Mod.Config.MaxSpawns) return;
+
+                // Validate that we are far enough away from trap origins to spawn another
+                foreach (Vector3 trapOrigin in ModState.TrapSpawnOrigins)
                 {
-                    Mod.Log.Debug($"  -- {CombatantUtils.Label(combatant)}");
-                }
-                
-                // TODO: Random chance to spawn
-                List<BattleTech.Building> candidates = new List<BattleTech.Building>();
-                Mod.Log.Debug($"Comparing distance from actor: {CombatantUtils.Label(__instance)} at position: {__instance.CurrentPosition}");
-                foreach (BattleTech.Building building in ModState.CandidateBuildings)
-                {
-                    if (!building.IsDead && (building.CurrentPosition - __instance.CurrentPosition).magnitude < 200.0f)
+                    float distance = (__instance.CurrentPosition - trapOrigin).magnitude;
+                    if (distance < Mod.Config.MinSpawnDistance)
                     {
-                        Mod.Log.Debug($" -- Building: {CombatantUtils.Label(building)} at position: {building.CurrentPosition} is within range.");
-                        candidates.Add(building);
-                    }
-                    else
-                    {
-                        Mod.Log.Trace($" -- Building: {CombatantUtils.Label(building)} at position: {building.CurrentPosition} is more than 200 meters away.");
+                        Mod.Log.Debug($" Actor {CombatantUtils.Label(__instance)} at pos: {__instance.CurrentPosition} is {distance}m away from " +
+                            $"previous trap origin: {trapOrigin}. Skipping.");
+                        return;
                     }
                 }
 
-                if (candidates.Count > 0)
-                {
-                    int idx = Mod.Random.Next(0, candidates.Count - 1);
-                    BattleTech.Building trapBuilding = candidates.ElementAt(idx);
+                // Determine trap type - infantry ambush, tank ambush, IED
+                // TODO: Randomize
+                //TrapType trapType = TrapType.TRAP_INFANTRY_AMBUSH;
 
-                    if (ModState.TrapBuildingsToTurrets.ContainsKey(trapBuilding.GUID)) return; // skip turret creation if this building already has one
-                    if (ModState.TrapTurretToBuildingIds.Keys.Count >= Mod.Config.MaxAmbushTurrets) return; // skip turrets if we're already maxed out on the count
-
-
-                    idx = ModState.CandidateTeams.Count > 0 ? Mod.Random.Next(0, ModState.CandidateTeams.Count - 1) : 0;
-                    Team trapTeam = ModState.CandidateTeams.ElementAt<Team>(idx);
-                    Mod.Log.Debug($" Spawning trap under team: {trapTeam}");
-
-                    // Spawn a turret trap
-                    // TODO: Create unique spawnPosition and rotation?
-                    //Vector3 spawnPosition = trapBuilding.currentPosition;
-                    //Quaternion quaternion = Quaternion.LookRotation(positionB - positionA);
-                    AbstractActor trapTurret = SpawnHelper.SpawnTrapTurret(Mod.Config.TurretDef, Mod.Config.TurretPilotDef, trapTeam, trapBuilding);
-
-                    trapTurret.OnPlayerVisibilityChanged(VisibilityLevel.LOSFull);
-                    //PilotableActorRepresentation par = trapTurret.GameRep as PilotableActorRepresentation;
-                    //if (par == null) Mod.Log.Error("PAR IS NULL!");
-                    //par.SetForcedPlayerVisibilityLevel(VisibilityLevel.Blip4Maximum, false);
-
-                    Mod.Log.Debug("Updated turret visibility");
-                    trapTurret.OnPositionUpdate(trapBuilding.CurrentPosition, trapBuilding.CurrentRotation, -1, true, null, false);
-                    Mod.Log.Debug("Updated turret position.");
-
-                    trapTurret.BehaviorTree = BehaviorTreeFactory.MakeBehaviorTree(ModState.Combat.BattleTechGame, trapTurret, BehaviorTreeIDEnum.CoreAITree);
-                    Mod.Log.Debug("Updated turret behaviorTree");
-
-                    UnitSpawnedMessage message = new UnitSpawnedMessage("CJ_TRAP", trapTurret.GUID);
-                    ModState.Combat.MessageCenter.PublishMessage(message);
-                    Mod.Log.Debug("Sent spawn message!");
-                }
+                InfantryTrapHelper.SpawnInfantryAmbush(__instance.CurrentPosition);
             }
             
         }

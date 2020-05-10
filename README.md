@@ -30,4 +30,31 @@ Todo:
 * Test AoE effect ordering
   * How to prevent the turrets from taking damage
 * WTF won't building highlighting work? Probably not a huge deal
+* Spawn turrets 50/80% up building
+* Add quips on trap spawn
+* Add audio to quips
+* Select candidate buildings from closest to furthest (prevent buildings at back of pack)
+* Move turrets higher on spawn
+* Make sure turrets salvage isn't included
+* Check that a building isn't marked a condition mid-mission
+* Give turrets a 'free-turn' during the ambush moment?
+* Remove candidate buildings when they become infantry / vehicle traps
+
+Quips:
+
+* Get'em boys!
+
+* Boom. Headshot.
+
+* Charge!
+
+* Focus fire!
+
+* Concentrate on the lead!
+
+* Open Fire!
+
+* Wrong neighborhood, fucko
+
+  
 

@@ -1,6 +1,7 @@
 ﻿
 using BattleTech;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace ConcreteJungle {
 
@@ -15,6 +16,9 @@ namespace ConcreteJungle {
         public static Turret CurrentTurretForLOF = null;
         public static Turret CurrentTurretForLOS = null;
 
+        public static int TrapsSpawned = 0;
+        public static List<Vector3> TrapSpawnOrigins = new List<Vector3>();
+
         public static CombatGameState Combat = null;
 
         public static void Reset() {
@@ -27,6 +31,10 @@ namespace ConcreteJungle {
 
             CurrentTurretForLOF = null;
             CurrentTurretForLOS = null;
+
+            TrapsSpawned = 0;
+            TrapSpawnOrigins.Clear();
+
             Combat = null;
         }
 

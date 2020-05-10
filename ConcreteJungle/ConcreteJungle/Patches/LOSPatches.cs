@@ -9,6 +9,9 @@ using us.frostraptor.modUtils;
 namespace ConcreteJungle.Patches
 {
 
+    // TODO: The bresenham tests should probably be prefixes
+
+    // When a trap turret's line of sight is calculated, give it 'x-ray' vision to see through the shell building.
     [HarmonyPatch(typeof(LineOfSight), "GetVisibilityToTargetWithPositionsAndRotations")]
     [HarmonyPatch(new Type[] {  typeof(AbstractActor), typeof(Vector3), typeof(ICombatant), typeof(Vector3), typeof(Quaternion)})]
     static class LineOfSight_GetVisibilityToTargetWithPositionsAndRotations
@@ -17,7 +20,7 @@ namespace ConcreteJungle.Patches
         {
             if (source != null && ModState.TrapTurretToBuildingIds.ContainsKey(source.GUID) && !(target is BattleTech.Building))
             {
-                Mod.Log.Debug($"___VISIBILITY: SOURCE {CombatantUtils.Label(source)} TO TARGET {CombatantUtils.Label(target)}");
+                Mod.Log.Trace($"___VISIBILITY: SOURCE {CombatantUtils.Label(source)} TO TARGET {CombatantUtils.Label(target)}");
             }
 
             if (source is Turret turret && ModState.TrapTurretToBuildingIds.Keys.Contains(turret.GUID))
@@ -32,7 +35,7 @@ namespace ConcreteJungle.Patches
         {
             if (source != null && ModState.TrapTurretToBuildingIds.ContainsKey(source.GUID) && !(target is BattleTech.Building))
             {
-                Mod.Log.Debug($"___VISIBILITY RESULT: {__result}");
+                Mod.Log.Trace($"___VISIBILITY RESULT: {__result}");
             }
 
             if (ModState.CurrentTurretForLOS != null)
@@ -42,37 +45,7 @@ namespace ConcreteJungle.Patches
         }
     }
 
-    [HarmonyPatch(typeof(LOFCache), "GetLineOfFire")]
-    static class LOFCache_GetLineOfFire { 
-
-        static void Prefix(AbstractActor source, ICombatant target, LineOfFireLevel __result)
-        {
-            if (!source.team.IsLocalPlayer && !(target is BattleTech.Building building))
-            {
-                Mod.Log.Debug($"== CALCULATING LOF FROM {CombatantUtils.Label(source)} TO TARGET: {CombatantUtils.Label(target)}");
-            }
-
-            if (source is Turret turret && ModState.TrapTurretToBuildingIds.Keys.Contains(turret.GUID))
-            {
-                Mod.Log.Trace($"Turret {CombatantUtils.Label(turret)} is calculating it's LOF");
-                ModState.CurrentTurretForLOF = turret;
-            }
-        }
-
-        static void Postfix(AbstractActor source, ICombatant target, LineOfFireLevel __result)
-        {
-            if (ModState.CurrentTurretForLOF != null)
-            {
-                ModState.CurrentTurretForLOF = null;
-            }
-
-            if (!source.team.IsLocalPlayer && !(target is BattleTech.Building building))
-            {
-                Mod.Log.Debug($"== LOF RESULT: {__result}");
-            }
-        }
-    }
-
+    // Modify the vision test to allow 'x-ray' vision through the shell building for trap turrets
     [HarmonyPatch(typeof(LineOfSight), "bresenhamVisionTest")]
     static class LineOfSight_bresenhamVisionTest
     {
@@ -156,6 +129,39 @@ namespace ConcreteJungle.Patches
         }
     }
 
+    // When a trap turret's line of fire is calculated, give it 'x-ray' vision to see through the shell building.
+    [HarmonyPatch(typeof(LOFCache), "GetLineOfFire")]
+    static class LOFCache_GetLineOfFire { 
+
+        static void Prefix(AbstractActor source, ICombatant target, LineOfFireLevel __result)
+        {
+            if (!source.team.IsLocalPlayer && !(target is BattleTech.Building building))
+            {
+                Mod.Log.Trace($"== CALCULATING LOF FROM {CombatantUtils.Label(source)} TO TARGET: {CombatantUtils.Label(target)}");
+            }
+
+            if (source is Turret turret && ModState.TrapTurretToBuildingIds.Keys.Contains(turret.GUID))
+            {
+                Mod.Log.Trace($"Turret {CombatantUtils.Label(turret)} is calculating it's LOF");
+                ModState.CurrentTurretForLOF = turret;
+            }
+        }
+
+        static void Postfix(AbstractActor source, ICombatant target, LineOfFireLevel __result)
+        {
+            if (ModState.CurrentTurretForLOF != null)
+            {
+                ModState.CurrentTurretForLOF = null;
+            }
+
+            if (!source.team.IsLocalPlayer && !(target is BattleTech.Building building))
+            {
+                Mod.Log.Trace($"== LOF RESULT: {__result}");
+            }
+        }
+    }
+
+    // Modify the vision test to allow 'x-ray' vision through the shell building for trap turrets
     [HarmonyPatch(typeof(LineOfSight), "bresenhamHeightTest")]
     static class LineOfSight_bresenhamHeightTest
     {
@@ -166,7 +172,7 @@ namespace ConcreteJungle.Patches
 
             if (ModState.CurrentTurretForLOF == null) return;
 
-            Mod.Log.Debug($"Recalculating LOF from {CombatantUtils.Label(ModState.CurrentTurretForLOF)} due to collision on building shell. " +
+            Mod.Log.Trace($"Recalculating LOF from {CombatantUtils.Label(ModState.CurrentTurretForLOF)} due to collision on building shell. " +
                 $"CollisonWorldPos=> x={collisionWorldPos.X} z={collisionWorldPos.Z}");
 
             collisionWorldPos = p1;
@@ -208,7 +214,7 @@ namespace ConcreteJungle.Patches
 
                 if (targetIsABuilding && encounterLayerData.mapEncounterLayerDataCells[point.Z, point.X].HasSpecifiedBuilding(targetedBuildingGuid))
                 {
-                    Mod.Log.Debug($" Building {targetedBuildingGuid} conflicts with the LoS, collision at x={collisionWorldPos.X} z={collisionWorldPos.Z}");
+                    Mod.Log.Trace($" Building {targetedBuildingGuid} conflicts with the LoS, collision at x={collisionWorldPos.X} z={collisionWorldPos.Z}");
                     collisionWorldPos = bresenhamLinePoints[i];
                     __result = true;
                     return;
@@ -216,14 +222,14 @@ namespace ConcreteJungle.Patches
 
                 if (mapMetaData.mapTerrainDataCells[point.Z, point.X].cachedHeight > collisionPointHeight)
                 {
-                    Mod.Log.Debug($" Collision on terrain at position x={collisionWorldPos.X} z={collisionWorldPos.Z}");
+                    Mod.Log.Trace($" Collision on terrain at position x={collisionWorldPos.X} z={collisionWorldPos.Z}");
                     collisionWorldPos = bresenhamLinePoints[i];
                     __result = false;
                     return;
                 }
             }
 
-            Mod.Log.Debug($"No collision detected, changing LoF to true. CollisonWorldPos => x ={ collisionWorldPos.X} z ={ collisionWorldPos.Z}");
+            Mod.Log.Trace($"No collision detected, changing LoF to true. CollisonWorldPos => x ={ collisionWorldPos.X} z ={ collisionWorldPos.Z}");
 
             __result = true;
             return;

@@ -64,10 +64,14 @@
     <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Helper\DevestationHelper.cs" />
+    <Compile Include="Helper\InfantryTrapHelper.cs" />
+    <Compile Include="Helper\QuipHelper.cs" />
     <Compile Include="Helper\SpawnHelper.cs" />
     <Compile Include="ModConfig.cs" />
     <Compile Include="ModInit.cs" />
     <Compile Include="ModState.cs" />
+    <Compile Include="Objects\TrapTypes.cs" />
     <Compile Include="Patches\AbstractActorPatches.cs" />
     <Compile Include="Patches\ATUtilPatches.cs" />
     <Compile Include="Patches\BuildingPatches.cs" />

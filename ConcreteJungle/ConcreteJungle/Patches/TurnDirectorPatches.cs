@@ -1,5 +1,6 @@
 ﻿using BattleTech;
 using BattleTech.Data;
+using ConcreteJungle.Helper;
 using Harmony;
 using us.frostraptor.modUtils;
 
@@ -35,6 +36,8 @@ namespace ConcreteJungle.Patches
                         Mod.Log.Trace($"     isDestructible: {building.BuildingDef.Destructible} " +
                             $"structurePoints: {building.BuildingDef.StructurePoints} ");
                     }
+                    else { continue; }
+
                     if (building.UrbanDestructible != null)
                     {
                         Mod.Log.Trace($"   -- UrbanDestructible: " +
@@ -42,6 +45,13 @@ namespace ConcreteJungle.Patches
                             $"canBeDesolation: {building.UrbanDestructible.CanBeDesolation} " +
                             $"currentDesolationState: {building.UrbanDestructible.CurDesolationState}"
                             );
+                    }
+                    else { continue; }
+
+                    if (building.objectiveGUIDS.Contains(combat.GUID))
+                    {
+                        Mod.Log.Debug($"   -- Building is an objective, skipping.");
+                        continue;
                     }
 
                     if (building.BuildingDef != null && building.BuildingDef.Destructible &&
@@ -56,14 +66,28 @@ namespace ConcreteJungle.Patches
             }
             Mod.Log.Debug($"Map has: {ModState.CandidateBuildings.Count} buildings suitable for traps");
 
+            // Devestate buildings
+            DevestationHelper.DevestateBuildings();
+
+            Mod.Log.Debug($"After devestation, map has {ModState.CandidateBuildings.Count} candidate buildings.");
+
             // Load the necessary turret defs
             Mod.Log.Debug($"DM TurretDefs are: {combat.DataManager.TurretDefs.Count}");
             LoadRequest asyncSpawnReq = combat.DataManager.CreateLoadRequest(delegate (LoadRequest loadRequest)
             {
                 OnLoadComplete(combat);
             }, false);
-            asyncSpawnReq.AddBlindLoadRequest(BattleTechResourceType.TurretDef, Mod.Config.TurretDef, new bool?(false));
-            asyncSpawnReq.AddBlindLoadRequest(BattleTechResourceType.PilotDef, Mod.Config.TurretPilotDef, new bool?(false));
+
+            // TODO: This is woefully inefficient, if there's large numbers of both
+            foreach (string turretDefId in Mod.Config.InfantryAmbush.TurretDefIds)
+            {
+                asyncSpawnReq.AddBlindLoadRequest(BattleTechResourceType.TurretDef, turretDefId, new bool?(false));
+            }
+            foreach (string pilotDefId in Mod.Config.InfantryAmbush.PilotDefIds)
+            {
+                asyncSpawnReq.AddBlindLoadRequest(BattleTechResourceType.PilotDef, pilotDefId, new bool?(false));
+            }
+
             asyncSpawnReq.ProcessRequests(1000U);
         }
 

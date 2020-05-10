@@ -11,6 +11,8 @@ namespace ConcreteJungle.Patches
     [HarmonyBefore("us.frostraptor.LowVisibility")]
     static class PilotableActorRepresentation_OnPlayerVisibilityChanged
     {
+        static bool Prepare() { return !Mod.Config.InfantryAmbush.VisibleTrapTurrets;  }
+
         static void Postfix(PilotableActorRepresentation __instance, VisibilityLevel newLevel)
         {
             Mod.Log.Trace("PAR:OPVC entered.");

@@ -28,6 +28,7 @@ namespace ConcreteJungle.Patches
         }
     }
 
+    // Kill the associated turrets on death.
     [HarmonyPatch(typeof(BattleTech.Building), "HandleDeath")]
     static class Building_HandleDeath
     {
@@ -37,8 +38,8 @@ namespace ConcreteJungle.Patches
             {
                 // Despawn the associated turret
                 Turret turret = ModState.TrapBuildingsToTurrets[__instance.GUID];
-                turret.FlagForDeath("Shell Building Destroyed", DeathMethod.VitalComponentDestroyed, DamageType.Enemy, -1, -1, "", false);
-                turret.HandleDeath(__instance.GUID);
+                DespawnActorMessage despawnMessage = new DespawnActorMessage(__instance.GUID, turret.GUID, DeathMethod.VitalComponentDestroyed);
+                __instance.Combat.MessageCenter.PublishMessage(despawnMessage);
             }
         }
     }
