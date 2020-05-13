@@ -43,7 +43,8 @@ namespace ConcreteJungle.Patches
                 // TODO: Randomize
                 //TrapType trapType = TrapType.TRAP_INFANTRY_AMBUSH;
 
-                InfantryTrapHelper.SpawnInfantryAmbush(__instance.CurrentPosition);
+                //InfantryAmbushHelper.SpawnAmbush(__instance.CurrentPosition);
+                ExplosionAmbushHelper.SpawnAmbush(__instance.CurrentPosition);
             }
             
         }

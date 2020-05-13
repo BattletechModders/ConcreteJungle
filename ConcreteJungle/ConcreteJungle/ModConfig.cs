@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Org.BouncyCastle.Security;
+using System;
 using System.Collections.Generic;
 
 namespace ConcreteJungle {
@@ -19,9 +20,11 @@ namespace ConcreteJungle {
 
             public string AmbushHUDTitle = "Entrenched Infantry";
 
-            public int SearchRadius = 300;
+            public int SearchRadius = 200;
 
             public bool VisibleTrapTurrets = true;
+
+            public bool Enabled = true;
         }
         public InfantryAmbushOpts InfantryAmbush = new InfantryAmbushOpts();
 
@@ -30,9 +33,27 @@ namespace ConcreteJungle {
             public float MinDevestation = 0.6f;
             public float MaxDevestation = 0.9f;
 
-            public bool Enabled = true;
+            public bool Enabled = false;
         }
         public DevestationOpts Devestation = new DevestationOpts();
+
+        public class ExplosionAmbushOpts
+        {
+            public int SearchRadius = 100;
+
+            public float DamagePerShot = 400f;
+            public float DamageVariance = 5f;
+            
+            public float HeatDamagePerShot = 30f;
+            //public float HeatDamageVariance = 5f;
+
+            public float StabilityDamagePerShot = 20f;
+            //public float StabilityDamageVariance = 5f;
+
+            public bool Enabled = true;
+
+        }
+        public ExplosionAmbushOpts ExplosionAmbush = new ExplosionAmbushOpts();
 
         public class QipsConfig
         {
@@ -56,6 +77,11 @@ namespace ConcreteJungle {
 
             public List<string> ExplosiveAmbush = new List<string>()
             {
+                "Watch your step",
+                //"Pushing the plunger",
+                //"Boom goes the dynamite",
+                //"Not this time invaders",
+                //"Salt the earth!",
 
             };
 

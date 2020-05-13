@@ -4,42 +4,23 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using us.frostraptor.modUtils;
-using us.frostraptor.modUtils.math;
 
 namespace ConcreteJungle.Helper
 {
-    public static class InfantryTrapHelper
+    public static class InfantryAmbushHelper
     {
-        public static void SpawnInfantryAmbush(Vector3 originPos)
+        public static void SpawnAmbush(Vector3 originPos)
         {
-            // Build list of candidate trap buildings
-            List<BattleTech.Building> candidates = new List<BattleTech.Building>();
-            foreach (BattleTech.Building building in ModState.CandidateBuildings)
-            {
-                if (!building.IsDead && (building.CurrentPosition - originPos).magnitude < 200.0f)
-                {
-                    Mod.Log.Debug($" -- Candidate building: {CombatantUtils.Label(building)} at position: {building.CurrentPosition} is within search range.");
-                    candidates.Add(building);
-                }
-                else
-                {
-                    Mod.Log.Trace($" -- Candidate building: {CombatantUtils.Label(building)} at position: {building.CurrentPosition} is beyond search range");
-                }
-            }
+            if (!Mod.Config.InfantryAmbush.Enabled) return;
 
-            // Remove any candidates that already have a trap in them
-            candidates.RemoveAll(x => ModState.TrapBuildingsToTurrets.ContainsKey(x.GUID));
+            // Build list of candidate trap buildings
+            List<BattleTech.Building> candidates = CandidateHelper.FilterCandidates(originPos, Mod.Config.InfantryAmbush.SearchRadius);
 
             if (candidates.Count < Mod.Config.InfantryAmbush.MinBuildings)
             {
-                Mod.Log.Debug($"Insufficient candidate buildings to spawn an ambush. Skipping.");
+                Mod.Log.Debug($"Insufficient candidate buildings to spawn an infantry ambush. Skipping.");
                 return;
             }
-
-            // Sort buildings by distance to the origin
-            candidates.Sort((b1, b2) => 
-                (b1.CurrentPosition - originPos).magnitude.CompareTo((b2.CurrentPosition - originPos).magnitude)
-            );
 
             // Determine the team we should use for the traps
             int teamIdx = ModState.CandidateTeams.Count > 0 ? Mod.Random.Next(0, ModState.CandidateTeams.Count - 1) : 0;
