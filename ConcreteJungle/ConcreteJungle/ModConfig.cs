@@ -64,19 +64,25 @@ namespace ConcreteJungle {
         public class AmbushLance
         {
             public string MechDefId;
-            public string VehicleDefId;
             public string TurretDefId;
+            public string VehicleDefId;
             public string PilotDefId;
+
+            public bool IsMech { get { return MechDefId != null && !MechDefId.Equals(""); }  }
+            public bool IsTurret { get { return TurretDefId != null && !TurretDefId.Equals(""); } }
+            public bool IsVehicle { get { return VehicleDefId != null && !VehicleDefId.Equals(""); } }
         }
 
         public class SpawnAmbushOpts
         {
             public List<AmbushLance> AmbushLance = new List<AmbushLance>() { 
                 new AmbushLance() { VehicleDefId = "vehicledef_DEMOLISHER", PilotDefId = "pilot_d7_brawler" },
-                new AmbushLance() { VehicleDefId = "vehicledef_MANTICORE", PilotDefId = "pilot_d7_brawler" }
+                new AmbushLance() { VehicleDefId = "vehicledef_DEMOLISHER", PilotDefId = "pilot_d7_brawler" },
+                new AmbushLance() { VehicleDefId = "vehicledef_MANTICORE", PilotDefId = "pilot_d7_brawler" },
+                new AmbushLance() { VehicleDefId = "vehicledef_MANTICORE", PilotDefId = "pilot_d7_brawler" },
             };
 
-            public int searchRadius = 200;
+            public int SearchRadius = 200;
 
             public bool Enabled = true;
         }
@@ -95,15 +101,17 @@ namespace ConcreteJungle {
 
             public List<string> InfantryAmbush = new List<string>() {
                 "Wrong neighborhood, fucko.",
-                //"Concentrate fire!",
+                //"Concentrate on the lead!",
                 //"Open fire!",
                 //"Fire Fire Fire!",
+                //"Focus on the critical points!",
                 //"Welcome to the jungle!"
             };
 
             public List<string> SpawnAmbush = new List<string>()
             {
                 "Charge!",
+                "Get'em boys!"
             };
 
         }

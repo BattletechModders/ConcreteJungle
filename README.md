@@ -23,8 +23,6 @@ Todo:
 
 * Remove turrets when you move more than N meters away / lose LoS to the building
 
-* Make trap shells tab selectable
-
 * Roll for trap, deploy X traps of a single type?
 
 * Need to store association of turret -> building in a stat for save loading purposes
@@ -40,14 +38,6 @@ Todo:
 * WTF won't building highlighting work? Probably not a huge deal
 
 * Spawn turrets 50/80% up building
-
-* Add quips on trap spawn
-
-* Add audio to quips
-
-* Select candidate buildings from closest to furthest (prevent buildings at back of pack)
-
-* Move turrets higher on spawn
 
 * Make sure turrets salvage isn't included
 
@@ -66,21 +56,11 @@ Todo:
 
 * Remove candidate buildings when they become infantry / vehicle traps
 
-Quips:
+* Should not always trigger on first mover; add random chance to introduction variability
 
-* Get'em boys!
 
-* Boom. Headshot.
 
-* Charge!
 
-* Focus fire!
 
-* Concentrate on the lead!
 
-* Open Fire!
-
-* Wrong neighborhood, fucko
-
-  
 

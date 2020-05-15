@@ -3,6 +3,7 @@ using BattleTech.Data;
 using ConcreteJungle.Helper;
 using Harmony;
 using us.frostraptor.modUtils;
+using static ConcreteJungle.ModConfig;
 
 namespace ConcreteJungle.Patches
 {
@@ -23,8 +24,9 @@ namespace ConcreteJungle.Patches
                 // TODO: Randomize
                 //TrapType trapType = TrapType.TRAP_INFANTRY_AMBUSH;
 
-                //InfantryAmbushHelper.SpawnAmbush(__instance.CurrentPosition);
-                ExplosionAmbushHelper.SpawnAmbush(ModState.PendingAmbushOrigin);
+                //InfantryAmbushHelper.SpawnAmbush(ModState.PendingAmbushOrigin);
+                //ExplosionAmbushHelper.SpawnAmbush(ModState.PendingAmbushOrigin);
+                SpawnAmbushHelper.SpawnAmbush(ModState.PendingAmbushOrigin);
 
             }
         }
@@ -111,6 +113,11 @@ namespace ConcreteJungle.Patches
             foreach (string pilotDefId in Mod.Config.InfantryAmbush.PilotDefIds)
             {
                 asyncSpawnReq.AddBlindLoadRequest(BattleTechResourceType.PilotDef, pilotDefId, new bool?(false));
+            }
+            foreach (AmbushLance lance in Mod.Config.SpawnAmbush.AmbushLance)
+            {
+                asyncSpawnReq.AddBlindLoadRequest(BattleTechResourceType.VehicleDef, lance.VehicleDefId, new bool?(false));
+                asyncSpawnReq.AddBlindLoadRequest(BattleTechResourceType.PilotDef, lance.PilotDefId, new bool?(false));
             }
 
             asyncSpawnReq.AddBlindLoadRequest(BattleTechResourceType.WeaponDef, "Weapon_Ambush_Explosion", new bool?(false));

@@ -1,9 +1,11 @@
 ﻿using BattleTech;
+using ConcreteJungle.Sequence;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using us.frostraptor.modUtils;
+using static ConcreteJungle.ModConfig;
 
 namespace ConcreteJungle.Helper
 {
@@ -13,109 +15,92 @@ namespace ConcreteJungle.Helper
         {
             if (!Mod.Config.SpawnAmbush.Enabled) return;
 
-            // Build list of candidate trap buildings
-            //List<BattleTech.Building> candidates = CandidateHelper.FilterCandidates(originPos, Mod.Config.InfantryAmbush.SearchRadius);
+            //Build list of candidate trap buildings
+            List<BattleTech.Building> candidates = CandidateHelper.FilterCandidates(originPos, Mod.Config.InfantryAmbush.SearchRadius);
 
-            //if (candidates.Count < Mod.Config.InfantryAmbush.MinBuildings)
-            //{
-            //    Mod.Log.Debug($"Insufficient candidate buildings to spawn an infantry ambush. Skipping.");
-            //    return;
-            //}
+            // Only spawn if there are sufficient buildings.
+            if (candidates.Count < Mod.Config.SpawnAmbush.AmbushLance.Count)
+            {
+                Mod.Log.Debug($"Insufficient candidate buildings to for a spawn ambush. Need {Mod.Config.SpawnAmbush.AmbushLance.Count} buildings. Skipping.");
+                return;
+            }
 
-            //// Determine the team we should use for the traps
-            //int teamIdx = ModState.CandidateTeams.Count > 0 ? Mod.Random.Next(0, ModState.CandidateTeams.Count - 1) : 0;
-            //Team trapTeam = ModState.CandidateTeams.ElementAt<Team>(teamIdx);
+            int teamIdx = ModState.CandidateTeams.Count > 0 ? Mod.Random.Next(0, ModState.CandidateTeams.Count - 1) : 0;
+            Team trapTeam = ModState.CandidateTeams.ElementAt<Team>(teamIdx);
 
-            //int ambushCount = Mod.Random.Next(Mod.Config.InfantryAmbush.MinBuildings, Mod.Config.InfantryAmbush.MaxBuidlings);
-            //if (candidates.Count < ambushCount) ambushCount = candidates.Count;
-            //Mod.Log.Debug($"Spawning {ambushCount} ambushes for team: {trapTeam}");
+            BattleTech.Building[] spawnPoints = candidates.Take(Mod.Config.SpawnAmbush.AmbushLance.Count).ToArray();
+            Dictionary<AbstractActor, BattleTech.Building> actorToSpawnBuildings = new Dictionary<AbstractActor, BattleTech.Building>();
+            for (int i = 0; i < Mod.Config.SpawnAmbush.AmbushLance.Count; i++)
+            {
+                AmbushLance lance = Mod.Config.SpawnAmbush.AmbushLance[i];
+                BattleTech.Building originBuilding = spawnPoints[i];
+                AbstractActor spawnedActor = null;
+                if (lance.IsVehicle)
+                {
+                    spawnedActor = SpawnAmbushVehicle(lance, trapTeam, originPos, originBuilding);
+                }
+                actorToSpawnBuildings.Add(spawnedActor, originBuilding);
+            }
 
-            //List<Vector3> spawnPositions = new List<Vector3>();
-            //for (int i = 0; i < ambushCount; i++)
-            //{
-            //    BattleTech.Building trapBuilding = candidates.ElementAt(i);
+            List<ICombatant> targets = new List<ICombatant>();
+            List<Collider> overlapedColliders = new List<Collider>(Physics.OverlapSphere(originPos, Mod.Config.ExplosionAmbush.SearchRadius));
+            foreach (ICombatant combatant in ModState.Combat.GetAllCombatants())
+            {
+                if (!combatant.IsDead && !combatant.IsFlaggedForDeath)
+                {
+                    if (combatant.team != null && ModState.Combat.HostilityMatrix.IsLocalPlayerFriendly(combatant.team) &&
+                        Vector3.Distance(originPos, combatant.CurrentPosition) <= Mod.Config.SpawnAmbush.SearchRadius)
+                    {
+                        Mod.Log.Debug($"Adding potential target: {CombatantUtils.Label(combatant)}");
+                        targets.Add(combatant);
+                    }                    
+                }
+            }
 
-            //    // Spawn a turret trap
-            //    int turretDefIdx = Mod.Random.Next(0, Mod.Config.InfantryAmbush.TurretDefIds.Count - 1);
-            //    string turretDefId = Mod.Config.InfantryAmbush.TurretDefIds.ElementAt(turretDefIdx);
-            //    int pilotDefIdx = Mod.Random.Next(0, Mod.Config.InfantryAmbush.PilotDefIds.Count - 1);
-            //    string pilotDefId = Mod.Config.InfantryAmbush.PilotDefIds.ElementAt(pilotDefIdx);
-            //    Mod.Log.Debug($"Spawning turretDef: {turretDefId} + pilotDef: {pilotDefId} within building at position: {trapBuilding.CurrentPosition}");
+            Mod.Log.Debug("Sending AddSequence message for spawn ambush explosion.");
+            try
+            {
+                SpawnAmbushSequence ambushSequence = new SpawnAmbushSequence(ModState.Combat, originPos, actorToSpawnBuildings);
+                ModState.Combat.MessageCenter.PublishMessage(new AddSequenceToStackMessage(ambushSequence));
 
-            //    AbstractActor trapTurret = SpawnTrapTurret(turretDefId, pilotDefId, trapTeam, trapBuilding);
+            }
+            catch (Exception e)
+            {
+                Mod.Log.Error("Failed to create AES sequence due to error!", e);
+            }
 
-            //    trapTurret.OnPlayerVisibilityChanged(VisibilityLevel.LOSFull);
-            //    trapTurret.OnPositionUpdate(trapBuilding.CurrentPosition, trapBuilding.CurrentRotation, -1, true, null, false);
-            //    Mod.Log.Debug("Updated turret visibility and position.");
-
-            //    trapTurret.BehaviorTree = BehaviorTreeFactory.MakeBehaviorTree(ModState.Combat.BattleTechGame, trapTurret, BehaviorTreeIDEnum.CoreAITree);
-            //    Mod.Log.Debug("Updated turret behaviorTree");
-
-            //    UnitSpawnedMessage message = new UnitSpawnedMessage("CJ_TRAP", trapTurret.GUID);
-            //    ModState.Combat.MessageCenter.PublishMessage(message);
-                
-            //    Mod.Log.Debug($"Sent spawn message for position: {trapTurret.CurrentPosition}");
-            //    spawnPositions.Add(trapTurret.CurrentPosition);
-
-            //    if (i + 1 == ambushCount)
-            //    {
-            //        // Create a quip
-            //        QuipHelper.PlayQuip(trapTurret, Mod.Config.Qips.InfantryAmbush, 6);
-            //    }
-            //}
 
             ModState.TrapSpawnOrigins.Add(originPos);
-
         }
 
-        public static AbstractActor SpawnTrapTurret(string turretDefId, string pilotDefId, Team team, BattleTech.Building building)
+        public static AbstractActor SpawnAmbushVehicle(AmbushLance ambushLance, Team team, Vector3 ambushOrigin, BattleTech.Building originBuilding)
         {
-            PilotDef pilotDef = ModState.Combat.DataManager.PilotDefs.GetOrCreate(pilotDefId);
-            TurretDef turretDef = ModState.Combat.DataManager.TurretDefs.GetOrCreate(turretDefId);
-            turretDef.Refresh();
+            PilotDef pilotDef = ModState.Combat.DataManager.PilotDefs.GetOrCreate(ambushLance.PilotDefId);
+            VehicleDef vehicleDef = ModState.Combat.DataManager.VehicleDefs.GetOrCreate(ambushLance.VehicleDefId);
+            vehicleDef.Refresh();
 
-            Turret turret = ActorFactory.CreateTurret(turretDef, pilotDef, team.EncounterTags, ModState.Combat, team.GetNextSupportUnitGuid(), "", null);
-            turret.Init(building.CurrentPosition, building.CurrentRotation.eulerAngles.y, true);
-            turret.InitGameRep(null);
+            Vector3 spawnPos = originBuilding.CurrentPosition;
+            spawnPos.y = ModState.Combat.MapMetaData.GetLerpedHeightAt(spawnPos, true);
 
-            if (turret == null) Mod.Log.Error($"Failed to spawn turretDefId: {turretDefId} + pilotDefId: {pilotDefId} !");
+            Vector3 spawnDirection = Vector3.RotateTowards(originBuilding.CurrentRotation.eulerAngles, ambushOrigin, 1f, 0f);
+            Quaternion spawnRotation = Quaternion.LookRotation(spawnDirection);
 
-            Mod.Log.Debug($" Spawned trap turret, adding to team.");
-            team.AddUnit(turret);
-            turret.AddToLance(team.lances.First<Lance>());
+            Vehicle vehicle = ActorFactory.CreateVehicle(vehicleDef, pilotDef, team.EncounterTags, ModState.Combat, team.GetNextSupportUnitGuid(), "", null);
+            vehicle.Init(spawnPos, spawnRotation.eulerAngles.y, true);
+            vehicle.InitGameRep(null);
+            Mod.Log.Debug($"Spawned vehicle {CombatantUtils.Label(vehicle)} at position: {spawnPos}");
 
-            ModState.TrapBuildingsToTurrets.Add(building.GUID, turret);
-            ModState.TrapTurretToBuildingIds.Add(turret.GUID, building.GUID);
+            if (vehicle == null) Mod.Log.Error($"Failed to spawn vehicle: {ambushLance.VehicleDefId} + pilotDefId: {ambushLance.PilotDefId} !");
 
-            Mod.Log.Debug($" -- using building: {CombatantUtils.Label(building)} as trap.");
-            float surfaceArea = building.DestructibleObjectGroup.footprint.x * building.DestructibleObjectGroup.footprint.z;
-            Mod.Log.Debug($" -- building has dimensions {building.DestructibleObjectGroup.footprint} with surface: {surfaceArea} and " +
-                $"height: {building.DestructibleObjectGroup.footprint.y}  team: {building.TeamId}");
+            Lance lance = team.lances.First<Lance>();
+            Mod.Log.Debug($" Spawned ambush vehicle, adding to team: {team} and lance: {lance}");
+            team.AddUnit(vehicle);
+            vehicle.AddToLance(lance);
 
-            Mod.Log.Debug($" Parent building associated with team: {building.TeamId}, adding to team: {team.GUID}");
-            building.AddToTeam(team);
-            building.BuildingRep.IsTargetable = true;
-            building.BuildingRep.SetHighlightColor(ModState.Combat, team);
-            building.BuildingRep.RefreshEdgeCache();
+            vehicle.BehaviorTree = BehaviorTreeFactory.MakeBehaviorTree(ModState.Combat.BattleTechGame, vehicle, BehaviorTreeIDEnum.CoreAITree);
+            Mod.Log.Debug("Enabled vehicle behavior tree");
 
-            // determine a position somewhere up the building's axis
-            EncounterLayerData encounterLayerData = ModState.Combat.EncounterLayerData;
-            Point cellPoint = new Point(
-                ModState.Combat.MapMetaData.GetXIndex(building.CurrentPosition.x),
-                ModState.Combat.MapMetaData.GetZIndex(building.CurrentPosition.z));
-            MapEncounterLayerDataCell melDataCell =
-                encounterLayerData.mapEncounterLayerDataCells[cellPoint.Z, cellPoint.X];
-            float buildingHeight = melDataCell.GetBuildingHeight();
-
-            float heightDelta = (float)Math.Floor(buildingHeight * 0.9f);
-            Mod.Log.Debug($"Building has height: {buildingHeight} and position: {building.CurrentPosition} moving turret to a position 0.9 up the Y axis: {heightDelta}");
-
-            Vector3 newPosition = turret.GameRep.transform.position;
-            newPosition.y += heightDelta;
-            Mod.Log.Debug($"Changing transform postition from: {turret.GameRep.transform.position} to {newPosition}");
-            //turret.GameRep.transform.position = newPosition;
-
-            return turret;
+            return vehicle;
         }
     }
 }
