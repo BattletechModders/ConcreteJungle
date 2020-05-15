@@ -22,22 +22,48 @@ Interesting methods
 Todo: 
 
 * Remove turrets when you move more than N meters away / lose LoS to the building
+
 * Make trap shells tab selectable
+
 * Roll for trap, deploy X traps of a single type?
+
 * Need to store association of turret -> building in a stat for save loading purposes
+
 * Verify AI can't attack/destroy a trap turret directly
+
 * Debug will kill turrets directly
+
 * Test AoE effect ordering
+  
   * How to prevent the turrets from taking damage
+  
 * WTF won't building highlighting work? Probably not a huge deal
+
 * Spawn turrets 50/80% up building
+
 * Add quips on trap spawn
+
 * Add audio to quips
+
 * Select candidate buildings from closest to furthest (prevent buildings at back of pack)
+
 * Move turrets higher on spawn
+
 * Make sure turrets salvage isn't included
+
+  * From Denadan - remove them from enemies after death
+
+  * ```
+                        var turrets = Contract.Contract.BattleTechGame.Combat.AllEnemies.OfType<Turret>()
+                            .Where(t => t.IsDead)
+    ```
+
+    
+
 * Check that a building isn't marked a condition mid-mission
+
 * Give turrets a 'free-turn' during the ambush moment?
+
 * Remove candidate buildings when they become infantry / vehicle traps
 
 Quips:

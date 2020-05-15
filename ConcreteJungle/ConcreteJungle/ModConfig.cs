@@ -1,4 +1,5 @@
-﻿using Org.BouncyCastle.Security;
+﻿using BattleTech;
+using Org.BouncyCastle.Security;
 using System;
 using System.Collections.Generic;
 
@@ -10,24 +11,6 @@ namespace ConcreteJungle {
 
     public class ModConfig {
 
-        public class InfantryAmbushOpts
-        {
-            public int MinBuildings = 2;
-            public int MaxBuidlings = 5;
-
-            public List<string> TurretDefIds = new List<string>();
-            public List<string> PilotDefIds = new List<string>();
-
-            public string AmbushHUDTitle = "Entrenched Infantry";
-
-            public int SearchRadius = 200;
-
-            public bool VisibleTrapTurrets = true;
-
-            public bool Enabled = true;
-        }
-        public InfantryAmbushOpts InfantryAmbush = new InfantryAmbushOpts();
-
         public class DevestationOpts
         {
             public float MinDevestation = 0.6f;
@@ -36,6 +19,7 @@ namespace ConcreteJungle {
             public bool Enabled = false;
         }
         public DevestationOpts Devestation = new DevestationOpts();
+
 
         public class ExplosionAmbushOpts
         {
@@ -58,8 +42,57 @@ namespace ConcreteJungle {
         }
         public ExplosionAmbushOpts ExplosionAmbush = new ExplosionAmbushOpts();
 
+        public class InfantryAmbushOpts
+        {
+            public int MinBuildings = 2;
+            public int MaxBuidlings = 5;
+
+            public List<string> TurretDefIds = new List<string>();
+            public List<string> PilotDefIds = new List<string>();
+
+            public string AmbushHUDTitle = "Entrenched Infantry";
+
+            public int SearchRadius = 200;
+
+            public bool VisibleTrapTurrets = true;
+
+            public bool Enabled = true;
+        }
+        public InfantryAmbushOpts InfantryAmbush = new InfantryAmbushOpts();
+
+
+        public class AmbushLance
+        {
+            public string MechDefId;
+            public string VehicleDefId;
+            public string TurretDefId;
+            public string PilotDefId;
+        }
+
+        public class SpawnAmbushOpts
+        {
+            public List<AmbushLance> AmbushLance = new List<AmbushLance>() { 
+                new AmbushLance() { VehicleDefId = "vehicledef_DEMOLISHER", PilotDefId = "pilot_d7_brawler" },
+                new AmbushLance() { VehicleDefId = "vehicledef_MANTICORE", PilotDefId = "pilot_d7_brawler" }
+            };
+
+            public int searchRadius = 200;
+
+            public bool Enabled = true;
+        }
+        public SpawnAmbushOpts SpawnAmbush = new SpawnAmbushOpts();
+
         public class QipsConfig
         {
+            public List<string> ExplosiveAmbush = new List<string>()
+            {
+                "Watch your step",
+                //"Pushing the plunger",
+                //"Boom goes the dynamite",
+                //"Not this time invaders",
+                //"Salt the earth!",
+            };
+
             public List<string> InfantryAmbush = new List<string>() {
                 "Wrong neighborhood, fucko.",
                 //"Concentrate fire!",
@@ -68,31 +101,13 @@ namespace ConcreteJungle {
                 //"Welcome to the jungle!"
             };
 
-            public List<string> VehicleAmbush = new List<string>()
+            public List<string> SpawnAmbush = new List<string>()
             {
-
-            };
-
-            public List<string> BattleArmorAmbush = new List<string>()
-            {
-
-            };
-
-            public List<string> ExplosiveAmbush = new List<string>()
-            {
-                "Watch your step",
-                //"Pushing the plunger",
-                //"Boom goes the dynamite",
-                //"Not this time invaders",
-                //"Salt the earth!",
-
+                "Charge!",
             };
 
         }
         public QipsConfig Qips = new QipsConfig();
-
-        public string VehicleDef = "vehicledef_DEMOLISHER";
-        public string VehiclePilotDef = "pilot_d9_brawler";
 
         public int MaxSpawns = 2;
         public float MinSpawnDistance = 600f;
@@ -102,7 +117,6 @@ namespace ConcreteJungle {
         // If true, all logs will be printed
         public bool Trace = false;
 
-        
         public void LogConfig() {
             Mod.Log.Info("=== MOD CONFIG BEGIN ===");
             Mod.Log.Info($"  DEBUG:{this.Debug} Trace:{this.Trace}");

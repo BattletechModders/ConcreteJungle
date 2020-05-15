@@ -72,9 +72,11 @@
     <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Extensions\BuildingExtensions.cs" />
     <Compile Include="Helper\CandidateHelper.cs" />
     <Compile Include="Helper\DevestationHelper.cs" />
     <Compile Include="Helper\ExplosionAmbushHelper.cs" />
+    <Compile Include="Helper\SpawnAmbushHelper.cs" />
     <Compile Include="Helper\InfantryAmbushHelper.cs" />
     <Compile Include="Helper\QuipHelper.cs" />
     <Compile Include="ModConfig.cs" />

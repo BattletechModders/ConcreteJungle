@@ -70,10 +70,19 @@ namespace ConcreteJungle.Helper
 			}
 
 			Mod.Log.Debug("Sending AddSequence message for ambush explosion.");
-			AmbushExplosionSequence ambushSequence = new AmbushExplosionSequence(ModState.Combat, blastOrigins, targets);
-			ModState.Combat.MessageCenter.PublishMessage(new AddSequenceToStackMessage(ambushSequence));
+			try
+			{
+				AmbushExplosionSequence ambushSequence = new AmbushExplosionSequence(ModState.Combat, originPos, blastOrigins, targets);
+				ModState.Combat.MessageCenter.PublishMessage(new AddSequenceToStackMessage(ambushSequence));
+
+			}
+			catch (Exception e)
+			{
+				Mod.Log.Error("Failed to create AES sequence due to error!", e);
+			}
 
 			// Reset the initial state
+			Mod.Log.Debug("Resetting mod to original state");
 			ModState.PendingAmbushOrigin = Vector3.zero;
 		}
     }

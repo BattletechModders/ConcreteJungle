@@ -1,4 +1,5 @@
 ﻿using BattleTech;
+using ConcreteJungle.Extensions;
 using ConcreteJungle.Helper;
 using System;
 using System.Collections.Generic;
@@ -12,7 +13,13 @@ namespace ConcreteJungle.Sequence
     {
         private List<ICombatant> Targets { get; set; }
 
-        private List<Vector3> BlastOrigins { get; set; }
+        private List<Vector3> FXOrigins { get; set; }
+        
+        private Vector3 AmbushPosition { get; set; }
+
+        private Weapon AmbushWeapon { get; set; }
+
+        private int AmbushHits { get; set; }
 
         public override bool IsValidMultiSequenceChild {  get { return false;  } }
 
@@ -23,9 +30,31 @@ namespace ConcreteJungle.Sequence
 
         public override bool IsComplete { get { return this.state == AmbushExplosionSequenceState.Finished; } }
 
-        public AmbushExplosionSequence(CombatGameState combat, List<Vector3> blastOrigins, List<ICombatant> targets) : base(combat)
+        public AmbushExplosionSequence(CombatGameState combat, Vector3 ambushPos, List<Vector3> blastOrigins, List<ICombatant> targets) : base(combat)
         {
-            this.BlastOrigins = blastOrigins;
+            Mod.Log.Debug($"Creating AES for position: {ambushPos}");
+            AmbushPosition = ambushPos;
+            AmbushHits = blastOrigins.Count;
+
+            WeaponDef weaponDef = ModState.Combat.DataManager.WeaponDefs.Get("Weapon_Ambush_Explosion");
+            Mod.Log.Debug($"Loaded weapon def: {weaponDef} with Damage: {weaponDef.Damage}");
+            MechComponentRef mechComponentRef = new MechComponentRef(
+                weaponDef.Description.Id, weaponDef.Description.Id + "_ReferenceWeapon", 
+                ComponentType.Weapon, ChassisLocations.None, -1, ComponentDamageLevel.Functional,
+                true);
+            Mod.Log.Debug($"Created mechComponentRef: {mechComponentRef}");
+            mechComponentRef.SetComponentDef(weaponDef);
+            mechComponentRef.DataManager = this.Combat.DataManager;
+            mechComponentRef.RefreshComponentDef();
+            Mod.Log.Debug($"Refreshed componentDef. Def after refresh is: {mechComponentRef.Def}");
+            AmbushWeapon = new Weapon(null, ModState.Combat, mechComponentRef, this.Combat.GUID);
+            AmbushWeapon.InitStats();
+            Mod.Log.Debug($"Created ambush weapon {AmbushWeapon.Description.Id} with " +
+                $"Name: {AmbushWeapon.Name} " +
+                $"DamagePerShot: {AmbushWeapon.DamagePerShot} and " +
+                $"baseComponentDef: {AmbushWeapon.baseComponentRef}");
+
+            this.FXOrigins = blastOrigins;
             this.Targets = targets;
         }
 
@@ -52,7 +81,7 @@ namespace ConcreteJungle.Sequence
                     break;
                 case AmbushExplosionSequenceState.Exploding:
                     this.PlayNextFX();
-                    if (this.BlastOrigins.Count < 1)
+                    if (this.FXOrigins.Count < 1)
                     {
                         this.SetState(AmbushExplosionSequenceState.Damaging);
                     }
@@ -103,7 +132,7 @@ namespace ConcreteJungle.Sequence
                 // Create a quip
                 Guid g = Guid.NewGuid();
                 QuipHelper.PlayQuip(ModState.Combat, g.ToString(),
-                    ModState.CandidateTeams.ElementAt(0), "IED Ambush", Mod.Config.Qips.ExplosiveAmbush, 6);
+                    ModState.CandidateTeams.ElementAt(0), "IED Ambush", Mod.Config.Qips.ExplosiveAmbush, this.timeToTaunt * 3f);
                 hasTaunted = true;
             }
         }
@@ -114,10 +143,10 @@ namespace ConcreteJungle.Sequence
             this.timeSinceLastExplosion += Time.deltaTime;
             if (this.timeSinceLastExplosion > this.timeBetweenExplosions)
             {
-                if (this.BlastOrigins.Count > 0)
+                if (this.FXOrigins.Count > 0)
                 {
-                    Vector3 origin = this.BlastOrigins[0];
-                    this.BlastOrigins.RemoveAt(0);
+                    Vector3 origin = this.FXOrigins[0];
+                    this.FXOrigins.RemoveAt(0);
 
                     Mod.Log.Debug($"Spawning explosion type {base.Combat.Constants.VFXNames.artillery_explosion} at position {origin}");
                     this.osd = new ObjectSpawnData(base.Combat.Constants.VFXNames.artillery_explosion,
@@ -191,11 +220,46 @@ namespace ConcreteJungle.Sequence
             {
                 if (this.Targets.Count > 0)
                 {
-                    ICombatant combatant = this.Targets[0];
-                    Mod.Log.Debug($" Damaging target: {CombatantUtils.Label(combatant)}");
+                    ICombatant target = this.Targets[0];
+                    BattleTech.Building targetBuilding = target as BattleTech.Building;
+                    this.Targets.Remove(target);
+                    Mod.Log.Debug($" Damaging target: {CombatantUtils.Label(target)}");
 
-                    this.Targets.Remove(combatant);
-                    AbstractActor abstractActor = combatant as AbstractActor;
+                    WeaponHitInfo weaponHitInfo = default(WeaponHitInfo);
+                    weaponHitInfo.attackerId = "Artillery";
+                    weaponHitInfo.targetId = target.GUID;
+                    weaponHitInfo.numberOfShots = this.AmbushHits;
+                    weaponHitInfo.stackItemUID = base.SequenceGUID;
+                    weaponHitInfo.locationRolls = new float[this.AmbushHits];
+                    weaponHitInfo.hitLocations = new int[this.AmbushHits];
+                    weaponHitInfo.hitQualities = new AttackImpactQuality[this.AmbushHits];
+
+                    // TODO: Attacks should come from each of the source positions
+                    AttackDirection attackDirection = base.Combat.HitLocation.GetAttackDirection(this.AmbushPosition, target);
+                    weaponHitInfo.attackDirections = new AttackDirection[this.AmbushHits];
+
+                    for (int i = 0; i < this.AmbushHits; i++)
+                    {
+                        weaponHitInfo.attackDirections[i] = attackDirection;
+                        weaponHitInfo.hitQualities[i] = AttackImpactQuality.Solid;
+                    }
+
+                    this.GetIndividualHits(ref weaponHitInfo, AmbushWeapon, target);
+                    for (int j = 0; j < this.AmbushHits; j++)
+                    {
+                        Mod.Log.Debug($"  -- target takes: {this.AmbushWeapon.DamagePerShot} to location: {weaponHitInfo.hitLocations[j]}");
+                        if (targetBuilding != null)
+                        {
+                            targetBuilding.DamageBuilding(this.AmbushPosition, weaponHitInfo, this.AmbushWeapon, this.AmbushWeapon.DamagePerShot, 0f, j, DamageType.Artillery);
+                        }
+                        else
+                        {
+                            target.TakeWeaponDamage(weaponHitInfo, weaponHitInfo.hitLocations[j], this.AmbushWeapon, this.AmbushWeapon.DamagePerShot, 0f, j, DamageType.Artillery);
+                        }
+                    }
+
+                    target.ResolveWeaponDamage(weaponHitInfo, this.AmbushWeapon, MeleeAttackType.NotSet);
+                    target.HandleDeath("Artillery");
 
                     //if (abstractActor != null && abstractActor.BehaviorTree != null && 
                     //    !abstractActor.BehaviorTree.IsTargetIgnored(this.owningActor))
@@ -230,15 +294,25 @@ namespace ConcreteJungle.Sequence
             }
         }
 
+        private void GetIndividualHits(ref WeaponHitInfo hitInfo, Weapon weapon, ICombatant target)
+        {
+            hitInfo.locationRolls = base.Combat.AttackDirector.GetRandomFromCache(hitInfo, hitInfo.numberOfShots);
+            hitInfo.hitVariance = base.Combat.AttackDirector.GetVarianceSumsFromCache(hitInfo, hitInfo.numberOfShots, weapon);
+            for (int i = 0; i < hitInfo.numberOfShots; i++)
+            {
+                hitInfo.hitLocations[i] = target.GetHitLocation(null, this.AmbushPosition, hitInfo.locationRolls[i], 0, 1f);
+            }
+        }
+
         private float timeInCurrentState;
         //private float timeInExplosion;
         //private float timeInDamaging;
 
         private bool hasTaunted = false;
-        private float timeToTaunt = 6f;
+        private float timeToTaunt = 1f;
 
         private float timeSinceLastExplosion = 0f;
-        private float timeBetweenExplosions = 1f;
+        private float timeBetweenExplosions = 0.75f;
 
         private float timeSinceLastAttack;
         private float timeBetweenTargets = 0.25f;

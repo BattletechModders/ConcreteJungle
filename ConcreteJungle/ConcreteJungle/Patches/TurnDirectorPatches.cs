@@ -113,6 +113,8 @@ namespace ConcreteJungle.Patches
                 asyncSpawnReq.AddBlindLoadRequest(BattleTechResourceType.PilotDef, pilotDefId, new bool?(false));
             }
 
+            asyncSpawnReq.AddBlindLoadRequest(BattleTechResourceType.WeaponDef, "Weapon_Ambush_Explosion", new bool?(false));
+
             asyncSpawnReq.ProcessRequests(1000U);
         }
 
