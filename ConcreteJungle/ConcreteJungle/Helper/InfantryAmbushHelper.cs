@@ -60,7 +60,7 @@ namespace ConcreteJungle.Helper
                 if (i + 1 == ambushCount)
                 {
                     // Create a quip
-                    QuipHelper.PublishQuip(trapTurret, Mod.Config.Qips.InfantryAmbush, 6);
+                    QuipHelper.PlayQuip(trapTurret, Mod.Config.Qips.InfantryAmbush, 6);
                 }
             }
 

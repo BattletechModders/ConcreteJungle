@@ -1,5 +1,6 @@
 ﻿using BattleTech;
 using ConcreteJungle.Sequence;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -12,15 +13,36 @@ namespace ConcreteJungle.Helper
             // Build list of candidate trap buildings
             List<BattleTech.Building> candidates = CandidateHelper.FilterCandidates(originPos, Mod.Config.ExplosionAmbush.SearchRadius);
 
-            // The ambush requires at least one building within the explosion radius of the target
-            if (candidates.Count < 1)
-            {
-                Mod.Log.Debug($"Insufficient candidate buildings to spawn an explosion ambush. Skipping.");
-                return;
-            }
+			Vector3 originHex = ModState.Combat.HexGrid.GetClosestPointOnGrid(originPos);
+			List<Vector3> adjacentHexes = ModState.Combat.HexGrid.GetGridPointsAroundPointWithinRadius(originPos, 2);
+			Mod.Log.Debug($"Found origin hex: {originHex} with {adjacentHexes.Count} adjacent hexes within {2} hexes");
 
-			List<ICombatant> list = new List<ICombatant>();
-			List<Collider> list2 = new List<Collider>(Physics.OverlapSphere(originPos, Mod.Config.ExplosionAmbush.SearchRadius));
+			int numBlasts = Mod.Random.Next(Mod.Config.ExplosionAmbush.MinExplosions, Mod.Config.ExplosionAmbush.MaxExplosions);
+			List<Vector3> blastOrigins = new List<Vector3> { originHex };
+			numBlasts--;
+
+			for (int i = 0; i < numBlasts; i++)
+			{
+				if (adjacentHexes.Count == 0) break;
+
+				int randIdx = Mod.Random.Next(0, adjacentHexes.Count);
+				Vector3 newHexPos = adjacentHexes[randIdx];
+				Mod.Log.Debug($" Adding additional blast position: {newHexPos}");
+
+				EncounterLayerData encounterLayerData = ModState.Combat.EncounterLayerData;
+				Point cellPoint = new Point(
+					ModState.Combat.MapMetaData.GetXIndex(newHexPos.x),
+					ModState.Combat.MapMetaData.GetZIndex(newHexPos.z));
+				MapEncounterLayerDataCell melDataCell =
+					encounterLayerData.mapEncounterLayerDataCells[cellPoint.Z, cellPoint.X];
+				Mod.Log.Debug($" TerrainCell cached height: {melDataCell.relatedTerrainCell.cachedHeight}");
+
+				blastOrigins.Add(new Vector3(newHexPos.x, melDataCell.relatedTerrainCell.cachedHeight, newHexPos.z));
+				adjacentHexes.RemoveAt(randIdx);
+			}
+
+			List<ICombatant> targets = new List<ICombatant>();
+			List<Collider> overlapedColliders = new List<Collider>(Physics.OverlapSphere(originPos, Mod.Config.ExplosionAmbush.SearchRadius));
 			foreach (ICombatant combatant in ModState.Combat.GetAllCombatants())
 			{
 				if (!combatant.IsDead && !combatant.IsFlaggedForDeath)
@@ -32,9 +54,9 @@ namespace ConcreteJungle.Helper
 							for (int i = 0; i < combatant.GameRep.AllRaycastColliders.Length; i++)
 							{
 								Collider item = combatant.GameRep.AllRaycastColliders[i];
-								if (list2.Contains(item))
+								if (overlapedColliders.Contains(item))
 								{
-									list.Add(combatant);
+									targets.Add(combatant);
 									break;
 								}
 							}
@@ -42,18 +64,17 @@ namespace ConcreteJungle.Helper
 					}
 					else if (Vector3.Distance(originPos, combatant.CurrentPosition) <= Mod.Config.ExplosionAmbush.SearchRadius)
 					{
-						list.Add(combatant);
+						targets.Add(combatant);
 					}
 				}
 			}
 
 			Mod.Log.Debug("Sending AddSequence message for ambush explosion.");
-			AmbushExplosionSequence ambushSequence = new AmbushExplosionSequence(ModState.Combat, originPos, list);
+			AmbushExplosionSequence ambushSequence = new AmbushExplosionSequence(ModState.Combat, blastOrigins, targets);
 			ModState.Combat.MessageCenter.PublishMessage(new AddSequenceToStackMessage(ambushSequence));
 
-			//List<Vector3> targetPositions = new List<Vector3> { originPos };
-			//MessageCenterMessage message = new MechMortarInvocation(creator, targetPositions, list, weapon, this);
-			//ModState.Combat.MessageCenter.PublishMessage(message);
+			// Reset the initial state
+			ModState.PendingAmbushOrigin = Vector3.zero;
 		}
     }
 }

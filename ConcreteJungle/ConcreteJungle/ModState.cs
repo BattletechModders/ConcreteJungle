@@ -16,6 +16,8 @@ namespace ConcreteJungle {
         public static Turret CurrentTurretForLOF = null;
         public static Turret CurrentTurretForLOS = null;
 
+        public static Vector3 PendingAmbushOrigin = new Vector3(0f, 0f, 0f);
+
         public static int TrapsSpawned = 0;
         public static List<Vector3> TrapSpawnOrigins = new List<Vector3>();
 
@@ -31,6 +33,8 @@ namespace ConcreteJungle {
 
             CurrentTurretForLOF = null;
             CurrentTurretForLOS = null;
+
+            PendingAmbushOrigin = new Vector3(0f, 0f, 0f);
 
             TrapsSpawned = 0;
             TrapSpawnOrigins.Clear();

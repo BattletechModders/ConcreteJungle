@@ -41,6 +41,9 @@ namespace ConcreteJungle {
         {
             public int SearchRadius = 100;
 
+            public int MinExplosions = 2;
+            public int MaxExplosions = 6;
+
             public float DamagePerShot = 400f;
             public float DamageVariance = 5f;
             

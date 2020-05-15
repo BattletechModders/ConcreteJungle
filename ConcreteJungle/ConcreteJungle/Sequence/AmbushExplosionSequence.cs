@@ -1,5 +1,8 @@
 ﻿using BattleTech;
+using ConcreteJungle.Helper;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using us.frostraptor.modUtils;
 
@@ -9,7 +12,7 @@ namespace ConcreteJungle.Sequence
     {
         private List<ICombatant> Targets { get; set; }
 
-        private Vector3 AttackOrigin { get; set; }
+        private List<Vector3> BlastOrigins { get; set; }
 
         public override bool IsValidMultiSequenceChild {  get { return false;  } }
 
@@ -20,9 +23,9 @@ namespace ConcreteJungle.Sequence
 
         public override bool IsComplete { get { return this.state == AmbushExplosionSequenceState.Finished; } }
 
-        public AmbushExplosionSequence(CombatGameState combat, Vector3 attackOrigin, List<ICombatant> targets) : base(combat)
+        public AmbushExplosionSequence(CombatGameState combat, List<Vector3> blastOrigins, List<ICombatant> targets) : base(combat)
         {
-            this.AttackOrigin = attackOrigin;
+            this.BlastOrigins = blastOrigins;
             this.Targets = targets;
         }
 
@@ -30,18 +33,26 @@ namespace ConcreteJungle.Sequence
         {
             base.OnAdded();
             Mod.Log.Debug("Starting new AmbushExplosionSequence.");
-            this.SetState(AmbushExplosionSequenceState.Exploding);
+            this.SetState(AmbushExplosionSequenceState.Taunting);
         }
 
         public override void OnUpdate()
         {
-            Mod.Log.Debug($"Updating AmbushExplosionSequence in state: {this.state}");
+            Mod.Log.Trace($"Updating AmbushExplosionSequence in state: {this.state}");
             base.OnUpdate();
             this.timeInCurrentState += Time.deltaTime;
             switch (this.state)
             {
+                case AmbushExplosionSequenceState.Taunting:
+                    this.Taunt();
+                    if (this.timeInCurrentState > this.timeToTaunt)
+                    {
+                        this.SetState(AmbushExplosionSequenceState.Exploding);
+                    }
+                    break;
                 case AmbushExplosionSequenceState.Exploding:
-                    if (this.timeInCurrentState > 3f)
+                    this.PlayNextFX();
+                    if (this.BlastOrigins.Count < 1)
                     {
                         this.SetState(AmbushExplosionSequenceState.Damaging);
                     }
@@ -70,7 +81,6 @@ namespace ConcreteJungle.Sequence
             {
                 case AmbushExplosionSequenceState.Exploding:
                     Mod.Log.Debug("Playing explosion FX.");
-                    this.PlayFX();
                     return;
                 case AmbushExplosionSequenceState.Damaging:
                     Mod.Log.Debug("Damaging targets");
@@ -86,36 +96,64 @@ namespace ConcreteJungle.Sequence
             }
         }
 
-        private void PlayFX()
+        private void Taunt()
         {
-            Mod.Log.Debug($"Spawning explosion type {base.Combat.Constants.VFXNames.artillery_explosion} at position {AttackOrigin}");
-            this.osd = new ObjectSpawnData(base.Combat.Constants.VFXNames.artillery_explosion,
-                this.AttackOrigin, true, true);
-            this.osd.Spawn(base.Combat);
-
-            CameraControl.Instance.AddCameraShake(
-                10f * (Mod.Config.ExplosionAmbush.DamagePerShot) * 
-                    base.Combat.Constants.CombatUIConstants.ScreenShakeRangedDamageRelativeMod + 
-                    base.Combat.Constants.CombatUIConstants.ScreenShakeRangedDamageAbsoluteMod, 
-                2f, this.AttackOrigin);
-            this.timeSinceLastSound = 0f;
-            this.timeBetweenSounds = UnityEngine.Random.Range(this.minTimeBetweenExplosions, this.maxTimeBetweenExplosions);
-
-            GameObject spawnedObject = this.osd.spawnedObject;
-            if (spawnedObject != null)
+            if (!hasTaunted)
             {
-                Mod.Log.Debug("Playing sound.");
-                AkGameObj akGameObj = spawnedObject.GetComponent<AkGameObj>();
-                if (akGameObj == null) akGameObj = spawnedObject.AddComponent<AkGameObj>();
+                // Create a quip
+                Guid g = Guid.NewGuid();
+                QuipHelper.PlayQuip(ModState.Combat, g.ToString(),
+                    ModState.CandidateTeams.ElementAt(0), "IED Ambush", Mod.Config.Qips.ExplosiveAmbush, 6);
+                hasTaunted = true;
+            }
+        }
 
-                WwiseManager.PostEvent<AudioEventList_explosion>(AudioEventList_explosion.explosion_large, akGameObj, null, null);
-                WwiseManager.PostEvent<AudioEventList_impact>(AudioEventList_impact.impact_thumper, this.audioObject, null, null); 
-                WwiseManager.PostEvent<AudioEventList_impact>(AudioEventList_impact.impact_mortar, this.audioObject, null, null);
-            }
-            else
+
+        private void PlayNextFX()
+        {
+            this.timeSinceLastExplosion += Time.deltaTime;
+            if (this.timeSinceLastExplosion > this.timeBetweenExplosions)
             {
-                Mod.Log.Debug("OSD WAS NULL - WTF?");
+                if (this.BlastOrigins.Count > 0)
+                {
+                    Vector3 origin = this.BlastOrigins[0];
+                    this.BlastOrigins.RemoveAt(0);
+
+                    Mod.Log.Debug($"Spawning explosion type {base.Combat.Constants.VFXNames.artillery_explosion} at position {origin}");
+                    this.osd = new ObjectSpawnData(base.Combat.Constants.VFXNames.artillery_explosion,
+                        origin, true, true);
+                    this.osd.Spawn(base.Combat);
+
+                    CameraControl.Instance.AddCameraShake(
+                        10f * (Mod.Config.ExplosionAmbush.DamagePerShot) *
+                            base.Combat.Constants.CombatUIConstants.ScreenShakeRangedDamageRelativeMod +
+                            base.Combat.Constants.CombatUIConstants.ScreenShakeRangedDamageAbsoluteMod,
+                        2f, origin);
+                    this.timeSinceLastSound = 0f;
+                    this.timeBetweenSounds = UnityEngine.Random.Range(this.minTimeBetweenExplosions, this.maxTimeBetweenExplosions);
+
+                    // TODO: Speed up the animations?
+
+                    GameObject spawnedObject = this.osd.spawnedObject;
+                    if (spawnedObject != null)
+                    {
+                        Mod.Log.Debug("Playing sound.");
+                        AkGameObj akGameObj = spawnedObject.GetComponent<AkGameObj>();
+                        if (akGameObj == null) akGameObj = spawnedObject.AddComponent<AkGameObj>();
+
+                        WwiseManager.PostEvent<AudioEventList_explosion>(AudioEventList_explosion.explosion_large, akGameObj, null, null);
+                        //WwiseManager.PostEvent<AudioEventList_impact>(AudioEventList_impact.impact_thumper, this.audioObject, null, null); 
+                        //WwiseManager.PostEvent<AudioEventList_impact>(AudioEventList_impact.impact_mortar, this.audioObject, null, null);
+                    }
+                    else
+                    {
+                        Mod.Log.Debug("OSD WAS NULL - WTF?");
+                    }
+
+                }
+                this.timeSinceLastExplosion = 0f;
             }
+
         }
 
         //private void SpawnScorch()
@@ -193,23 +231,29 @@ namespace ConcreteJungle.Sequence
         }
 
         private float timeInCurrentState;
-        private float timeInExplosion;
-        private float timeInDamaging;
+        //private float timeInExplosion;
+        //private float timeInDamaging;
+
+        private bool hasTaunted = false;
+        private float timeToTaunt = 6f;
+
+        private float timeSinceLastExplosion = 0f;
+        private float timeBetweenExplosions = 1f;
 
         private float timeSinceLastAttack;
         private float timeBetweenTargets = 0.25f;
-        private float timeShowingEffects = 3f;
+        //private float timeShowingEffects = 3f;
 
         private float timeSinceLastSound;
         private float timeBetweenSounds;
         private float minTimeBetweenExplosions = 0.0625f;
         private float maxTimeBetweenExplosions = 0.125f;
 
-        private float focalDistance = 400f;
+        //private float focalDistance = 400f;
 
-        private float impactLightIntensity = 1000000f;
+        //private float impactLightIntensity = 1000000f;
 
-        private AkGameObj audioObject;
+        //private AkGameObj audioObject;
 
         private ObjectSpawnData osd;
 
@@ -219,6 +263,7 @@ namespace ConcreteJungle.Sequence
         private enum AmbushExplosionSequenceState
         {
             NotSet,
+            Taunting,
             Exploding,
             Damaging,
             Finished

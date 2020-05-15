@@ -1,9 +1,5 @@
 ﻿using BattleTech;
-using ConcreteJungle.Helper;
-using ConcreteJungle.Objects;
 using Harmony;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using us.frostraptor.modUtils;
 
@@ -15,14 +11,13 @@ namespace ConcreteJungle.Patches
         static void Postfix(AbstractActor __instance)
         {
             // TODO: Allow spawn on ally as well
-            if (__instance.team.IsLocalPlayer)
+            if (__instance.team.IsLocalPlayer && 
+                !__instance.Combat.TurnDirector.IsInterleaved && 
+                !__instance.Combat.TurnDirector.IsInterleavePending)
             {
 
-                //Mod.Log.Debug($"Tab targets available to: {CombatantUtils.Label(__instance)}");
-                //foreach (ICombatant combatant in __instance.Combat.GetAllTabTargets(__instance))
-                //{
-                //    Mod.Log.Debug($"  -- {CombatantUtils.Label(combatant)}");
-                //}
+                // We have a pending ambush, skip
+                if (ModState.PendingAmbushOrigin.magnitude != 0) return;
 
                 // Check that we haven't exhausted the max traps for this mission
                 if (ModState.TrapsSpawned >= Mod.Config.MaxSpawns) return;
@@ -39,12 +34,9 @@ namespace ConcreteJungle.Patches
                     }
                 }
 
-                // Determine trap type - infantry ambush, tank ambush, IED
-                // TODO: Randomize
-                //TrapType trapType = TrapType.TRAP_INFANTRY_AMBUSH;
+                // If everything passes, mark this as a potential ambush location
+                ModState.PendingAmbushOrigin = __instance.CurrentPosition;
 
-                //InfantryAmbushHelper.SpawnAmbush(__instance.CurrentPosition);
-                ExplosionAmbushHelper.SpawnAmbush(__instance.CurrentPosition);
             }
             
         }

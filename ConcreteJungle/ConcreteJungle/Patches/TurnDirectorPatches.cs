@@ -6,6 +6,31 @@ using us.frostraptor.modUtils;
 
 namespace ConcreteJungle.Patches
 {
+
+    [HarmonyPatch(typeof(TurnDirector), "IncrementActiveTurnActor")]
+    static class TurnDirector_IncrementActiveTurnActor
+    {
+        static void Prefix(TurnDirector __instance)
+        {
+            if (!__instance.IsInterleaved && ! __instance.IsInterleavePending &&
+                __instance.ActiveTurnActor is Team activeTeam &&
+                activeTeam.IsLocalPlayer &&
+                ModState.PendingAmbushOrigin.magnitude != 0)
+            {
+                Mod.Log.Debug($"Resolving pending ambush at position: {ModState.PendingAmbushOrigin}");
+
+                // Determine trap type - infantry ambush, tank ambush, IED
+                // TODO: Randomize
+                //TrapType trapType = TrapType.TRAP_INFANTRY_AMBUSH;
+
+                //InfantryAmbushHelper.SpawnAmbush(__instance.CurrentPosition);
+                ExplosionAmbushHelper.SpawnAmbush(ModState.PendingAmbushOrigin);
+
+            }
+        }
+    }
+
+
     // We need to defer until after the buildings are initialized in pass 2, because the UrbanDestructible elements aren't
     //   added until then. 
     [HarmonyPatch(typeof(TurnDirector), "OnInitializeContractComplete")]
