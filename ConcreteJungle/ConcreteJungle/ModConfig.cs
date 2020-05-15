@@ -109,6 +109,8 @@ namespace ConcreteJungle {
         }
         public QipsConfig Qips = new QipsConfig();
 
+        public float CritChanceMultiplier = 1f;
+
         public int MaxSpawns = 2;
         public float MinSpawnDistance = 600f;
         

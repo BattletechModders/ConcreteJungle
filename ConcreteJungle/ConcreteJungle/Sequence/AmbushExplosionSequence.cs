@@ -158,8 +158,6 @@ namespace ConcreteJungle.Sequence
                             base.Combat.Constants.CombatUIConstants.ScreenShakeRangedDamageRelativeMod +
                             base.Combat.Constants.CombatUIConstants.ScreenShakeRangedDamageAbsoluteMod,
                         2f, origin);
-                    this.timeSinceLastSound = 0f;
-                    this.timeBetweenSounds = UnityEngine.Random.Range(this.minTimeBetweenExplosions, this.maxTimeBetweenExplosions);
 
                     // TODO: Speed up the animations?
 
@@ -170,9 +168,9 @@ namespace ConcreteJungle.Sequence
                         AkGameObj akGameObj = spawnedObject.GetComponent<AkGameObj>();
                         if (akGameObj == null) akGameObj = spawnedObject.AddComponent<AkGameObj>();
 
-                        WwiseManager.PostEvent<AudioEventList_explosion>(AudioEventList_explosion.explosion_large, akGameObj, null, null);
-                        //WwiseManager.PostEvent<AudioEventList_impact>(AudioEventList_impact.impact_thumper, this.audioObject, null, null); 
-                        //WwiseManager.PostEvent<AudioEventList_impact>(AudioEventList_impact.impact_mortar, this.audioObject, null, null);
+                        //WwiseManager.PostEvent<AudioEventList_explosion>(AudioEventList_explosion.explosion_large, akGameObj, null, null);
+                        WwiseManager.PostEvent<AudioEventList_impact>(AudioEventList_impact.impact_thumper, akGameObj, null, null);
+                        //WwiseManager.PostEvent<AudioEventList_impact>(AudioEventList_impact.impact_mortar, akGameObj, null, null);
                     }
                     else
                     {
@@ -185,34 +183,6 @@ namespace ConcreteJungle.Sequence
 
         }
 
-        //private void SpawnScorch()
-        //{
-        //    float num = this.referenceAbility.Def.FloatParam1 * 0.8f;
-        //    Vector3 vector = new Vector3(UnityEngine.Random.Range(0f, 1f), 0f, UnityEngine.Random.Range(0f, 1f));
-        //    FootstepManager.Instance.AddScorch(this.TargetPositions[0], vector.normalized, new Vector3(num, num, num), true);
-        //}
-
-        //private void DestroyFlimsyObjects()
-        //{
-        //    foreach (Collider collider in Physics.OverlapSphere(this.TargetPositions[0], 
-        //        this.referenceAbility.Def.FloatParam1, -5, QueryTriggerInteraction.Ignore))
-        //    {
-        //        Vector3 normalized = (collider.transform.position - this.TargetPositions[0]).normalized;
-        //        float num = Mod.Config.ExplosionAmbush.DamagePerShot + base.Combat.Constants.ResolutionConstants.FlimsyDestructionForceMultiplier;
-        //        DestructibleObject component = collider.gameObject.GetComponent<DestructibleObject>();
-        //        DestructibleUrbanFlimsy component2 = collider.gameObject.GetComponent<DestructibleUrbanFlimsy>();
-        //        if (component != null && component.isFlimsy)
-        //        {
-        //            component.TakeDamage(this.TargetPositions[0], normalized, num);
-        //            component.Collapse(normalized, num);
-        //        }
-        //        if (component2 != null)
-        //        {
-        //            component2.PlayDestruction(normalized, num);
-        //        }
-        //    }
-        //}
-
         private void DamageNextTarget()
         {
             this.timeSinceLastAttack += Time.deltaTime;
@@ -222,6 +192,8 @@ namespace ConcreteJungle.Sequence
                 {
                     ICombatant target = this.Targets[0];
                     BattleTech.Building targetBuilding = target as BattleTech.Building;
+                    Mech targetMech = target as Mech;
+
                     this.Targets.Remove(target);
                     Mod.Log.Debug($" Damaging target: {CombatantUtils.Label(target)}");
 
@@ -232,6 +204,7 @@ namespace ConcreteJungle.Sequence
                     weaponHitInfo.stackItemUID = base.SequenceGUID;
                     weaponHitInfo.locationRolls = new float[this.AmbushHits];
                     weaponHitInfo.hitLocations = new int[this.AmbushHits];
+                    weaponHitInfo.hitPositions = new Vector3[this.AmbushHits];
                     weaponHitInfo.hitQualities = new AttackImpactQuality[this.AmbushHits];
 
                     // TODO: Attacks should come from each of the source positions
@@ -242,6 +215,7 @@ namespace ConcreteJungle.Sequence
                     {
                         weaponHitInfo.attackDirections[i] = attackDirection;
                         weaponHitInfo.hitQualities[i] = AttackImpactQuality.Solid;
+                        weaponHitInfo.hitPositions[i] = this.AmbushPosition;
                     }
 
                     this.GetIndividualHits(ref weaponHitInfo, AmbushWeapon, target);
@@ -250,7 +224,7 @@ namespace ConcreteJungle.Sequence
                         Mod.Log.Debug($"  -- target takes: {this.AmbushWeapon.DamagePerShot} to location: {weaponHitInfo.hitLocations[j]}");
                         if (targetBuilding != null)
                         {
-                            targetBuilding.DamageBuilding(this.AmbushPosition, weaponHitInfo, this.AmbushWeapon, this.AmbushWeapon.DamagePerShot, 0f, j, DamageType.Artillery);
+                            targetBuilding.DamageBuilding(this.AmbushPosition, weaponHitInfo, this.AmbushWeapon, this.AmbushWeapon.DamagePerShot, 0f, j);
                         }
                         else
                         {
@@ -258,37 +232,16 @@ namespace ConcreteJungle.Sequence
                         }
                     }
 
-                    target.ResolveWeaponDamage(weaponHitInfo, this.AmbushWeapon, MeleeAttackType.NotSet);
+                    if (targetMech != null)
+                    {
+                        targetMech.ResolveSourcelessWeaponDamage(weaponHitInfo, this.AmbushWeapon, MeleeAttackType.NotSet);
+                    }
+                    else
+                    {
+                        target.ResolveWeaponDamage(weaponHitInfo, this.AmbushWeapon, MeleeAttackType.NotSet);
+                    }
+
                     target.HandleDeath("Artillery");
-
-                    //if (abstractActor != null && abstractActor.BehaviorTree != null && 
-                    //    !abstractActor.BehaviorTree.IsTargetIgnored(this.owningActor))
-                    //{
-                    //    combatant.LastTargetedPhaseNumber = base.Combat.TurnDirector.TotalElapsedPhases;
-                    //}
-
-                    //if (Mod.Config.ExplosionAmbush.DamagePerShot > 0f)
-                    //{
-                    //    Vector2 damageRange = new Vector2(
-                    //        Mod.Config.ExplosionAmbush.DamagePerShot - Mod.Config.ExplosionAmbush.DamageVariance,
-                    //        Mod.Config.ExplosionAmbush.DamagePerShot + Mod.Config.ExplosionAmbush.DamageVariance
-                    //        );
-                    //    DamageOrderUtility.ApplyDamageToAllLocations(this.owningActor.GUID, base.SequenceGUID, base.RootSequenceGUID, 
-                    //        combatant, (int)damageRange.x, (int)damageRange.y, AttackDirection.FromArtillery, DamageType.Artillery);
-                    //}
-
-                    //if (Mod.Config.ExplosionAmbush.DamagePerShot > 0f)
-                    //{
-                    //    DamageOrderUtility.ApplyHeatDamage(base.SequenceGUID, combatant, (int)Mod.Config.ExplosionAmbush.DamagePerShot);
-                    //}
-
-                    //if (Mod.Config.ExplosionAmbush.DamagePerShot > 0f)
-                    //{
-                    //    DamageOrderUtility.ApplyStabilityDamage(base.SequenceGUID, combatant, Mod.Config.ExplosionAmbush.DamagePerShot);
-                    //}
-
-                    //ActorAttackedMessage message = new ActorAttackedMessage("0", combatant.GUID);
-                    //base.Combat.MessageCenter.PublishMessage(message);
                 }
                 this.timeSinceLastAttack = 0f;
             }
@@ -305,32 +258,17 @@ namespace ConcreteJungle.Sequence
         }
 
         private float timeInCurrentState;
-        //private float timeInExplosion;
-        //private float timeInDamaging;
 
         private bool hasTaunted = false;
         private float timeToTaunt = 1f;
 
         private float timeSinceLastExplosion = 0f;
-        private float timeBetweenExplosions = 0.75f;
+        private float timeBetweenExplosions = 0.5f;
 
         private float timeSinceLastAttack;
         private float timeBetweenTargets = 0.25f;
-        //private float timeShowingEffects = 3f;
-
-        private float timeSinceLastSound;
-        private float timeBetweenSounds;
-        private float minTimeBetweenExplosions = 0.0625f;
-        private float maxTimeBetweenExplosions = 0.125f;
-
-        //private float focalDistance = 400f;
-
-        //private float impactLightIntensity = 1000000f;
-
-        //private AkGameObj audioObject;
 
         private ObjectSpawnData osd;
-
 
         private AmbushExplosionSequenceState state;
 

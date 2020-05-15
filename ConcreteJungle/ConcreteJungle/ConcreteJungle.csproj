@@ -73,6 +73,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Extensions\BuildingExtensions.cs" />
+    <Compile Include="Extensions\MechExtensions.cs" />
     <Compile Include="Helper\CandidateHelper.cs" />
     <Compile Include="Helper\DevestationHelper.cs" />
     <Compile Include="Helper\ExplosionAmbushHelper.cs" />
@@ -88,6 +89,7 @@
     <Compile Include="Patches\BuildingPatches.cs" />
     <Compile Include="Patches\CombatGameStatePatches.cs" />
     <Compile Include="Patches\CombatHUDPatches.cs" />
+    <Compile Include="Patches\CritChanceRulesPatches.cs" />
     <Compile Include="Patches\LOSPatches.cs" />
     <Compile Include="Patches\GameRepresentationPatches.cs" />
     <Compile Include="Patches\TurnDirectorPatches.cs" />
