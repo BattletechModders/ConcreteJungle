@@ -114,7 +114,7 @@ namespace ConcreteJungle.Patches
             {
                 asyncSpawnReq.AddBlindLoadRequest(BattleTechResourceType.PilotDef, pilotDefId, new bool?(false));
             }
-            foreach (AmbushLance lance in Mod.Config.SpawnAmbush.AmbushLance)
+            foreach (AmbushDef lance in Mod.Config.SpawnAmbush.AmbushLance)
             {
                 asyncSpawnReq.AddBlindLoadRequest(BattleTechResourceType.VehicleDef, lance.VehicleDefId, new bool?(false));
                 asyncSpawnReq.AddBlindLoadRequest(BattleTechResourceType.PilotDef, lance.PilotDefId, new bool?(false));

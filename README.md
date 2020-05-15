@@ -37,8 +37,6 @@ Todo:
   
 * WTF won't building highlighting work? Probably not a huge deal
 
-* Spawn turrets 50/80% up building
-
 * Make sure turrets salvage isn't included
 
   * From Denadan - remove them from enemies after death
@@ -58,9 +56,19 @@ Todo:
 
 * Should not always trigger on first mover; add random chance to introduction variability
 
+*  I have two suggestions: (a) Toggle or slider for having infantry be more likely if the target owns the planet. (b) falling buildings do damage, mostly STAB damage
 
+* Collapse buildings from jumping if tonnage > structure points. Alternatively - jumping onto a building does X damage? Probably too much.
 
+* Add ambushes that target the enemy or enemies in a 3 way 
 
+* Add ambushes that are hostile to all
+
+* Explosion should put up a floatie that gives the blast name
+
+  
+
+  
 
 
 

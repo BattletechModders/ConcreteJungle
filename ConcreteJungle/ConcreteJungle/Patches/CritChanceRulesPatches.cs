@@ -11,7 +11,7 @@ namespace ConcreteJungle.Patches
             // We are in a weapon without parent - so we're coming from one of our sourceless attacks. Don't breka.
             if (weapon != null && weapon.parent == null)
             {
-                float baseCritChance = Mod.Config.CritChanceMultiplier;
+                float baseCritChance = 1f;
                 float weaponMultiplier = __instance.GetWeaponMultiplier(weapon);
                 float targetEffectMutliplier = __instance.GetTargetEffectMutliplier(target);
                 float totalCritChance = baseCritChance * weaponMultiplier * targetEffectMutliplier;

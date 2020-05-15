@@ -20,13 +20,13 @@ namespace ConcreteJungle.Patches
                 if (ModState.PendingAmbushOrigin.magnitude != 0) return;
 
                 // Check that we haven't exhausted the max traps for this mission
-                if (ModState.TrapsSpawned >= Mod.Config.MaxSpawns) return;
+                if (ModState.TrapsSpawned >= Mod.Config.MaxAbushesPerMap) return;
 
                 // Validate that we are far enough away from trap origins to spawn another
                 foreach (Vector3 trapOrigin in ModState.TrapSpawnOrigins)
                 {
                     float distance = (__instance.CurrentPosition - trapOrigin).magnitude;
-                    if (distance < Mod.Config.MinSpawnDistance)
+                    if (distance < Mod.Config.MinDistanceBetweenAmbushes)
                     {
                         Mod.Log.Debug($" Actor {CombatantUtils.Label(__instance)} at pos: {__instance.CurrentPosition} is {distance}m away from " +
                             $"previous trap origin: {trapOrigin}. Skipping.");

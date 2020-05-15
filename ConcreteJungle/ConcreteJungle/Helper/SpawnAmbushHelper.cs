@@ -32,7 +32,7 @@ namespace ConcreteJungle.Helper
             Dictionary<AbstractActor, BattleTech.Building> actorToSpawnBuildings = new Dictionary<AbstractActor, BattleTech.Building>();
             for (int i = 0; i < Mod.Config.SpawnAmbush.AmbushLance.Count; i++)
             {
-                AmbushLance lance = Mod.Config.SpawnAmbush.AmbushLance[i];
+                AmbushDef lance = Mod.Config.SpawnAmbush.AmbushLance[i];
                 BattleTech.Building originBuilding = spawnPoints[i];
                 AbstractActor spawnedActor = null;
                 if (lance.IsVehicle)
@@ -73,7 +73,7 @@ namespace ConcreteJungle.Helper
             ModState.TrapSpawnOrigins.Add(originPos);
         }
 
-        public static AbstractActor SpawnAmbushVehicle(AmbushLance ambushLance, Team team, Vector3 ambushOrigin, BattleTech.Building originBuilding)
+        public static AbstractActor SpawnAmbushVehicle(AmbushDef ambushLance, Team team, Vector3 ambushOrigin, BattleTech.Building originBuilding)
         {
             PilotDef pilotDef = ModState.Combat.DataManager.PilotDefs.GetOrCreate(ambushLance.PilotDefId);
             VehicleDef vehicleDef = ModState.Combat.DataManager.VehicleDefs.GetOrCreate(ambushLance.VehicleDefId);

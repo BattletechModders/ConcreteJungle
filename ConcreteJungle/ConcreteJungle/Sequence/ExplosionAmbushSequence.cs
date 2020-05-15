@@ -9,7 +9,7 @@ using us.frostraptor.modUtils;
 
 namespace ConcreteJungle.Sequence
 {
-    public class AmbushExplosionSequence : MultiSequence
+    public class ExplosionAmbushSequence : MultiSequence
     {
         private List<ICombatant> Targets { get; set; }
 
@@ -30,7 +30,7 @@ namespace ConcreteJungle.Sequence
 
         public override bool IsComplete { get { return this.state == AmbushExplosionSequenceState.Finished; } }
 
-        public AmbushExplosionSequence(CombatGameState combat, Vector3 ambushPos, List<Vector3> blastOrigins, List<ICombatant> targets) : base(combat)
+        public ExplosionAmbushSequence(CombatGameState combat, Vector3 ambushPos, List<Vector3> blastOrigins, List<ICombatant> targets) : base(combat)
         {
             Mod.Log.Debug($"Creating AES for position: {ambushPos}");
             AmbushPosition = ambushPos;

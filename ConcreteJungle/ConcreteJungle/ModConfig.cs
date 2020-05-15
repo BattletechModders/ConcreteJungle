@@ -1,6 +1,4 @@
-﻿using BattleTech;
-using Org.BouncyCastle.Security;
-using System;
+﻿
 using System.Collections.Generic;
 
 namespace ConcreteJungle {
@@ -13,78 +11,64 @@ namespace ConcreteJungle {
 
         public class DevestationOpts
         {
-            public float MinDevestation = 0.6f;
-            public float MaxDevestation = 0.9f;
-
+            // If false, buildings will not be pre-destroyed
             public bool Enabled = false;
+            
+            // If no tags match, the range we'll use
+            public DevestationDef DefaultRange = new DevestationDef() { MinDevestation = 0.3f, MaxDevestation = 0.9f };
+
+            // Ranges specified by planet tags. We'll use the worst effect.
+            public HashSet<DevestationDef> RangesByPlanetTag = new HashSet<DevestationDef>();
         }
         public DevestationOpts Devestation = new DevestationOpts();
 
-
         public class ExplosionAmbushOpts
         {
-            public int SearchRadius = 100;
-
-            public int MinExplosions = 2;
-            public int MaxExplosions = 6;
-
-            public float DamagePerShot = 400f;
-            public float DamageVariance = 5f;
-            
-            public float HeatDamagePerShot = 30f;
-            //public float HeatDamageVariance = 5f;
-
-            public float StabilityDamagePerShot = 20f;
-            //public float StabilityDamageVariance = 5f;
-
+            // If false, cannot be selected randomly
             public bool Enabled = true;
 
+            // How far from the trigger origin should we search for suitable buildings
+            public int SearchRadius = 100;
+
+            // All of the ambush definitions
+            public List<ExplosionAmbushDef> Ambushes = new List<ExplosionAmbushDef>();
         }
         public ExplosionAmbushOpts ExplosionAmbush = new ExplosionAmbushOpts();
 
         public class InfantryAmbushOpts
         {
-            public int MinBuildings = 2;
-            public int MaxBuidlings = 5;
+            // If false, cannot be selected randomly
+            public bool Enabled = true;
 
-            public List<string> TurretDefIds = new List<string>();
-            public List<string> PilotDefIds = new List<string>();
+            // If true, every unit will generate an attack sequence against the closest target
+            public bool FreeAttackEnabled = true;
 
-            public string AmbushHUDTitle = "Entrenched Infantry";
-
+            // How far from the trigger origin should we search for suitable buildings
             public int SearchRadius = 200;
 
+            // If true, the trap turrets will be visible to the player. 
             public bool VisibleTrapTurrets = true;
 
-            public bool Enabled = true;
+            // All of the ambush definitions
+            public List<InfantryAmbushDef> Ambushes = new List<InfantryAmbushDef>();
+
         }
         public InfantryAmbushOpts InfantryAmbush = new InfantryAmbushOpts();
 
-
-        public class AmbushLance
-        {
-            public string MechDefId;
-            public string TurretDefId;
-            public string VehicleDefId;
-            public string PilotDefId;
-
-            public bool IsMech { get { return MechDefId != null && !MechDefId.Equals(""); }  }
-            public bool IsTurret { get { return TurretDefId != null && !TurretDefId.Equals(""); } }
-            public bool IsVehicle { get { return VehicleDefId != null && !VehicleDefId.Equals(""); } }
-        }
-
         public class SpawnAmbushOpts
         {
-            public List<AmbushLance> AmbushLance = new List<AmbushLance>() { 
-                new AmbushLance() { VehicleDefId = "vehicledef_DEMOLISHER", PilotDefId = "pilot_d7_brawler" },
-                new AmbushLance() { VehicleDefId = "vehicledef_DEMOLISHER", PilotDefId = "pilot_d7_brawler" },
-                new AmbushLance() { VehicleDefId = "vehicledef_MANTICORE", PilotDefId = "pilot_d7_brawler" },
-                new AmbushLance() { VehicleDefId = "vehicledef_MANTICORE", PilotDefId = "pilot_d7_brawler" },
-            };
+            // If false, cannot be selected randomly
+            public bool Enabled = true;
 
+            // If true, every unit will generate an attack sequence against the closest target
+            public bool FreeAttackEnabled = true;
+
+            // How far from the trigger origin should we search for suitable buildings
             public int SearchRadius = 200;
 
-            public bool Enabled = true;
+            // All of the ambush definitions
+            public List<SpawnAmbushDef> Ambushes = new List<SpawnAmbushDef>();
+
         }
         public SpawnAmbushOpts SpawnAmbush = new SpawnAmbushOpts();
 
@@ -117,10 +101,10 @@ namespace ConcreteJungle {
         }
         public QipsConfig Qips = new QipsConfig();
 
-        public float CritChanceMultiplier = 1f;
+        public int MaxAbushesPerMap = 2;
+        public float MinDistanceBetweenAmbushes = 600f;
 
-        public int MaxSpawns = 2;
-        public float MinSpawnDistance = 600f;
+        // TODO: need a weight for ambushes, from 1-10. S, I, E maybe? 
         
         // If true, many logs will be printed
         public bool Debug = false;
@@ -140,14 +124,45 @@ namespace ConcreteJungle {
         public void Init() {
             Mod.Log.Debug(" == Initializing Configuration");
 
-            // Infantry def defaults
-            if (this.InfantryAmbush?.TurretDefIds?.Count == 0)
+            if (Mod.Config.ExplosionAmbush.Ambushes.Count == 0)
             {
-                this.InfantryAmbush.TurretDefIds.Add("turretdef_Light_Shredder");
+                Mod.Config.ExplosionAmbush.Ambushes.Add(new ExplosionAmbushDef
+                {
+                    MinDifficulty = 1,
+                    MaxDifficulty = 10,
+                    MinSpawns = 2,
+                    MaxSpawns = 6,
+                    WeaponDefs = { "Weapon_Ambush_Explosion" }
+                    
+                });
             }
-            if (this.InfantryAmbush?.PilotDefIds?.Count == 0)
+            
+            if (Mod.Config.InfantryAmbush.Ambushes.Count == 0)
             {
-                this.InfantryAmbush.PilotDefIds.Add("pilot_d7_turret");
+                Mod.Config.InfantryAmbush.Ambushes.Add(new InfantryAmbushDef
+                {
+                    MinDifficulty = 1,
+                    MaxDifficulty = 10,
+                    MinSpawns = 2,
+                    MaxSpawns = 6,
+                    TurretDefs = { "turretdef_Light_Shredder", "turretdef_Light_Laser" },
+                    PilotDefId = "pilot_d5_turret"
+                });
+            }
+            
+            if (Mod.Config.SpawnAmbush.Ambushes.Count == 0)
+            {
+                Mod.Config.SpawnAmbush.Ambushes.Add(new SpawnAmbushDef
+                {
+                    MinDifficulty = 1,
+                    MaxDifficulty = 10,
+                    MinSpawns = 2,
+                    MaxSpawns = 6,
+                    MechDefs = { "mechdef_urbanmech_UM-R60" },
+                    TurretDefs = { },
+                    VehicleDefs = { "vehicledef_BULLDOG", "vehicledef_MANTICORE", "vehicledef_CARRIER_SRM" },
+                    PilotDefId = "pilot_d3_gunner"
+                });
             }
 
             Mod.Log.Debug(" == Configuration Initialized");
