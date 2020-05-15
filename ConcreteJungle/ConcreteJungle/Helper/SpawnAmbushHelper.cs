@@ -42,11 +42,11 @@ namespace ConcreteJungle.Helper
                 actorToSpawnBuildings.Add(spawnedActor, originBuilding);
             }
 
+            // TODO: This should be 
             List<ICombatant> targets = new List<ICombatant>();
-            List<Collider> overlapedColliders = new List<Collider>(Physics.OverlapSphere(originPos, Mod.Config.ExplosionAmbush.SearchRadius));
             foreach (ICombatant combatant in ModState.Combat.GetAllCombatants())
             {
-                if (!combatant.IsDead && !combatant.IsFlaggedForDeath)
+                if (!combatant.IsDead && !combatant.IsFlaggedForDeath && !(combatant is BattleTech.Building))
                 {
                     if (combatant.team != null && ModState.Combat.HostilityMatrix.IsLocalPlayerFriendly(combatant.team) &&
                         Vector3.Distance(originPos, combatant.CurrentPosition) <= Mod.Config.SpawnAmbush.SearchRadius)
@@ -60,7 +60,7 @@ namespace ConcreteJungle.Helper
             Mod.Log.Debug("Sending AddSequence message for spawn ambush explosion.");
             try
             {
-                SpawnAmbushSequence ambushSequence = new SpawnAmbushSequence(ModState.Combat, originPos, actorToSpawnBuildings);
+                SpawnAmbushSequence ambushSequence = new SpawnAmbushSequence(ModState.Combat, originPos, actorToSpawnBuildings, targets);
                 ModState.Combat.MessageCenter.PublishMessage(new AddSequenceToStackMessage(ambushSequence));
 
             }

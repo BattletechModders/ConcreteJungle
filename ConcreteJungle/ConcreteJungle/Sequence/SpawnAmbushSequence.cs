@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using us.frostraptor.modUtils;
+using static BattleTech.AttackDirector;
 
 namespace ConcreteJungle.Sequence
 {
@@ -17,6 +18,8 @@ namespace ConcreteJungle.Sequence
 
         private List<BattleTech.Building> BuildingsToCollapse { get; set; }
 
+        private List<ICombatant> AllTargets { get; set; }
+
         public override bool IsValidMultiSequenceChild {  get { return false;  } }
 
         public override bool IsParallelInterruptable { get { return false; } }
@@ -26,12 +29,13 @@ namespace ConcreteJungle.Sequence
 
         public override bool IsComplete { get { return this.state == AmbushExplosionSequenceState.Finished; } }
 
-        public SpawnAmbushSequence(CombatGameState combat, Vector3 ambushPos, Dictionary<AbstractActor, BattleTech.Building> actorToSpawnBuildings) : base(combat)
+        public SpawnAmbushSequence(CombatGameState combat, Vector3 ambushPos, Dictionary<AbstractActor, BattleTech.Building> actorToSpawnBuildings, List<ICombatant> targets) : base(combat)
         {
             Mod.Log.Debug($"Creating SAS for position: {ambushPos}");
             this.AmbushPosition = ambushPos;
             this.AttackingActors = actorToSpawnBuildings.Keys.ToList();
             this.BuildingsToCollapse = actorToSpawnBuildings.Values.ToList();
+            this.AllTargets = targets;
         }
 
         public override void OnAdded()
@@ -104,8 +108,31 @@ namespace ConcreteJungle.Sequence
                     AbstractActor actor = this.AttackingActors[0];
                     this.AttackingActors.RemoveAt(0);
 
+                    // Find the closest target
+                    ICombatant closestTarget = AllTargets[0];
+                    foreach (ICombatant target in AllTargets)
+                    {
+                        if ((target.CurrentPosition - actor.CurrentPosition).magnitude <
+                            (closestTarget.CurrentPosition - actor.CurrentPosition).magnitude)
+                        {
+                            closestTarget = target;
+                        }
+                    }
+
+                    float currentRange = (closestTarget.CurrentPosition - actor.CurrentPosition).magnitude;
+                    List<Weapon> selectedWeapons = new List<Weapon>();
+                    foreach (Weapon weapon in actor.Weapons)
+                    {
+                        if (weapon.CanFire && weapon.MinRange < currentRange)
+                        {
+                            selectedWeapons.Add(weapon);
+                        }
+                    }
+                    
                     Mod.Log.Debug($"Ambush attack from actor: {CombatantUtils.Label(actor)}");
-                    // TODO:
+                    AttackStackSequence attackSequence = new AttackStackSequence(actor, closestTarget, actor.CurrentPosition, actor.CurrentRotation,
+                        selectedWeapons);
+                    ModState.Combat.MessageCenter.PublishMessage(new AddSequenceToStackMessage(attackSequence));
                 }
                 this.timeSinceLastCollapse = 0f;
             }
