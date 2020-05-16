@@ -14,7 +14,7 @@ namespace ConcreteJungle.Helper
             if (!Mod.Config.InfantryAmbush.Enabled) return;
 
             // Build list of candidate trap buildings
-            List<BattleTech.Building> candidates = CandidateHelper.FilterCandidates(originPos, Mod.Config.InfantryAmbush.SearchRadius);
+            List<BattleTech.Building> candidates = CandidateBuildingsHelper.FilterCandidates(originPos, Mod.Config.InfantryAmbush.SearchRadius);
 
             if (candidates.Count < Mod.Config.InfantryAmbush.MinBuildings)
             {
@@ -64,7 +64,7 @@ namespace ConcreteJungle.Helper
                 }
             }
 
-            ModState.TrapSpawnOrigins.Add(originPos);
+            ModState.AmbushOrigins.Add(originPos);
 
         }
 

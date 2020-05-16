@@ -8,7 +8,7 @@ namespace ConcreteJungle.Patches
     {
         public static bool Prefix(CritChanceRules __instance, ICombatant target, Weapon weapon, bool shouldLog, ref float __result)
         {
-            // We are in a weapon without parent - so we're coming from one of our sourceless attacks. Don't breka.
+            // We are in a weapon without parent - so we're coming from one of our sourceless attacks. Don't break.
             if (weapon != null && weapon.parent == null)
             {
                 float baseCritChance = 1f;

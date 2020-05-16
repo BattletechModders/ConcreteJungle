@@ -9,6 +9,24 @@ namespace ConcreteJungle {
 
     public class ModConfig {
 
+        public class AmbushOpts
+        {
+            public int MaxPerMap = 2;
+            public float MinDistanceBetween = 600f;
+            public float BaseChance = 0.3f;
+            public float ChancePerActor = 0.05f;
+
+            // How far from the trigger origin should we search for suitable buildings
+            public int SearchRadius = 250;
+
+            // TODO: need a weight for ambushes, from 1-10. S, I, E maybe? 
+            // Maybe tie this into tags?
+            // Just make this a default
+            public string[] AmbushWeights;
+            public AmbushType[] AmbushTable;
+        }
+        public AmbushOpts Ambush = new AmbushOpts();
+
         public class DevestationOpts
         {
             // If false, buildings will not be pre-destroyed
@@ -27,9 +45,6 @@ namespace ConcreteJungle {
             // If false, cannot be selected randomly
             public bool Enabled = true;
 
-            // How far from the trigger origin should we search for suitable buildings
-            public int SearchRadius = 100;
-
             // The weapons that can be used in the ambush
             public List<ExplosionAmbushDef> Ambushes = new List<ExplosionAmbushDef>();
         }
@@ -42,9 +57,6 @@ namespace ConcreteJungle {
 
             // If true, every unit will generate an attack sequence against the closest target
             public bool FreeAttackEnabled = true;
-
-            // How far from the trigger origin should we search for suitable buildings
-            public int SearchRadius = 200;
 
             // If true, the trap turrets will be visible to the player. 
             public bool VisibleTrapTurrets = true;
@@ -63,9 +75,6 @@ namespace ConcreteJungle {
             // If true, every unit will generate an attack sequence against the closest target
             public bool FreeAttackEnabled = true;
 
-            // How far from the trigger origin should we search for suitable buildings
-            public int SearchRadius = 200;
-
             // The actor/pilot pairs that are possible ambushers
             public List<MechAmbushDef> Ambushes = new List<MechAmbushDef>();
 
@@ -80,9 +89,6 @@ namespace ConcreteJungle {
 
             // If true, every unit will generate an attack sequence against the closest target
             public bool FreeAttackEnabled = true;
-
-            // How far from the trigger origin should we search for suitable buildings
-            public int SearchRadius = 200;
 
             // All of the ambush definitions
             public List<VehicleAmbushDef> Ambushes = new List<VehicleAmbushDef>();
@@ -119,11 +125,6 @@ namespace ConcreteJungle {
         }
         public QipsConfig Qips = new QipsConfig();
 
-        public int MaxAbushesPerMap = 2;
-        public float MinDistanceBetweenAmbushes = 600f;
-
-        // TODO: need a weight for ambushes, from 1-10. S, I, E maybe? 
-        
         // If true, many logs will be printed
         public bool Debug = false;
         // If true, all logs will be printed

@@ -52,8 +52,6 @@ Todo:
 
 * Remove candidate buildings when they become infantry / vehicle traps
 
-* Should not always trigger on first mover; add random chance to introduction variability
-
 *  I have two suggestions: (a) Toggle or slider for having infantry be more likely if the target owns the planet. (b) falling buildings do damage, mostly STAB damage
 
 * Collapse buildings from jumping if tonnage > structure points. Alternatively - jumping onto a building does X damage? Probably too much.

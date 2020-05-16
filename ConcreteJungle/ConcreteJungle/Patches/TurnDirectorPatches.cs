@@ -1,9 +1,10 @@
 ﻿using BattleTech;
-using BattleTech.Data;
 using ConcreteJungle.Helper;
 using Harmony;
-using us.frostraptor.modUtils;
-using static ConcreteJungle.ModConfig;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
 namespace ConcreteJungle.Patches
 {
@@ -14,10 +15,52 @@ namespace ConcreteJungle.Patches
         static void Prefix(TurnDirector __instance)
         {
             if (!__instance.IsInterleaved && ! __instance.IsInterleavePending &&
-                __instance.ActiveTurnActor is Team activeTeam &&
-                activeTeam.IsLocalPlayer &&
-                ModState.PendingAmbushOrigin.magnitude != 0)
+                __instance.ActiveTurnActor is Team activeTeam && activeTeam.IsLocalPlayer &&
+                ModState.PotentialAmbushOrigins.Count != 0)
             {
+                // Re-Filter the candidates to try to catch buildings that were marked contract objectives
+                CandidateBuildingsHelper.FilterOnTurnActorIncrement(__instance.Combat);
+
+                bool wasAmbushed = false;
+                Dictionary<Vector3, List<BattleTech.Building>> ambushSites = new Dictionary<Vector3, List<BattleTech.Building>>();
+                foreach (Vector3 origin in ModState.PotentialAmbushOrigins)
+                {
+                    float roll = Mod.Random.Next(1, 100);
+                    int threshold = (int)Math.Ceiling(ModState.CurrentAmbushChance * 100f);
+                    if (roll <= threshold)
+                    {                        
+                        Mod.Log.Info($" Roll: {roll} is under current threshold: {threshold}, enabling possible ambush");
+                        wasAmbushed = true;
+                    }
+                    else
+                    {
+                        ModState.CurrentAmbushChance += Mod.Config.Ambush.ChancePerActor;
+                        Mod.Log.Info($" Roll: {roll} was over threshold: {threshold}, increasing ambush chance to: {ModState.CurrentAmbushChance} for next position.");
+                    }
+
+                    // For the given origin, find how many potential buildings there are.
+                    List<BattleTech.Building> originCandidates = CandidateBuildingsHelper.FilterCandidates(origin, Mod.Config.Ambush.SearchRadius);
+                    Mod.Log.Debug($" Found {originCandidates.Count} candidate buildings for originPos: {origin}");
+                    ambushSites.Add(origin, originCandidates);
+
+                }
+                ModState.PotentialAmbushOrigins.Clear(); // reset potential origins for next round
+
+                if (wasAmbushed)
+                {
+                    // Sort the ambushSites by number of buildings to maximize ambush success
+                    Mod.Log.Debug("Sorting sites by potential buildings.");
+                    List<KeyValuePair<Vector3, List<BattleTech.Building>>> sortedSites = ambushSites.ToList();
+                    sortedSites.Sort((x, y) => x.Value.Count.CompareTo(y.Value.Count));
+
+                    Vector3 ambushOrigin = sortedSites[0].Key;
+                    Mod.Log.Debug($"Spawning an ambush at position: {ambushOrigin}");
+
+                    // Randomly determine an ambush type by weight
+                }
+
+
+
                 Mod.Log.Debug($"Resolving pending ambush at position: {ModState.PendingAmbushOrigin}");
 
                 // Determine trap type - infantry ambush, tank ambush, IED
@@ -28,6 +71,9 @@ namespace ConcreteJungle.Patches
                 //ExplosionAmbushHelper.SpawnAmbush(ModState.PendingAmbushOrigin);
                 SpawnAmbushHelper.SpawnAmbush(ModState.PendingAmbushOrigin);
 
+                // Record a successful ambush and reset the weighting
+                ModState.AmbushOrigins.Add(ModState.PendingAmbushOrigin);
+                ModState.CurrentAmbushChance = Mod.Config.Ambush.BaseChance;
             }
         }
     }
@@ -42,61 +88,16 @@ namespace ConcreteJungle.Patches
         {
             Mod.Log.Trace("TD:OICC - entered.");
 
-            InitializeContractCompleteMessage initializeContractMessage = message as InitializeContractCompleteMessage;
-            CombatGameState combat = __instance.Combat;
-            Contract activeContract = combat.ActiveContract;
+            if (!ModState.IsUrbanBiome) return;
 
             // Find candidate buildings
-            Mod.Log.Debug("Filtering candidate buidlings:");
-            ModState.CandidateBuildings.Clear();
-            foreach (ICombatant combatant in combat.GetAllCombatants())
-            {
-                if (combatant is BattleTech.Building building)
-                {
-                    Mod.Log.Trace($" Found building {CombatantUtils.Label(building)}");
-                    Mod.Log.Trace($"  -- isTabTarget: {building.IsTabTarget}");
-
-                    if (building.BuildingDef != null)
-                    {
-                        Mod.Log.Trace($"   -- BuildingDef:");
-                        Mod.Log.Trace($"     description: '{building.BuildingDef.Description}' ");
-                        Mod.Log.Trace($"     isDestructible: {building.BuildingDef.Destructible} " +
-                            $"structurePoints: {building.BuildingDef.StructurePoints} ");
-                    }
-                    else { continue; }
-
-                    if (building.UrbanDestructible != null)
-                    {
-                        Mod.Log.Trace($"   -- UrbanDestructible: " +
-                            $"name: {building.UrbanDestructible.name} " +
-                            $"canBeDesolation: {building.UrbanDestructible.CanBeDesolation} " +
-                            $"currentDesolationState: {building.UrbanDestructible.CurDesolationState}"
-                            );
-                    }
-                    else { continue; }
-
-                    if (building.objectiveGUIDS.Contains(combat.GUID))
-                    {
-                        Mod.Log.Debug($"   -- Building is an objective, skipping.");
-                        continue;
-                    }
-
-                    if (building.BuildingDef != null && building.BuildingDef.Destructible &&
-                        building.UrbanDestructible != null && building.UrbanDestructible.CanBeDesolation &&
-                        !building.IsTabTarget)
-                    {
-                        Mod.Log.Trace($"  -- Building {CombatantUtils.Label(building)} meets criteria, adding as trap candidate.");
-                        ModState.CandidateBuildings.Add(building);
-                    }
-
-                }
-            }
-            Mod.Log.Debug($"Map has: {ModState.CandidateBuildings.Count} buildings suitable for traps");
+            CandidateBuildingsHelper.DoInitialFilter(__instance.Combat);
+            Mod.Log.Info($"Contract initially has: {ModState.CandidateBuildings.Count} candidate buildings");
 
             // Devestate buildings
             DevestationHelper.DevestateBuildings();
 
-            Mod.Log.Debug($"After devestation, map has {ModState.CandidateBuildings.Count} candidate buildings.");
+            Mod.Log.Info($"After devestation, map has {ModState.CandidateBuildings.Count} candidate buildings.");
         }
 
     }

@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 
 namespace ConcreteJungle
 {
-    enum TrapType
+    public enum AmbushType
     {
-        TRAP_INFANTRY_AMBUSH,
-        TRAP_VEHICLE_AMBUSH,
-        TRAP_IED
+        Explosion,
+        Infantry,
+        Mech,
+        Vehicle
     }
 }

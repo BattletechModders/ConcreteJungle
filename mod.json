@@ -1,7 +1,7 @@
 {
     "Name": "ConcreteJungle",
     "Enabled": true,
-    "Version": "0.1.0",
+    "Version": "0.5.0",
     "Description": "Provides fun surprises on urban maps.",
     "Author": "IceRaptor",
     "Website": "https://github.com/IceRaptor/ConcreteJungle",
@@ -15,8 +15,15 @@
     "Settings": {
         "Debug" : true,
         "Trace" : false
-        "MaxAbushesPerMap" : 2,
-        "MinDistanceBetweenAmbushes" : 600.0,
+
+        "Ambush" :
+        {
+            "MaxPerMap" : 2,
+            "MinDistanceBetween" : 600.0,
+            "BaseChance" : 0.3,
+            "ChancePerActor" : 0.05,
+            "SearchRadius" : 250
+        },
 
         "Devestation" : {
             "Enabled" : false,

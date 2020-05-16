@@ -18,7 +18,7 @@ namespace ConcreteJungle.Patches
     {
         static void Prefix(AbstractActor source, Vector3 sourcePosition, ICombatant target, Vector3 targetPosition, Quaternion targetRotation)
         {
-            if (source != null && ModState.TrapTurretToBuildingIds.ContainsKey(source.GUID) && !(target is BattleTech.Building))
+            if (source != null && ModState.IsUrbanBiome && ModState.TrapTurretToBuildingIds.ContainsKey(source.GUID) && !(target is BattleTech.Building))
             {
                 Mod.Log.Trace($"___VISIBILITY: SOURCE {CombatantUtils.Label(source)} TO TARGET {CombatantUtils.Label(target)}");
             }
@@ -33,7 +33,7 @@ namespace ConcreteJungle.Patches
 
         static void Postfix(AbstractActor source, Vector3 sourcePosition, ICombatant target, Vector3 targetPosition, Quaternion targetRotation, VisibilityLevel __result)
         {
-            if (source != null && ModState.TrapTurretToBuildingIds.ContainsKey(source.GUID) && !(target is BattleTech.Building))
+            if (source != null && ModState.IsUrbanBiome && ModState.TrapTurretToBuildingIds.ContainsKey(source.GUID) && !(target is BattleTech.Building))
             {
                 Mod.Log.Trace($"___VISIBILITY RESULT: {__result}");
             }
@@ -137,10 +137,10 @@ namespace ConcreteJungle.Patches
         {
             if (!source.team.IsLocalPlayer && !(target is BattleTech.Building building))
             {
-                Mod.Log.Trace($"== CALCULATING LOF FROM {CombatantUtils.Label(source)} TO TARGET: {CombatantUtils.Label(target)}");
+                Mod.Log.Trace($"== CALCULATING LOF FROM {CombatantUtils.Label(source)} TO TARGET: {CombatantUtils.Label(source)}");
             }
 
-            if (source is Turret turret && ModState.TrapTurretToBuildingIds.Keys.Contains(turret.GUID))
+            if (source is Turret turret && ModState.IsUrbanBiome && ModState.TrapTurretToBuildingIds.Keys.Contains(turret.GUID))
             {
                 Mod.Log.Trace($"Turret {CombatantUtils.Label(turret)} is calculating it's LOF");
                 ModState.CurrentTurretForLOF = turret;

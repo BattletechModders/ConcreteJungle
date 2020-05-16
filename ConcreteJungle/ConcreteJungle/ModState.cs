@@ -22,9 +22,10 @@ namespace ConcreteJungle {
         public static Turret CurrentTurretForLOS = null;
 
         // -- General ambush state
-        public static Vector3 PendingAmbushOrigin = new Vector3(0f, 0f, 0f);
-        public static int TrapsSpawned = 0;
-        public static List<Vector3> TrapSpawnOrigins = new List<Vector3>();
+        public static int Ambushes = 0;
+        public static List<Vector3> AmbushOrigins = new List<Vector3>();
+        public static List<Vector3> PotentialAmbushOrigins = new List<Vector3>();
+        public static float CurrentAmbushChance = Mod.Config.Ambush.BaseChance;
 
         // -- General state
         public static CombatGameState Combat = null;        
@@ -48,10 +49,10 @@ namespace ConcreteJungle {
             CurrentTurretForLOF = null;
             CurrentTurretForLOS = null;
 
-            PendingAmbushOrigin = new Vector3(0f, 0f, 0f);
-
-            TrapsSpawned = 0;
-            TrapSpawnOrigins.Clear();
+            Ambushes = 0;
+            AmbushOrigins.Clear();
+            PotentialAmbushOrigins.Clear();
+            CurrentAmbushChance = Mod.Config.Ambush.BaseChance;
 
             Combat = null;
             IsUrbanBiome = false;

@@ -11,7 +11,7 @@ namespace ConcreteJungle.Helper
         public static void SpawnAmbush(Vector3 originPos)
         {
             // Build list of candidate trap buildings
-            List<BattleTech.Building> candidates = CandidateHelper.FilterCandidates(originPos, Mod.Config.ExplosionAmbush.SearchRadius);
+            List<BattleTech.Building> candidates = CandidateBuildingsHelper.FilterCandidates(originPos, Mod.Config.ExplosionAmbush.SearchRadius);
 
 			Vector3 originHex = ModState.Combat.HexGrid.GetClosestPointOnGrid(originPos);
 			List<Vector3> adjacentHexes = ModState.Combat.HexGrid.GetGridPointsAroundPointWithinRadius(originPos, 2);
