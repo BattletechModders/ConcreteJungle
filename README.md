@@ -23,7 +23,7 @@ Todo:
 
 * Remove turrets when you move more than N meters away / lose LoS to the building
 
-* Roll for trap, deploy X traps of a single type?
+* Ambushes should spawn a new lance on the team.
 
 * Need to store association of turret -> building in a stat for save loading purposes
 
@@ -50,8 +50,6 @@ Todo:
 
 * Check that a building isn't marked a condition mid-mission
 
-* Give turrets a 'free-turn' during the ambush moment?
-
 * Remove candidate buildings when they become infantry / vehicle traps
 
 * Should not always trigger on first mover; add random chance to introduction variability
@@ -65,6 +63,14 @@ Todo:
 * Add ambushes that are hostile to all
 
 * Explosion should put up a floatie that gives the blast name
+
+* Should explosions use CAC AoE weapons?
+
+  * I think if they use a weapon with 1 or 2 range, this should work by default... need to test
+
+* Add mech ambush (equivalent to vehicle)
+
+* Can we make map devastation more efficient? Add it earlier in the processing?
 
   
 

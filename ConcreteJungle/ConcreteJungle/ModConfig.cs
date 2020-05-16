@@ -30,7 +30,7 @@ namespace ConcreteJungle {
             // How far from the trigger origin should we search for suitable buildings
             public int SearchRadius = 100;
 
-            // All of the ambush definitions
+            // The weapons that can be used in the ambush
             public List<ExplosionAmbushDef> Ambushes = new List<ExplosionAmbushDef>();
         }
         public ExplosionAmbushOpts ExplosionAmbush = new ExplosionAmbushOpts();
@@ -55,7 +55,25 @@ namespace ConcreteJungle {
         }
         public InfantryAmbushOpts InfantryAmbush = new InfantryAmbushOpts();
 
-        public class SpawnAmbushOpts
+        public class MechAmbushOpts
+        {
+            // If false, cannot be selected randomly
+            public bool Enabled = true;
+
+            // If true, every unit will generate an attack sequence against the closest target
+            public bool FreeAttackEnabled = true;
+
+            // How far from the trigger origin should we search for suitable buildings
+            public int SearchRadius = 200;
+
+            // The actor/pilot pairs that are possible ambushers
+            public List<MechAmbushDef> Ambushes = new List<MechAmbushDef>();
+
+        }
+        public MechAmbushOpts MechAmbush = new MechAmbushOpts();
+
+
+        public class VehicleAmbushOpts
         {
             // If false, cannot be selected randomly
             public bool Enabled = true;
@@ -67,10 +85,10 @@ namespace ConcreteJungle {
             public int SearchRadius = 200;
 
             // All of the ambush definitions
-            public List<SpawnAmbushDef> Ambushes = new List<SpawnAmbushDef>();
+            public List<VehicleAmbushDef> Ambushes = new List<VehicleAmbushDef>();
 
         }
-        public SpawnAmbushOpts SpawnAmbush = new SpawnAmbushOpts();
+        public VehicleAmbushOpts VehicleAmbush = new VehicleAmbushOpts();
 
         public class QipsConfig
         {
@@ -130,10 +148,11 @@ namespace ConcreteJungle {
                 {
                     MinDifficulty = 1,
                     MaxDifficulty = 10,
-                    MinSpawns = 2,
+                    MinSpawns = 1,
                     MaxSpawns = 6,
-                    WeaponDefs = { "Weapon_Ambush_Explosion" }
-                    
+                    SpawnPool = new List<WeaponDefRef>() {
+                        new WeaponDefRef{ WeaponDefId = "Weapon_Ambush_Explosion" }
+                    }
                 });
             }
             
@@ -145,23 +164,45 @@ namespace ConcreteJungle {
                     MaxDifficulty = 10,
                     MinSpawns = 2,
                     MaxSpawns = 6,
-                    TurretDefs = { "turretdef_Light_Shredder", "turretdef_Light_Laser" },
-                    PilotDefId = "pilot_d5_turret"
+                    SpawnPool = new List<TurretAndPilotDef>() {
+                        new TurretAndPilotDef{ TurretDefId = "turretdef_Light_Shredder", PilotDefId = "pilot_d5_turret" },
+                        new TurretAndPilotDef{ TurretDefId = "turretdef_Light_Laser", PilotDefId = "pilot_d5_turret" }
+                    }
                 });
             }
-            
-            if (Mod.Config.SpawnAmbush.Ambushes.Count == 0)
+
+            if (Mod.Config.MechAmbush.Ambushes.Count == 0)
             {
-                Mod.Config.SpawnAmbush.Ambushes.Add(new SpawnAmbushDef
+                Mod.Config.MechAmbush.Ambushes.Add(new MechAmbushDef
                 {
                     MinDifficulty = 1,
                     MaxDifficulty = 10,
                     MinSpawns = 2,
                     MaxSpawns = 6,
-                    MechDefs = { "mechdef_urbanmech_UM-R60" },
-                    TurretDefs = { },
-                    VehicleDefs = { "vehicledef_BULLDOG", "vehicledef_MANTICORE", "vehicledef_CARRIER_SRM" },
-                    PilotDefId = "pilot_d3_gunner"
+                    SpawnPool = new List<MechAndPilotDef>() {
+                        new MechAndPilotDef{ MechDefId = "mechdef_urbanmech_UM-R60", PilotDefId = "pilot_d3_gunner" },
+                        new MechAndPilotDef{ MechDefId = "mechdef_urbanmech_UM-R60", PilotDefId = "pilot_d3_gunner" },
+                        new MechAndPilotDef{ MechDefId = "mechdef_urbanmech_UM-R60L", PilotDefId = "pilot_d3_gunner" },
+                        new MechAndPilotDef{ MechDefId = "mechdef_panther_PNT-9R", PilotDefId = "pilot_d3_gunner" },
+                        new MechAndPilotDef{ MechDefId = "mechdef_hunchback_HBK-4G", PilotDefId = "pilot_d3_gunner" }
+                    }
+                });
+            }
+
+            if (Mod.Config.VehicleAmbush.Ambushes.Count == 0)
+            {
+                Mod.Config.VehicleAmbush.Ambushes.Add(new VehicleAmbushDef
+                {
+                    MinDifficulty = 1,
+                    MaxDifficulty = 10,
+                    MinSpawns = 2,
+                    MaxSpawns = 6,
+                    SpawnPool = new List<VehicleAndPilotDef>() {
+                        new VehicleAndPilotDef{ VehicleDefId = "vehicledef_BULLDOG", PilotDefId = "pilot_d3_gunner" },
+                        new VehicleAndPilotDef{ VehicleDefId = "vehicledef_MANTICORE", PilotDefId = "pilot_d3_gunner" },
+                        new VehicleAndPilotDef{ VehicleDefId = "vehicledef_CARRIER_SRM", PilotDefId = "pilot_d3_gunner" },
+                        new VehicleAndPilotDef{ VehicleDefId = "vehicledef_CARRIER_SRM", PilotDefId = "pilot_d3_gunner" }
+                    }
                 });
             }
 

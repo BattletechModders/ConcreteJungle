@@ -97,38 +97,7 @@ namespace ConcreteJungle.Patches
             DevestationHelper.DevestateBuildings();
 
             Mod.Log.Debug($"After devestation, map has {ModState.CandidateBuildings.Count} candidate buildings.");
-
-            // Load the necessary turret defs
-            Mod.Log.Debug($"DM TurretDefs are: {combat.DataManager.TurretDefs.Count}");
-            LoadRequest asyncSpawnReq = combat.DataManager.CreateLoadRequest(delegate (LoadRequest loadRequest)
-            {
-                OnLoadComplete(combat);
-            }, false);
-
-            // TODO: This is woefully inefficient, if there's large numbers of both
-            foreach (string turretDefId in Mod.Config.InfantryAmbush.TurretDefIds)
-            {
-                asyncSpawnReq.AddBlindLoadRequest(BattleTechResourceType.TurretDef, turretDefId, new bool?(false));
-            }
-            foreach (string pilotDefId in Mod.Config.InfantryAmbush.PilotDefIds)
-            {
-                asyncSpawnReq.AddBlindLoadRequest(BattleTechResourceType.PilotDef, pilotDefId, new bool?(false));
-            }
-            foreach (AmbushDef lance in Mod.Config.SpawnAmbush.AmbushLance)
-            {
-                asyncSpawnReq.AddBlindLoadRequest(BattleTechResourceType.VehicleDef, lance.VehicleDefId, new bool?(false));
-                asyncSpawnReq.AddBlindLoadRequest(BattleTechResourceType.PilotDef, lance.PilotDefId, new bool?(false));
-            }
-
-            asyncSpawnReq.AddBlindLoadRequest(BattleTechResourceType.WeaponDef, "Weapon_Ambush_Explosion", new bool?(false));
-
-            asyncSpawnReq.ProcessRequests(1000U);
         }
 
-        private static void OnLoadComplete(CombatGameState cgs)
-        {
-            Mod.Log.Debug($"TurretDef load complete!");
-            Mod.Log.Debug($"DM TurretDefs are: {cgs.DataManager.TurretDefs.Count}");
-        }
     }
 }

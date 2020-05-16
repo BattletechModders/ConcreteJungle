@@ -36,7 +36,9 @@
                     "MaxDifficulty" : 10,
                     "MinSpawns" : 2,
                     "MaxSpawns" : 6,
-                    "WeaponDefs" : { "Weapon_Ambush_Explosion" }
+                    "SpawnPool" : [
+                        { "WeaponDefId" : "Weapon_Ambush_Explosion" }
+                    ]
                 }
             ]
         },
@@ -52,13 +54,36 @@
                     "MaxDifficulty" : 10,
                     "MinSpawns" : 2,
                     "MaxSpawns" : 6,
-                    "TurretDefs" : { "turretdef_Light_Shredder", "turretdef_Light_Laser" },
-                    "PilotDef" :  "pilot_d5_turret"
+                     "SpawnPool" : [
+                        { "TurretDefId" : "turretdef_Light_Shredder", "pilotId" : "pilot_d5_turret" },
+                        { "TurretDefId" : "turretdef_Light_Laser", "pilotId" : "pilot_d5_turret" }
+                    ]
                 }
             ]
         },
 
-        "SpawnAmbush" : {
+        "MechAmbush" : {
+            "Enabled" : true,
+            "FreeAttackEnabled" : true,
+            "SearchRadius" : 200.0,
+            "Ambushes" : [
+                { 
+                    "MinDifficulty" : 1,
+                    "MaxDifficulty" : 10,
+                    "MinSpawns" : 1,
+                    "MaxSpawns" : 4,
+                    "SpawnPool" : [
+                        { "MechDefId" : "mechdef_urbanmech_UM-R60", "pilotId" : "pilot_d3_gunner" },
+                        { "MechDefId" : "mechdef_urbanmech_UM-R60", "pilotId" : "pilot_d3_gunner" },
+                        { "MechDefId" : "mechdef_urbanmech_UM-R60L", "pilotId" : "pilot_d3_gunner" },
+                        { "MechDefId" : "mechdef_panther_PNT-9R", "pilotId" : "pilot_d3_gunner" },
+                        { "MechDefId" : "mechdef_hunchback_HBK-4G", "pilotId" : "pilot_d3_gunner" }
+                    ]
+                }
+            ]
+        },
+
+        "VehicleAmbush" : {
             "Enabled" : true,
             "FreeAttackEnabled" : true,
             "SearchRadius" : 200.0,
@@ -67,11 +92,13 @@
                     "MinDifficulty" : 1,
                     "MaxDifficulty" : 10,
                     "MinSpawns" : 2,
-                    "MaxSpawns" : 6,
-                    "MechDefs" : { "mechdef_urbanmech_UM-R60" },
-                    "TurretDefs" : { },
-                    "VehicleDefs" : { "vehicledef_BULLDOG", "vehicledef_MANTICORE", "vehicledef_CARRIER_SRM" },
-                    "PilotDef" :  "pilot_d3_gunner"
+                    "MaxSpawns" : 4,
+                    "SpawnPool" : [
+                        { "VehicleDefId" : "vehicledef_BULLDOG", "pilotId" : "pilot_d3_gunner" },
+                        { "VehicleDefId" : "vehicledef_MANTICORE", "pilotId" : "pilot_d3_gunner" },
+                        { "VehicleDefId" : "vehicledef_CARRIER_SRM", "pilotId" : "pilot_d3_gunner" },
+                        { "VehicleDefId" : "vehicledef_CARRIER_SRM", "pilotId" : "pilot_d3_gunner" }
+                    ]
                 }
             ]
         },
