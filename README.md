@@ -23,6 +23,8 @@ The mod is designed to be heavily configurable, and express that configuration t
 * **Debug**: If true, the *Mods/ConcreteJungle/concrete_jungle.log* will be more verbose.
 * **Trace**: If true, the *Mods/ConcreteJungle/concrete_jungle.log* will include every line.
 
+:information_source: Many mod options have an `Ambushes: [ ]`. These represent different ranges of contract difficulty that you can configure. You MUST supply an appropriate ambush definition for all possible contract difficulties. If a ambush definition cannot be found for the contract's difficulty, it will be discarded and that contract will not experience any mod logic. Ranges cannot overlap and must be distinct - so you cannot have 1-3 and 2-4 ranges, for instance. 
+
 ### Ambush Configuration
 
 These options are available under the `Settings.Ambush`:
@@ -48,13 +50,18 @@ Devastation will pre-destroy a certain percentage of the buildings, making the m
 An explosion ambush will cause a random number of explosive blasts to occur at the origin position. The explosion will use 
 
 * Enabled
+
 * SearchRadius
+
 * Ambushes
+
   * MinDifficulty
   * MaxDifficulty
   * MinSpawns
   * MaxSpawns
   * SpawnPool
+
+  
 
 ### Infantry Ambush Configuration
 
@@ -105,6 +112,8 @@ Loreum ipsum
 ### Todo
 
 * Spawns should be rotated towards ambush origin
+
+* Need to move turret spawns upwards
 
 * Remove turrets when you move more than N meters away / lose LoS to the building
 
