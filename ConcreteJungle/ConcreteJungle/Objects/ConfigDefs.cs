@@ -3,7 +3,7 @@
 namespace ConcreteJungle
 {
 
-    public class DevestationDef
+    public class DevastationDef
     {
         public string PlanetTag = null;
         public float MinDevestation = 0f;

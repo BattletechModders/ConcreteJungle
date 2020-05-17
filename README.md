@@ -8,6 +8,10 @@ This is a mod for the [HBS BattleTech](http://battletechgame.com/) game that mak
 
 These ambushes only occur on the 'Urban Hi-Tech' map type introduced in the Urban Warfare DLC. If you do not have the DLC you may not see the effects of this mod at all.
 
+In addition, the mod can pre-destroy a certain percentage of buildings to reflect a war-torn and destroyed urban area. This is controlled by the Devastation settings, below.
+
+This mod relies heavily upon buildings, some of which can be contract targets or objectives. Every effort has been made to exclude contract objectives and important buildings from the list of possible ambush sites. If you notice an error, please open an issue so I can refine the selection filtering.
+
 :warning: This mod requires [IRBTModUtils](https://github.com/iceraptor/IRBTModUtils/) - download the latest copy and include in your Mods/ folder.
 
 
@@ -32,7 +36,9 @@ These options are available under the `Settings.Ambush`:
 
 ### Devastation Configuration
 
-Loreum ipsum
+Devastation will pre-destroy a certain percentage of the battle
+
+* Enabled: If true, buildling
 
 ### Explosion Ambush Configuration
 

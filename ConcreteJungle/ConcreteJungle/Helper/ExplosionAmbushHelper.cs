@@ -14,7 +14,7 @@ namespace ConcreteJungle.Helper
 
 			// Determine the number of blasts that will occurs
 			int numBlasts = Mod.Random.Next(ModState.ExplosionAmbushDefForContract.MinSpawns, ModState.ExplosionAmbushDefForContract.MaxSpawns);
-			numBlasts--;
+			Mod.Log.Info($"Explosion ambush will apply {numBlasts} blasts.");
 
 			// Load the weapons we'll use in the blast
 			List<Weapon> attackWeapons = BuildRandomizedWeaponList(numBlasts);
@@ -24,7 +24,7 @@ namespace ConcreteJungle.Helper
 			List<Vector3> blastPositions = new List<Vector3> { originHex };
 			List<Vector3> adjacentHexes = ModState.Combat.HexGrid.GetGridPointsAroundPointWithinRadius(originPos, 2);
 			Mod.Log.Debug($"Found origin hex: {originHex} with {adjacentHexes.Count} adjacent hexes within {2} hexes");
-			for (int i = 0; i < numBlasts; i++)
+			for (int i = 0; i < numBlasts - 1; i++) 
 			{
 				if (adjacentHexes.Count == 0) break;
 
@@ -73,7 +73,7 @@ namespace ConcreteJungle.Helper
 				}
 			}
 
-			Mod.Log.Debug($"Sending AddSequence message for ambush explosion wit {attackWeapons.Count} and {blastPositions.Count} blasts");
+			Mod.Log.Debug($"Sending AddSequence message for ambush explosion with {attackWeapons.Count} weapons and {blastPositions.Count} blasts");
 			try
 			{
 				ExplosionAmbushSequence ambushSequence = new ExplosionAmbushSequence(ModState.Combat, attackWeapons, ModState.TargetAllyTeam, blastPositions, targets);

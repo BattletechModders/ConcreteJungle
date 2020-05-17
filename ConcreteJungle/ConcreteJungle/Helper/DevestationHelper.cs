@@ -11,7 +11,7 @@ namespace ConcreteJungle.Helper
 
         public static void DevestateBuildings()
         {
-            if (!Mod.Config.Devestation.Enabled) return;
+            if (!Mod.Config.Devastation.Enabled) return;
 
             Mod.Log.Debug("Processing buildings for pre-battle devestation.");
 
@@ -21,8 +21,8 @@ namespace ConcreteJungle.Helper
             // Randomize the buildings by shuffling them
             shuffledBuildings.Shuffle();
 
-            int minNum = (int)(Mod.Config.Devestation.DefaultRange.MinDevestation * 100f);
-            int maxNum = (int)(Mod.Config.Devestation.DefaultRange.MaxDevestation * 100f);
+            int minNum = (int)(Mod.Config.Devastation.DefaultRange.MinDevestation * 100f);
+            int maxNum = (int)(Mod.Config.Devastation.DefaultRange.MaxDevestation * 100f);
             int destroyPercentile = Mod.Random.Next(minNum, maxNum);
             float destroyPercent = (float) destroyPercentile / 100f;
             int destroyedBuildings = (int)Math.Floor(shuffledBuildings.Count * destroyPercent);

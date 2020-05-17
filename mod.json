@@ -28,7 +28,7 @@
             ]
         },
 
-        "Devestation" : {
+        "Devastation" : {
             "Enabled" : false,
             "DefaultRange" : { "MinDevestation" : 0.3, "MaxDevestation" : 0.9 },
             "RangesByPlanetTag" : [

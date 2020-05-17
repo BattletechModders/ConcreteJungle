@@ -28,18 +28,18 @@ namespace ConcreteJungle {
         }
         public AmbushOpts Ambush = new AmbushOpts();
 
-        public class DevestationOpts
+        public class DevastationOpts
         {
             // If false, buildings will not be pre-destroyed
             public bool Enabled = false;
             
             // If no tags match, the range we'll use
-            public DevestationDef DefaultRange = new DevestationDef() { MinDevestation = 0.3f, MaxDevestation = 0.9f };
+            public DevastationDef DefaultRange = new DevastationDef() { MinDevestation = 0.3f, MaxDevestation = 0.9f };
 
             // Ranges specified by planet tags. We'll use the worst effect.
-            public List<DevestationDef> RangesByPlanetTag = new List<DevestationDef>();
+            public List<DevastationDef> RangesByPlanetTag = new List<DevastationDef>();
         }
-        public DevestationOpts Devestation = new DevestationOpts();
+        public DevastationOpts Devastation = new DevastationOpts();
 
         public class ExplosionAmbushOpts
         {
