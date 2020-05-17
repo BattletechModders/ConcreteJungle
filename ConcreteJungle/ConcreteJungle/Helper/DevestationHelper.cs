@@ -2,8 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using us.frostraptor.modUtils;
 
 namespace ConcreteJungle.Helper
@@ -23,8 +21,8 @@ namespace ConcreteJungle.Helper
             // Randomize the buildings by shuffling them
             shuffledBuildings.Shuffle();
 
-            int minNum = (int)(Mod.Config.Devestation.MinDevestation * 100f);
-            int maxNum = (int)(Mod.Config.Devestation.MaxDevestation * 100f);
+            int minNum = (int)(Mod.Config.Devestation.DefaultRange.MinDevestation * 100f);
+            int maxNum = (int)(Mod.Config.Devestation.DefaultRange.MaxDevestation * 100f);
             int destroyPercentile = Mod.Random.Next(minNum, maxNum);
             float destroyPercent = (float) destroyPercentile / 100f;
             int destroyedBuildings = (int)Math.Floor(shuffledBuildings.Count * destroyPercent);

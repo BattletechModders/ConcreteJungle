@@ -78,6 +78,7 @@
     <Compile Include="Helper\DataLoadHelper.cs" />
     <Compile Include="Helper\DevestationHelper.cs" />
     <Compile Include="Helper\ExplosionAmbushHelper.cs" />
+    <Compile Include="Helper\TeamHelper.cs" />
     <Compile Include="Helper\SpawnAmbushHelper.cs" />
     <Compile Include="Helper\InfantryAmbushHelper.cs" />
     <Compile Include="Helper\QuipHelper.cs" />

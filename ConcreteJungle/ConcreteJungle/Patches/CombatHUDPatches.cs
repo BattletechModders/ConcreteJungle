@@ -81,7 +81,9 @@ namespace ConcreteJungle.Patches
 	{
 		static void Postfix(CombatHUDActorNameDisplay __instance, AbstractActor ___displayedActor, LocalizableText ___MechNameText)
 		{
-			if (__instance.DisplayedCombatant != null && __instance.DisplayedCombatant is BattleTech.Building building && ModState.TrapBuildingsToTurrets.ContainsKey(building.GUID))
+			if (__instance.DisplayedCombatant != null && 
+				__instance.DisplayedCombatant is BattleTech.Building building && 
+				ModState.TrapBuildingsToTurrets.ContainsKey(building.GUID))
 			{
 				Text localText = new Text(Mod.Config.InfantryAmbush.AmbushHUDTitle);
 				___MechNameText.SetText(localText.ToString());

@@ -10,17 +10,20 @@ namespace ConcreteJungle.Helper
     {
         public static void SpawnAmbush(Vector3 originPos)
         {
-            // Build list of candidate trap buildings
-            List<BattleTech.Building> candidates = CandidateBuildingsHelper.FilterCandidates(originPos, Mod.Config.ExplosionAmbush.SearchRadius);
+			if (!Mod.Config.ExplosionAmbush.Enabled) return;
 
-			Vector3 originHex = ModState.Combat.HexGrid.GetClosestPointOnGrid(originPos);
-			List<Vector3> adjacentHexes = ModState.Combat.HexGrid.GetGridPointsAroundPointWithinRadius(originPos, 2);
-			Mod.Log.Debug($"Found origin hex: {originHex} with {adjacentHexes.Count} adjacent hexes within {2} hexes");
-
-			int numBlasts = Mod.Random.Next(Mod.Config.ExplosionAmbush.MinExplosions, Mod.Config.ExplosionAmbush.MaxExplosions);
-			List<Vector3> blastOrigins = new List<Vector3> { originHex };
+			// Determine the number of blasts that will occurs
+			int numBlasts = Mod.Random.Next(ModState.ExplosionAmbushDefForContract.MinSpawns, ModState.ExplosionAmbushDefForContract.MaxSpawns);
 			numBlasts--;
 
+			// Load the weapons we'll use in the blast
+			List<Weapon> attackWeapons = BuildRandomizedWeaponList(numBlasts);
+
+			// Determine the positions for the blasts
+			Vector3 originHex = ModState.Combat.HexGrid.GetClosestPointOnGrid(originPos);
+			List<Vector3> blastPositions = new List<Vector3> { originHex };
+			List<Vector3> adjacentHexes = ModState.Combat.HexGrid.GetGridPointsAroundPointWithinRadius(originPos, 2);
+			Mod.Log.Debug($"Found origin hex: {originHex} with {adjacentHexes.Count} adjacent hexes within {2} hexes");
 			for (int i = 0; i < numBlasts; i++)
 			{
 				if (adjacentHexes.Count == 0) break;
@@ -37,19 +40,20 @@ namespace ConcreteJungle.Helper
 					encounterLayerData.mapEncounterLayerDataCells[cellPoint.Z, cellPoint.X];
 				Mod.Log.Debug($" TerrainCell cached height: {melDataCell.relatedTerrainCell.cachedHeight}");
 
-				blastOrigins.Add(new Vector3(newHexPos.x, melDataCell.relatedTerrainCell.cachedHeight, newHexPos.z));
+				blastPositions.Add(new Vector3(newHexPos.x, melDataCell.relatedTerrainCell.cachedHeight, newHexPos.z));
 				adjacentHexes.RemoveAt(randIdx);
 			}
 
+			// Find all targets and building within the explosion range to supply as potential targets.
 			List<ICombatant> targets = new List<ICombatant>();
-			List<Collider> overlapedColliders = new List<Collider>(Physics.OverlapSphere(originPos, Mod.Config.ExplosionAmbush.SearchRadius));
+			List<Collider> overlapedColliders = new List<Collider>(Physics.OverlapSphere(originPos, Mod.Config.Ambush.SearchRadius));
 			foreach (ICombatant combatant in ModState.Combat.GetAllCombatants())
 			{
 				if (!combatant.IsDead && !combatant.IsFlaggedForDeath)
 				{
 					if (combatant.UnitType == UnitType.Building)
 					{
-						if (Vector3.Distance(originPos, combatant.CurrentPosition) <= 2f * Mod.Config.ExplosionAmbush.SearchRadius)
+						if (Vector3.Distance(originPos, combatant.CurrentPosition) <= 2f * Mod.Config.Ambush.SearchRadius)
 						{
 							for (int i = 0; i < combatant.GameRep.AllRaycastColliders.Length; i++)
 							{
@@ -62,7 +66,7 @@ namespace ConcreteJungle.Helper
 							}
 						}
 					}
-					else if (Vector3.Distance(originPos, combatant.CurrentPosition) <= Mod.Config.ExplosionAmbush.SearchRadius)
+					else if (Vector3.Distance(originPos, combatant.CurrentPosition) <= Mod.Config.Ambush.SearchRadius)
 					{
 						targets.Add(combatant);
 					}
@@ -72,7 +76,7 @@ namespace ConcreteJungle.Helper
 			Mod.Log.Debug("Sending AddSequence message for ambush explosion.");
 			try
 			{
-				ExplosionAmbushSequence ambushSequence = new ExplosionAmbushSequence(ModState.Combat, originPos, blastOrigins, targets);
+				ExplosionAmbushSequence ambushSequence = new ExplosionAmbushSequence(ModState.Combat, attackWeapons, ModState.TargetAllyTeam, blastPositions, targets);
 				ModState.Combat.MessageCenter.PublishMessage(new AddSequenceToStackMessage(ambushSequence));
 
 			}
@@ -80,10 +84,56 @@ namespace ConcreteJungle.Helper
 			{
 				Mod.Log.Error("Failed to create AES sequence due to error!", e);
 			}
+		}
 
-			// Reset the initial state
-			Mod.Log.Debug("Resetting mod to original state");
-			ModState.PendingAmbushOrigin = Vector3.zero;
+		private static List<Weapon> BuildRandomizedWeaponList(int count)
+		{
+			// Create weapons for the defs first
+			Dictionary<string, Weapon> weapons = new Dictionary<string, Weapon>();
+			foreach (WeaponDefRef wdr in ModState.ExplosionAmbushDefForContract.SpawnPool)
+			{
+				if (!weapons.ContainsKey(wdr.WeaponDefId))
+				{
+					WeaponDef weaponDef = ModState.Combat.DataManager.WeaponDefs.Get(wdr.WeaponDefId);
+					Mod.Log.Debug($"Loaded weapon def: {weaponDef} with Damage: {weaponDef.Damage}");
+
+					MechComponentRef mechComponentRef = new MechComponentRef(
+						weaponDef.Description.Id, weaponDef.Description.Id + "_ReferenceWeapon",
+						ComponentType.Weapon, ChassisLocations.None, -1, ComponentDamageLevel.Functional,
+						true);
+					Mod.Log.Debug($"Created mechComponentRef: {mechComponentRef}");
+
+					mechComponentRef.SetComponentDef(weaponDef);
+					mechComponentRef.DataManager = ModState.Combat.DataManager;
+					mechComponentRef.RefreshComponentDef();
+					Mod.Log.Debug($"Refreshed componentDef. Def after refresh is: {mechComponentRef.Def}");
+
+					Weapon weapon = new Weapon(null, ModState.Combat, mechComponentRef, ModState.Combat.GUID);
+					weapon.InitStats();
+					Mod.Log.Debug($"Created ambush weapon {weapon.Description.Id} with " +
+						$"Name: {weapon.Name} " +
+						$"DamagePerShot: {weapon.DamagePerShot} and " +
+						$"baseComponentDef: {weapon.baseComponentRef}");
+
+					weapons.Add(wdr.WeaponDefId, weapon);
+				}
+			}
+
+			// Shuffle the weaponDefs over and over again, and add the weapon to the list.
+			List<Weapon> randomizedWeapons = new List<Weapon>();
+			List<WeaponDefRef> shuffledWepDefRefs = new List<WeaponDefRef>();
+			shuffledWepDefRefs.AddRange(ModState.ExplosionAmbushDefForContract.SpawnPool);
+
+			Mod.Log.Debug($"Shuffling weapons for explosive ambush");
+			for (int i = 0; i < count; i++)
+			{
+				shuffledWepDefRefs.Shuffle();
+				WeaponDefRef wepDefRef = shuffledWepDefRefs[0];
+				Mod.Log.Debug($"  [{i}] = weaponDefId: {wepDefRef.WeaponDefId}");
+				randomizedWeapons.Add(weapons[wepDefRef.WeaponDefId]);
+			}
+
+			return randomizedWeapons;
 		}
     }
 }

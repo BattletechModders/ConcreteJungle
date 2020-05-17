@@ -41,6 +41,12 @@ namespace ConcreteJungle.Patches
                 DespawnActorMessage despawnMessage = new DespawnActorMessage(__instance.GUID, turret.GUID, DeathMethod.VitalComponentDestroyed);
                 __instance.Combat.MessageCenter.PublishMessage(despawnMessage);
             }
+
+            // Remove any destroyed building from future candidates
+            if ((__instance.IsFlaggedForDeath || __instance.IsDead) && ModState.CandidateBuildings.Contains(__instance))
+            {
+                ModState.CandidateBuildings.Remove(__instance);
+            }
         }
     }
 }

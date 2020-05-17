@@ -9,7 +9,7 @@ namespace ConcreteJungle.Helper
         {
             Lance lance = new Lance(team, new BattleTech.Framework.LanceSpawnerRef[] { });
             Guid g = Guid.NewGuid();
-            string lanceGuid = LanceSpawnerGameLogic.GetLanceGuid(g);
+            string lanceGuid = LanceSpawnerGameLogic.GetLanceGuid(g.ToString());
             lance.lanceGuid = lanceGuid;
             ModState.Combat.ItemRegistry.AddItem(lance);
             team.lances.Add(lance);

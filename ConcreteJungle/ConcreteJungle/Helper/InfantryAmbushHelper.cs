@@ -64,8 +64,9 @@ namespace ConcreteJungle.Helper
                 }
             }
 
-            ModState.AmbushOrigins.Add(originPos);
 
+            // Remove any buildings that are part of this ambush from candidates
+            ModState.CandidateBuildings.RemoveAll(x => buildingsToLevel.Contains(x));
         }
 
         public static AbstractActor SpawnTrapTurret(string turretDefId, string pilotDefId, Team team, BattleTech.Building building)
