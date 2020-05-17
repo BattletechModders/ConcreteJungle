@@ -9,7 +9,7 @@ namespace ConcreteJungle.Patches
     {
         static void Postfix(BattleTech.Building __instance, ref bool __result)
         {
-            if (ModState.IsUrbanBiome && ModState.TrapBuildingsToTurrets.ContainsKey(__instance.GUID))
+            if (ModState.IsUrbanBiome && ModState.AmbushBuildingGUIDToTurrets.ContainsKey(__instance.GUID))
             {
                 __result = true;
             }
@@ -21,7 +21,7 @@ namespace ConcreteJungle.Patches
     {
         static void Postfix(BattleTech.Building __instance, ref bool __result)
         {
-            if (ModState.IsUrbanBiome && ModState.TrapBuildingsToTurrets.ContainsKey(__instance.GUID))
+            if (ModState.IsUrbanBiome && ModState.AmbushBuildingGUIDToTurrets.ContainsKey(__instance.GUID))
             {
                 __result = true;
             }
@@ -34,10 +34,10 @@ namespace ConcreteJungle.Patches
     {
         static void Prefix(BattleTech.Building __instance)
         {
-            if (ModState.IsUrbanBiome && ModState.TrapBuildingsToTurrets.ContainsKey(__instance.GUID))
+            if (ModState.IsUrbanBiome && ModState.AmbushBuildingGUIDToTurrets.ContainsKey(__instance.GUID))
             {
                 // Despawn the associated turret
-                Turret turret = ModState.TrapBuildingsToTurrets[__instance.GUID];
+                Turret turret = ModState.AmbushBuildingGUIDToTurrets[__instance.GUID];
                 DespawnActorMessage despawnMessage = new DespawnActorMessage(__instance.GUID, turret.GUID, DeathMethod.VitalComponentDestroyed);
                 __instance.Combat.MessageCenter.PublishMessage(despawnMessage);
             }

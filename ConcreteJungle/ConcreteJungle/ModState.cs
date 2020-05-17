@@ -15,8 +15,8 @@ namespace ConcreteJungle {
         public static Team HostileToAllTeam = null;
 
         // -- Infantry Ambush state
-        public static Dictionary<string, Turret> TrapBuildingsToTurrets = new Dictionary<string, Turret>();
-        public static Dictionary<string, string> TrapTurretToBuildingIds = new Dictionary<string, string>();
+        public static Dictionary<string, Turret> AmbushBuildingGUIDToTurrets = new Dictionary<string, Turret>();
+        public static Dictionary<string, string> AmbushTurretGUIDtoBuildingGUID = new Dictionary<string, string>();
         
         public static Turret CurrentTurretForLOF = null;
         public static Turret CurrentTurretForLOS = null;
@@ -43,8 +43,8 @@ namespace ConcreteJungle {
             TargetAllyTeam = null;
             HostileToAllTeam = null;
 
-            TrapBuildingsToTurrets.Clear();
-            TrapTurretToBuildingIds.Clear();
+            AmbushBuildingGUIDToTurrets.Clear();
+            AmbushTurretGUIDtoBuildingGUID.Clear();
 
             CurrentTurretForLOF = null;
             CurrentTurretForLOS = null;

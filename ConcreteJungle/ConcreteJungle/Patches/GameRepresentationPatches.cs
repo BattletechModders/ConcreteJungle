@@ -19,7 +19,7 @@ namespace ConcreteJungle.Patches
 
             Traverse parentT = Traverse.Create(__instance).Property("parentActor");
             AbstractActor parentActor = parentT.GetValue<AbstractActor>();
-            if (ModState.TrapTurretToBuildingIds.Keys.Contains(parentActor.GUID))
+            if (ModState.AmbushTurretGUIDtoBuildingGUID.Keys.Contains(parentActor.GUID))
             {
                 Turret turret = parentActor as Turret;
                 if (newLevel == VisibilityLevel.LOSFull)
@@ -37,7 +37,7 @@ namespace ConcreteJungle.Patches
     {
         static void Postfix(GameRepresentation __instance, CombatGameState combat, Team team)
         {
-            if (__instance != null && __instance.parentCombatant != null && ModState.TrapBuildingsToTurrets.Keys.Contains(__instance.parentCombatant.GUID))
+            if (__instance != null && __instance.parentCombatant != null && ModState.AmbushBuildingGUIDToTurrets.Keys.Contains(__instance.parentCombatant.GUID))
             {
                 Mod.Log.Debug($"Building {CombatantUtils.Label(__instance.parentCombatant)} contains a trap, marking it as hostile.");
 

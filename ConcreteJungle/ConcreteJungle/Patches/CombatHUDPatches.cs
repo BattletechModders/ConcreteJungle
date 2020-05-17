@@ -21,12 +21,12 @@ namespace ConcreteJungle.Patches
 			// Skip processing if we're not initialized properly
 			if (__instance == null || __instance?.ActivelyShownCombatant?.Combat == null || __instance.WeaponList == null) return;
 
-			if (__instance.ActivelyShownCombatant is BattleTech.Building building && ModState.TrapBuildingsToTurrets.ContainsKey(building.GUID))
+			if (__instance.ActivelyShownCombatant is BattleTech.Building building && ModState.AmbushBuildingGUIDToTurrets.ContainsKey(building.GUID))
 			{
 				Mod.Log.Debug($"TargetingHUD target {CombatantUtils.Label(__instance.ActivelyShownCombatant)} is trapped enemy building");
 
 				// Replicate RefreshWeaponList here as it expects an AbstractActor
-				Turret turret = ModState.TrapBuildingsToTurrets[building.GUID];
+				Turret turret = ModState.AmbushBuildingGUIDToTurrets[building.GUID];
 				for (int i = 0; i < ___weaponNames.Count; i++)
 				{
 					if (turret != null && i < turret.Weapons.Count)
@@ -83,9 +83,11 @@ namespace ConcreteJungle.Patches
 		{
 			if (__instance.DisplayedCombatant != null && 
 				__instance.DisplayedCombatant is BattleTech.Building building && 
-				ModState.TrapBuildingsToTurrets.ContainsKey(building.GUID))
+				ModState.AmbushBuildingGUIDToTurrets.ContainsKey(building.GUID))
 			{
-				Text localText = new Text(Mod.Config.InfantryAmbush.AmbushHUDTitle);
+				Turret turret = ModState.AmbushBuildingGUIDToTurrets[building.GUID];
+
+				Text localText = new Text(turret.DisplayName);
 				___MechNameText.SetText(localText.ToString());
 			}
 		}

@@ -129,7 +129,7 @@ namespace ConcreteJungle.Sequence
                         selectedWeapons);
                     ModState.Combat.MessageCenter.PublishMessage(new AddSequenceToStackMessage(attackSequence));
                 }
-                this.timeSinceLastCollapse = 0f;
+                this.timeSinceLastAttack = 0f;
             }
         }
 

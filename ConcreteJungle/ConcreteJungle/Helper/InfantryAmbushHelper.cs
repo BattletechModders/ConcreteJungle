@@ -1,4 +1,5 @@
 ﻿using BattleTech;
+using ConcreteJungle.Sequence;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,91 +10,101 @@ namespace ConcreteJungle.Helper
 {
     public static class InfantryAmbushHelper
     {
-        public static void SpawnAmbush(Vector3 originPos)
+        public static void SpawnAmbush(Vector3 ambushPos)
         {
             if (!Mod.Config.InfantryAmbush.Enabled) return;
 
-            // Build list of candidate trap buildings
-            List<BattleTech.Building> candidates = CandidateBuildingsHelper.FilterCandidates(originPos, Mod.Config.InfantryAmbush.SearchRadius);
+            int infantrySpawns = Mod.Random.Next(ModState.InfantryAmbushDefForContract.MinSpawns, ModState.InfantryAmbushDefForContract.MaxSpawns);
+            Mod.Log.Debug($"Spawning up to {infantrySpawns} infantry spawns as part of this ambush.");
 
-            if (candidates.Count < Mod.Config.InfantryAmbush.MinBuildings)
+            // Create a new lance in the target team
+            Lance ambushLance = TeamHelper.CreateAmbushLance(ModState.TargetAllyTeam);
+
+            // Build list of candidate trap buildings
+            List<BattleTech.Building> candidates = CandidateBuildingsHelper.ClosestCandidatesToPosition(ambushPos, Mod.Config.Ambush.SearchRadius);
+            if (candidates.Count < ModState.InfantryAmbushDefForContract.MinSpawns)
             {
                 Mod.Log.Debug($"Insufficient candidate buildings to spawn an infantry ambush. Skipping.");
                 return;
             }
 
-            // Determine the team we should use for the traps
-            int teamIdx = ModState.CandidateTeams.Count > 0 ? Mod.Random.Next(0, ModState.CandidateTeams.Count - 1) : 0;
-            Team trapTeam = ModState.CandidateTeams.ElementAt<Team>(teamIdx);
+            // Make sure we don't spawn more turrets than buildings
+            if (infantrySpawns > candidates.Count) infantrySpawns = candidates.Count;
 
-            int ambushCount = Mod.Random.Next(Mod.Config.InfantryAmbush.MinBuildings, Mod.Config.InfantryAmbush.MaxBuidlings);
-            if (candidates.Count < ambushCount) ambushCount = candidates.Count;
-            Mod.Log.Debug($"Spawning {ambushCount} ambushes for team: {trapTeam}");
-
-            List<Vector3> spawnPositions = new List<Vector3>();
-            for (int i = 0; i < ambushCount; i++)
+            List<AbstractActor> spawnedActors = new List<AbstractActor>();
+            List<BattleTech.Building> spawnBuildings = new List<BattleTech.Building>();
+            for (int i = 0; i < infantrySpawns; i++)
             {
-                BattleTech.Building trapBuilding = candidates.ElementAt(i);
+                BattleTech.Building spawnBuildingShell = candidates.ElementAt(i);
 
                 // Spawn a turret trap
-                int turretDefIdx = Mod.Random.Next(0, Mod.Config.InfantryAmbush.TurretDefIds.Count - 1);
-                string turretDefId = Mod.Config.InfantryAmbush.TurretDefIds.ElementAt(turretDefIdx);
-                int pilotDefIdx = Mod.Random.Next(0, Mod.Config.InfantryAmbush.PilotDefIds.Count - 1);
-                string pilotDefId = Mod.Config.InfantryAmbush.PilotDefIds.ElementAt(pilotDefIdx);
-                Mod.Log.Debug($"Spawning turretDef: {turretDefId} + pilotDef: {pilotDefId} within building at position: {trapBuilding.CurrentPosition}");
+                AbstractActor ambushTurret = SpawnAmbushTurret(ModState.TargetAllyTeam, ambushLance, spawnBuildingShell);
+                spawnedActors.Add(ambushTurret);
+                spawnBuildings.Add(spawnBuildingShell);
+                Mod.Log.Info($"Spawned turret: {ambushTurret} in building: {spawnBuildingShell}");
+            }
 
-                AbstractActor trapTurret = SpawnTrapTurret(turretDefId, pilotDefId, trapTeam, trapBuilding);
+            // Remove any buildings that are part of this ambush from candidates
+            ModState.CandidateBuildings.RemoveAll(x => spawnBuildings.Contains(x));
 
-                trapTurret.OnPlayerVisibilityChanged(VisibilityLevel.LOSFull);
-                trapTurret.OnPositionUpdate(trapBuilding.CurrentPosition, trapBuilding.CurrentRotation, -1, true, null, false);
-                Mod.Log.Debug("Updated turret visibility and position.");
-
-                trapTurret.BehaviorTree = BehaviorTreeFactory.MakeBehaviorTree(ModState.Combat.BattleTechGame, trapTurret, BehaviorTreeIDEnum.CoreAITree);
-                Mod.Log.Debug("Updated turret behaviorTree");
-
-                UnitSpawnedMessage message = new UnitSpawnedMessage("CJ_TRAP", trapTurret.GUID);
-                ModState.Combat.MessageCenter.PublishMessage(message);
-                
-                Mod.Log.Debug($"Sent spawn message for position: {trapTurret.CurrentPosition}");
-                spawnPositions.Add(trapTurret.CurrentPosition);
-
-                if (i + 1 == ambushCount)
+            // Determine the targets that should be prioritized by the enemies
+            List<ICombatant> targets = new List<ICombatant>();
+            foreach (ICombatant combatant in ModState.Combat.GetAllCombatants())
+            {
+                if (!combatant.IsDead && !combatant.IsFlaggedForDeath &&
+                    combatant.team != null &&
+                    ModState.Combat.HostilityMatrix.IsLocalPlayerFriendly(combatant.team))
                 {
-                    // Create a quip
-                    QuipHelper.PlayQuip(trapTurret, Mod.Config.Qips.InfantryAmbush, 6);
+                    if (Vector3.Distance(ambushPos, combatant.CurrentPosition) <= Mod.Config.Ambush.SearchRadius)
+                    {
+                        targets.Add(combatant);
+                    }
                 }
             }
 
-
-            // Remove any buildings that are part of this ambush from candidates
-            ModState.CandidateBuildings.RemoveAll(x => buildingsToLevel.Contains(x));
+            Mod.Log.Info($"Adding InfantryAmbushSequence for {spawnedActors.Count} actors.");
+            try
+            {
+                InfantryAmbushSequence ambushSequence = new InfantryAmbushSequence(ModState.Combat, ambushPos, spawnedActors, spawnBuildings, targets);
+                ModState.Combat.MessageCenter.PublishMessage(new AddSequenceToStackMessage(ambushSequence));
+            }
+            catch (Exception e)
+            {
+                Mod.Log.Error("Failed to create AES sequence due to error!", e);
+            }
         }
 
-        public static AbstractActor SpawnTrapTurret(string turretDefId, string pilotDefId, Team team, BattleTech.Building building)
+        public static AbstractActor SpawnAmbushTurret(Team team, Lance ambushLance, BattleTech.Building building)
         {
-            PilotDef pilotDef = ModState.Combat.DataManager.PilotDefs.GetOrCreate(pilotDefId);
-            TurretDef turretDef = ModState.Combat.DataManager.TurretDefs.GetOrCreate(turretDefId);
+
+            // Randomly determine one of the spawnpairs from the current ambushdef
+            List<TurretAndPilotDef> shuffledSpawns = new List<TurretAndPilotDef>();
+            shuffledSpawns.AddRange(ModState.InfantryAmbushDefForContract.SpawnPool);
+            shuffledSpawns.Shuffle();
+            TurretAndPilotDef ambushDef = shuffledSpawns[0];
+
+            PilotDef pilotDef = ModState.Combat.DataManager.PilotDefs.Get(ambushDef.PilotDefId);
+            TurretDef turretDef = ModState.Combat.DataManager.TurretDefs.GetOrCreate(ambushDef.TurretDefId);
             turretDef.Refresh();
 
+            // Create teh turret
             Turret turret = ActorFactory.CreateTurret(turretDef, pilotDef, team.EncounterTags, ModState.Combat, team.GetNextSupportUnitGuid(), "", null);
             turret.Init(building.CurrentPosition, building.CurrentRotation.eulerAngles.y, true);
             turret.InitGameRep(null);
 
-            if (turret == null) Mod.Log.Error($"Failed to spawn turretDefId: {turretDefId} + pilotDefId: {pilotDefId} !");
+            if (turret == null) Mod.Log.Error($"Failed to spawn turretDefId: {ambushDef.TurretDefId} + pilotDefId: {ambushDef.PilotDefId} !");
 
             Mod.Log.Debug($" Spawned trap turret, adding to team.");
             team.AddUnit(turret);
-            turret.AddToLance(team.lances.First<Lance>());
+            turret.AddToLance(ambushLance);
 
-            ModState.TrapBuildingsToTurrets.Add(building.GUID, turret);
-            ModState.TrapTurretToBuildingIds.Add(turret.GUID, building.GUID);
+            turret.BehaviorTree = BehaviorTreeFactory.MakeBehaviorTree(ModState.Combat.BattleTechGame, turret, BehaviorTreeIDEnum.CoreAITree);
+            Mod.Log.Debug("Updated turret behaviorTree");
 
-            Mod.Log.Debug($" -- using building: {CombatantUtils.Label(building)} as trap.");
-            float surfaceArea = building.DestructibleObjectGroup.footprint.x * building.DestructibleObjectGroup.footprint.z;
-            Mod.Log.Debug($" -- building has dimensions {building.DestructibleObjectGroup.footprint} with surface: {surfaceArea} and " +
-                $"height: {building.DestructibleObjectGroup.footprint.y}  team: {building.TeamId}");
+            ModState.AmbushBuildingGUIDToTurrets.Add(building.GUID, turret);
+            ModState.AmbushTurretGUIDtoBuildingGUID.Add(turret.GUID, building.GUID);
 
-            Mod.Log.Debug($" Parent building associated with team: {building.TeamId}, adding to team: {team.GUID}");
+            // Associate the building withe the team
             building.AddToTeam(team);
             building.BuildingRep.IsTargetable = true;
             building.BuildingRep.SetHighlightColor(ModState.Combat, team);
@@ -115,6 +126,16 @@ namespace ConcreteJungle.Helper
             newPosition.y += heightDelta;
             Mod.Log.Debug($"Changing transform postition from: {turret.GameRep.transform.position} to {newPosition}");
             //turret.GameRep.transform.position = newPosition;
+            // TODO: Re-enable?
+
+            // After the position change, notify the game rep and set our visibility to full
+            turret.OnPlayerVisibilityChanged(VisibilityLevel.LOSFull);
+            turret.OnPositionUpdate(turret.CurrentPosition, turret.CurrentRotation, -1, true, null, false);
+            Mod.Log.Debug("Updated turret visibility and position.");
+
+            // Finally notify others
+            UnitSpawnedMessage message = new UnitSpawnedMessage("CJ_TRAP", turret.GUID);
+            ModState.Combat.MessageCenter.PublishMessage(message);
 
             return turret;
         }

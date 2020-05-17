@@ -24,7 +24,7 @@ namespace ConcreteJungle.Helper
             }
 
             // Remove any candidates that already have a trap in them
-            candidates.RemoveAll(x => ModState.TrapBuildingsToTurrets.ContainsKey(x.GUID));
+            candidates.RemoveAll(x => ModState.AmbushBuildingGUIDToTurrets.ContainsKey(x.GUID));
 
             // Sort candidates by distance from the origin
             candidates.Sort((b1, b2) =>
@@ -55,7 +55,7 @@ namespace ConcreteJungle.Helper
                 }
 
                 // Sanity check infantry spawn
-                if (ModState.TrapBuildingsToTurrets.ContainsKey(building.GUID))
+                if (ModState.AmbushBuildingGUIDToTurrets.ContainsKey(building.GUID))
                 {
                     Mod.Log.Debug($"   -- didn't clean up after myself in infantry ambush, removing trap shell.");
                     guidsToRemove.Add(building.GUID);

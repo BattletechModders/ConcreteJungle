@@ -97,8 +97,8 @@
     <Compile Include="Patches\TurnDirectorPatches.cs" />
     <Compile Include="Patches\WeaponRangeIndicators.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Sequence\SpawnAmbushSequence.cs" />
     <Compile Include="Sequence\InfantryAmbushSequence.cs" />
+    <Compile Include="Sequence\SpawnAmbushSequence.cs" />
     <Compile Include="Sequence\ExplosionAmbushSequence.cs" />
   </ItemGroup>
   <ItemGroup />

@@ -27,6 +27,11 @@ namespace ConcreteJungle.Helper
 
             // Starting with the closest building, look through the buildings and determine how many locations can support a unit.
             List<BattleTech.Building> candidates = CandidateBuildingsHelper.ClosestCandidatesToPosition(ambushOrigin, Mod.Config.Ambush.SearchRadius);
+            if (candidates.Count < minSpawns)
+            {
+                Mod.Log.Debug($"Insufficient candidate buildings for a spawn ambush. Skipping.");
+                return;
+            }
 
             EncounterLayerData encounterLayerData = ModState.Combat.EncounterLayerData;
             List<BattleTech.Building> buildingsToLevel = new List<BattleTech.Building>();
@@ -108,7 +113,6 @@ namespace ConcreteJungle.Helper
             List<VehicleAndPilotDef> shuffledSpawns = new List<VehicleAndPilotDef>();
             shuffledSpawns.AddRange(ModState.VehicleAmbushDefForContract.SpawnPool);
             shuffledSpawns.Shuffle();
-
             VehicleAndPilotDef ambushDef = shuffledSpawns[0];
 
             PilotDef pilotDef = ModState.Combat.DataManager.PilotDefs.Get(ambushDef.PilotDefId);
@@ -135,6 +139,9 @@ namespace ConcreteJungle.Helper
 
             vehicle.BehaviorTree = BehaviorTreeFactory.MakeBehaviorTree(ModState.Combat.BattleTechGame, vehicle, BehaviorTreeIDEnum.CoreAITree);
             Mod.Log.Debug("Enabled vehicle behavior tree");
+
+            UnitSpawnedMessage message = new UnitSpawnedMessage("CJ_VEHICLE", vehicle.GUID);
+            ModState.Combat.MessageCenter.PublishMessage(message);
 
             return vehicle;
         }
@@ -173,6 +180,9 @@ namespace ConcreteJungle.Helper
 
             mech.BehaviorTree = BehaviorTreeFactory.MakeBehaviorTree(ModState.Combat.BattleTechGame, mech, BehaviorTreeIDEnum.CoreAITree);
             Mod.Log.Debug("Enabled mech behavior tree");
+
+            UnitSpawnedMessage message = new UnitSpawnedMessage("CJ_MECH", mech.GUID);
+            ModState.Combat.MessageCenter.PublishMessage(message);
 
             return mech;
         }
