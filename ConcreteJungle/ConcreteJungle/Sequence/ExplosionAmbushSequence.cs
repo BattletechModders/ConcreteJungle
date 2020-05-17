@@ -35,6 +35,7 @@ namespace ConcreteJungle.Sequence
             this.AmbushTeam = team;
             this.AmbushPositions = ambushOrigins;
             this.Targets = targets;
+            Mod.Log.Debug($"Positions count: {AmbushPositions.Count}  weapons count: {AmbushWeapons.Count}");
         }
 
         public override void OnAdded()

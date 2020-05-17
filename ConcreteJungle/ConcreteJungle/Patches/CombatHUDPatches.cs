@@ -79,7 +79,7 @@ namespace ConcreteJungle.Patches
 	[HarmonyPatch(new Type[] { typeof(VisibilityLevel) } )]
 	static class CombatHUDActorNameDisplay_RefreshInfo
 	{
-		static void Postfix(CombatHUDActorNameDisplay __instance, AbstractActor ___displayedActor, LocalizableText ___MechNameText)
+		static void Postfix(CombatHUDActorNameDisplay __instance, LocalizableText ___MechNameText)
 		{
 			if (__instance.DisplayedCombatant != null && 
 				__instance.DisplayedCombatant is BattleTech.Building building && 

@@ -39,4 +39,41 @@ namespace ConcreteJungle.Patches
             
         }
     }
+
+    // When buildings are destroyed, they check for actors standing on them and damage them with a fall. Prevent 
+    //   this during our spawn ambush.
+    [HarmonyPatch(typeof(AbstractActor), "OnActorDestroyed")]
+    static class AbstractActor_OnActorDestroyed
+    {
+        static bool Prefix(AbstractActor __instance, MessageCenterMessage message)
+        {
+            if (ModState.CurrentSpawningLance != null && __instance != null)
+            {
+                ActorDestroyedMessage actorDestroyedMessage = message as ActorDestroyedMessage;
+                if (actorDestroyedMessage != null &&
+                    actorDestroyedMessage.HasAffectedObject &&
+                    (actorDestroyedMessage.affectedObjectGuid == __instance.standingOnBuildingGuid || actorDestroyedMessage.affectedObjectGuid == __instance.standingOnBuildingGuid + ".Building") &&
+                    __instance.LanceId == ModState.CurrentSpawningLance.GUID
+                    )
+                {
+                    Mod.Log.Debug("Intercepted displacement message for ambush spawns.");
+
+                    // Replay displacement w/o effects 
+                    Vector3 vector = __instance.CurrentPosition;
+                    vector.y = __instance.Combat.MapMetaData.GetLerpedHeightAt(__instance.CurrentPosition, false);
+                    
+                    if (__instance.GameRep != null)
+                    {
+                        __instance.GameRep.transform.position = vector;
+                    }
+
+                    __instance.OnPositionUpdate(vector, __instance.CurrentRotation, -1, true, null, false);
+
+                    return false;
+                }
+            }
+
+            return true;
+        }
+    }
 }

@@ -17,6 +17,8 @@ namespace ConcreteJungle.Sequence
 
         private List<ICombatant> AllTargets { get; set; }
 
+        private bool ApplyAttacks { get; set; }
+
         public override bool IsValidMultiSequenceChild {  get { return false;  } }
 
         public override bool IsParallelInterruptable { get { return false; } }
@@ -26,12 +28,13 @@ namespace ConcreteJungle.Sequence
         public override bool IsComplete { get { return this.state == SpawnAmbushSequenceState.Finished; } }
 
         public SpawnAmbushSequence(CombatGameState combat, Vector3 ambushPos, List<AbstractActor> spawnedActors, 
-            List<BattleTech.Building> buildingsToLevel, List<ICombatant> targets) : base(combat)
+            List<BattleTech.Building> buildingsToLevel, List<ICombatant> targets, bool applyAttacks) : base(combat)
         {
             this.AmbushPosition = ambushPos;
             this.AttackingActors = spawnedActors;
             this.BuildingsToCollapse = buildingsToLevel;
             this.AllTargets = targets;
+            this.ApplyAttacks = applyAttacks;
         }
 
         public override void OnAdded()
@@ -62,6 +65,12 @@ namespace ConcreteJungle.Sequence
                     }
                     break;
                 case SpawnAmbushSequenceState.Attacking:
+                    if (!ApplyAttacks)
+                    {
+                        this.SetState(SpawnAmbushSequenceState.Finished);
+                        return;
+                    }
+
                     this.ResolveNextAttack();
                     if (this.AttackingActors.Count < 1)
                     {
@@ -69,6 +78,7 @@ namespace ConcreteJungle.Sequence
                     }
                     break;
                 case SpawnAmbushSequenceState.Finished:
+                    ModState.CurrentSpawningLance = null; 
                     break;
                 default:
                     return;
@@ -164,7 +174,8 @@ namespace ConcreteJungle.Sequence
                 Mod.Log.Debug("Taunting player.");
                 // Create a quip
                 Guid g = Guid.NewGuid();
-                QuipHelper.PlayQuip(ModState.Combat, g.ToString(),AttackingActors[0].team,
+                QuipHelper.PlayQuip(ModState.Combat, g.ToString(), 
+                    AttackingActors[0].team,
                     "Vehicle Ambush", Mod.Config.Qips.SpawnAmbush, this.timeToTaunt * 3f);
                 hasTaunted = true;
             }

@@ -65,7 +65,8 @@ namespace ConcreteJungle.Helper
             Mod.Log.Info($"Adding InfantryAmbushSequence for {spawnedActors.Count} actors.");
             try
             {
-                InfantryAmbushSequence ambushSequence = new InfantryAmbushSequence(ModState.Combat, ambushPos, spawnedActors, spawnBuildings, targets);
+                InfantryAmbushSequence ambushSequence = 
+                    new InfantryAmbushSequence(ModState.Combat, ambushPos, spawnedActors, spawnBuildings, targets, Mod.Config.InfantryAmbush.FreeAttackEnabled);
                 ModState.Combat.MessageCenter.PublishMessage(new AddSequenceToStackMessage(ambushSequence));
             }
             catch (Exception e)

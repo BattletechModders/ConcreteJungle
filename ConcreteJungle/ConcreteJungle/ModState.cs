@@ -17,7 +17,6 @@ namespace ConcreteJungle {
         // -- Infantry Ambush state
         public static Dictionary<string, Turret> AmbushBuildingGUIDToTurrets = new Dictionary<string, Turret>();
         public static Dictionary<string, string> AmbushTurretGUIDtoBuildingGUID = new Dictionary<string, string>();
-        
         public static Turret CurrentTurretForLOF = null;
         public static Turret CurrentTurretForLOS = null;
 
@@ -26,6 +25,7 @@ namespace ConcreteJungle {
         public static List<Vector3> AmbushOrigins = new List<Vector3>();
         public static List<Vector3> PotentialAmbushOrigins = new List<Vector3>();
         public static float CurrentAmbushChance = Mod.Config.Ambush.BaseChance;
+        public static Lance CurrentSpawningLance = null;
 
         // -- General state
         public static CombatGameState Combat = null;        
@@ -53,6 +53,7 @@ namespace ConcreteJungle {
             AmbushOrigins.Clear();
             PotentialAmbushOrigins.Clear();
             CurrentAmbushChance = Mod.Config.Ambush.BaseChance;
+            CurrentSpawningLance = null;
 
             Combat = null;
             IsUrbanBiome = false;

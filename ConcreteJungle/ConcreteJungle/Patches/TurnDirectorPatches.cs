@@ -75,7 +75,7 @@ namespace ConcreteJungle.Patches
                             SpawnAmbushHelper.SpawnAmbush(ambushOrigin, AmbushType.Mech);
                             break;
                         case AmbushType.Vehicle:
-                            SpawnAmbushHelper.SpawnAmbush(ambushOrigin, AmbushType.Mech);
+                            SpawnAmbushHelper.SpawnAmbush(ambushOrigin, AmbushType.Vehicle);
                             break;
                         default:
                             Mod.Log.Error($"UNKNOWN AMBUSH TYPE: {ambushType} - CANNOT PROCEED!");

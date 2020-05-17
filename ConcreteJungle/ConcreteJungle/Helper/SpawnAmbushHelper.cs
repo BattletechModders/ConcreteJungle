@@ -22,9 +22,6 @@ namespace ConcreteJungle.Helper
             int actorsToSpawn = Mod.Random.Next(minSpawns, maxSpawns);
             Mod.Log.Debug($"Spawning {actorsToSpawn} actors as part of this ambush.");
 
-            // Create a new lance in the target team
-            Lance ambushLance = TeamHelper.CreateAmbushLance(ModState.TargetAllyTeam);
-
             // Starting with the closest building, look through the buildings and determine how many locations can support a unit.
             List<BattleTech.Building> candidates = CandidateBuildingsHelper.ClosestCandidatesToPosition(ambushOrigin, Mod.Config.Ambush.SearchRadius);
             if (candidates.Count < minSpawns)
@@ -32,6 +29,10 @@ namespace ConcreteJungle.Helper
                 Mod.Log.Debug($"Insufficient candidate buildings for a spawn ambush. Skipping.");
                 return;
             }
+
+            // Create a new lance in the target team
+            Lance ambushLance = TeamHelper.CreateAmbushLance(ModState.TargetAllyTeam);
+            ModState.CurrentSpawningLance = ambushLance;
 
             EncounterLayerData encounterLayerData = ModState.Combat.EncounterLayerData;
             List<BattleTech.Building> buildingsToLevel = new List<BattleTech.Building>();
@@ -45,33 +46,42 @@ namespace ConcreteJungle.Helper
                 Mod.Log.Debug("Spawning actor at building origin.");
                 if (ambushType == AmbushType.Mech)
                 {
-                    SpawnAmbushMech(ModState.TargetAllyTeam, ambushLance, ambushOrigin, building.CurrentPosition, building.CurrentRotation);
+                    AbstractActor spawnedActor = SpawnAmbushMech(ModState.TargetAllyTeam, ambushLance, ambushOrigin, building.CurrentPosition, building.CurrentRotation);
+                    spawnedActors.Add(spawnedActor);
                 }
                 else
                 {
-                    SpawnAmbushVehicle(ModState.TargetAllyTeam, ambushLance, ambushOrigin, building.CurrentPosition, building.CurrentRotation);
+                    AbstractActor spawnedActor = SpawnAmbushVehicle(ModState.TargetAllyTeam, ambushLance, ambushOrigin, building.CurrentPosition, building.CurrentRotation);
+                    spawnedActors.Add(spawnedActor);
                 }
                 actorsToSpawn--;
 
                 // Iterate through adjacent hexes to see if we can spawn more units in the building
                 List<Vector3> adjacentHexes = ModState.Combat.HexGrid.GetGridPointsAroundPointWithinRadius(ambushOrigin, 3); // 3 hexes should cover most large buidlings
-                foreach (Vector3 adjacentPos in adjacentHexes)
+                foreach (Vector3 adjacentHex in adjacentHexes)
                 {
                     if (actorsToSpawn == 0) break;
 
-                    Point cellPoint = new Point(ModState.Combat.MapMetaData.GetXIndex(adjacentPos.x), ModState.Combat.MapMetaData.GetZIndex(adjacentPos.z));
+                    Point cellPoint = new Point(ModState.Combat.MapMetaData.GetXIndex(adjacentHex.x), ModState.Combat.MapMetaData.GetZIndex(adjacentHex.z));
+                    Mod.Log.Debug($" Evaluating point {cellPoint.X}, {cellPoint.Z} for potential ambush.");
                     if (encounterLayerData.mapEncounterLayerDataCells[cellPoint.Z, cellPoint.X].HasSpecifiedBuilding(building.GUID))
                     {
-                        Mod.Log.Debug($"Spawning actor at adjacent hex at position: {adjacentPos}");
+                        Mod.Log.Debug($"Spawning actor at adjacent hex at position: {adjacentHex}");
                         if (ambushType == AmbushType.Mech)
                         {
-                            SpawnAmbushMech(ModState.TargetAllyTeam, ambushLance, ambushOrigin, building.CurrentPosition, building.CurrentRotation);
+                            AbstractActor spawnedActor = SpawnAmbushMech(ModState.TargetAllyTeam, ambushLance, ambushOrigin, adjacentHex, building.CurrentRotation);
+                            spawnedActors.Add(spawnedActor);
                         }
                         else
                         {
-                            SpawnAmbushVehicle(ModState.TargetAllyTeam, ambushLance, ambushOrigin, building.CurrentPosition, building.CurrentRotation);
+                            AbstractActor spawnedActor = SpawnAmbushVehicle(ModState.TargetAllyTeam, ambushLance, ambushOrigin, adjacentHex, building.CurrentRotation);
+                            spawnedActors.Add(spawnedActor);
                         }
                         actorsToSpawn--;
+                    }
+                    else
+                    {
+                        Mod.Log.Debug($" Hex {adjacentHex} is outside of the main building, skipping.");
                     }
                 }
             }
@@ -94,10 +104,11 @@ namespace ConcreteJungle.Helper
                 }
             }
 
+            bool applyAttacks = ambushType == AmbushType.Mech ? Mod.Config.MechAmbush.FreeAttackEnabled : Mod.Config.VehicleAmbush.FreeAttackEnabled;
             Mod.Log.Info($"Adding SpawnAmbushSequence for {spawnedActors.Count} actors and {buildingsToLevel.Count} buildings to be leveled.");
             try
             {
-                SpawnAmbushSequence ambushSequence = new SpawnAmbushSequence(ModState.Combat, ambushOrigin, spawnedActors, buildingsToLevel, targets);
+                SpawnAmbushSequence ambushSequence = new SpawnAmbushSequence(ModState.Combat, ambushOrigin, spawnedActors, buildingsToLevel, targets, applyAttacks);
                 ModState.Combat.MessageCenter.PublishMessage(new AddSequenceToStackMessage(ambushSequence));
             }
             catch (Exception e)

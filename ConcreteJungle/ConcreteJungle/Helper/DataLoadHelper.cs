@@ -35,14 +35,14 @@ namespace ConcreteJungle.Helper
             HashSet<string> mechToLoad = new HashSet<string>();
             foreach (MechAndPilotDef ambushDef in ModState.MechAmbushDefForContract.SpawnPool)
             {
-                turretsToLoad.Add(ambushDef.MechDefId);
+                mechToLoad.Add(ambushDef.MechDefId);
                 pilotsToLoad.Add(ambushDef.PilotDefId);
             }
 
             HashSet<string> vehiclesToLoad = new HashSet<string>();
             foreach (VehicleAndPilotDef ambushDef in ModState.VehicleAmbushDefForContract.SpawnPool)
             {
-                turretsToLoad.Add(ambushDef.VehicleDefId);
+                vehiclesToLoad.Add(ambushDef.VehicleDefId);
                 pilotsToLoad.Add(ambushDef.PilotDefId);
             }
 

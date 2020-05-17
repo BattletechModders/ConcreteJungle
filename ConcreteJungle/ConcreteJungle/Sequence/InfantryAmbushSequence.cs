@@ -17,6 +17,8 @@ namespace ConcreteJungle.Sequence
 
         private List<ICombatant> AllTargets { get; set; }
 
+        private bool ApplyAttacks { get; set; }
+
         public override bool IsValidMultiSequenceChild {  get { return false;  } }
 
         public override bool IsParallelInterruptable { get { return false; } }
@@ -26,12 +28,13 @@ namespace ConcreteJungle.Sequence
         public override bool IsComplete { get { return this.state == InfantryAmbushSequenceState.Finished; } }
 
         public InfantryAmbushSequence(CombatGameState combat, Vector3 ambushPos, List<AbstractActor> spawnedActors, 
-            List<BattleTech.Building> shellBuildings, List<ICombatant> targets) : base(combat)
+            List<BattleTech.Building> shellBuildings, List<ICombatant> targets, bool applyAttacks) : base(combat)
         {
             this.AmbushPos = ambushPos;
             this.AttackingActors = spawnedActors;
             this.ShellBuildings = shellBuildings;
             this.AllTargets = targets;
+            this.ApplyAttacks = applyAttacks;
         }
 
         public override void OnAdded()
@@ -55,6 +58,12 @@ namespace ConcreteJungle.Sequence
                     }
                     break;
                 case InfantryAmbushSequenceState.Attacking:
+                    if (!ApplyAttacks)
+                    {
+                        this.SetState(InfantryAmbushSequenceState.Finished);
+                        return;
+                    }
+
                     this.ResolveNextAttack();
                     if (this.AttackingActors.Count < 1)
                     {

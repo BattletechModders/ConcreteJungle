@@ -73,7 +73,7 @@ namespace ConcreteJungle.Helper
 				}
 			}
 
-			Mod.Log.Debug("Sending AddSequence message for ambush explosion.");
+			Mod.Log.Debug($"Sending AddSequence message for ambush explosion wit {attackWeapons.Count} and {blastPositions.Count} blasts");
 			try
 			{
 				ExplosionAmbushSequence ambushSequence = new ExplosionAmbushSequence(ModState.Combat, attackWeapons, ModState.TargetAllyTeam, blastPositions, targets);

@@ -23,8 +23,8 @@ namespace ConcreteJungle {
             // TODO: need a weight for ambushes, from 1-10. S, I, E maybe? 
             // Maybe tie this into tags?
             // Just make this a default
-            public List<string> AmbushWeights;
-            public List<AmbushType> AmbushTypes; // internal only - do not config in mod.json
+            public List<string> AmbushWeights = new List<string>();
+            public List<AmbushType> AmbushTypes = new List<AmbushType>(); // internal only - do not config in mod.json
         }
         public AmbushOpts Ambush = new AmbushOpts();
 
@@ -37,7 +37,7 @@ namespace ConcreteJungle {
             public DevestationDef DefaultRange = new DevestationDef() { MinDevestation = 0.3f, MaxDevestation = 0.9f };
 
             // Ranges specified by planet tags. We'll use the worst effect.
-            public HashSet<DevestationDef> RangesByPlanetTag = new HashSet<DevestationDef>();
+            public List<DevestationDef> RangesByPlanetTag = new List<DevestationDef>();
         }
         public DevestationOpts Devestation = new DevestationOpts();
 
@@ -211,26 +211,26 @@ namespace ConcreteJungle {
             }
 
             Mod.Log.Debug(" -- Initializing weights");
-            this.BuildWeightTable(this.Ambush.AmbushWeights, this.Ambush.AmbushTypes);
-            this.ValidateWeights(this.Ambush.AmbushTypes);
+            this.BuildWeightTable();
+            this.ValidateWeights();
 
             Mod.Log.Debug(" == Configuration Initialized");
         }
 
         // Translate the strings in the config to enum types
-        private void BuildWeightTable(List<string> weightStrings, List<AmbushType> enumVals)
+        private void BuildWeightTable()
         {
-            foreach(string weightS in weightStrings)
+            foreach(string weightS in this.Ambush.AmbushWeights)
             {
                 AmbushType enumVal = (AmbushType)Enum.Parse(typeof(AmbushType), weightS);
-                enumVals.Add(enumVal);
+                this.Ambush.AmbushTypes.Add(enumVal);
             }
         }
 
         // Ensure that someone hasn't configured a weight value that is currently disabled
-        private void ValidateWeights(List<AmbushType> weights)
+        private void ValidateWeights()
         {
-            foreach (AmbushType type in weights)
+            foreach (AmbushType type in this.Ambush.AmbushTypes)
             { 
                 switch (type)
                 {

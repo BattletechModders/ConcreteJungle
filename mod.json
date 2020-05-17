@@ -14,7 +14,7 @@
     ],
     "Settings": {
         "Debug" : true,
-        "Trace" : false
+        "Trace" : false,
 
         "Ambush" :
         {
@@ -22,7 +22,7 @@
             "MinDistanceBetween" : 600.0,
             "BaseChance" : 0.3,
             "ChancePerActor" : 0.05,
-            "SearchRadius" : 250.0,
+            "SearchRadius" : 250,
             "AmbushWeights" : [ 
                 "Explosion", "Explosion", "Infantry", "Infantry", "Infantry", "Mech", "Vehicle"
             ]
@@ -31,10 +31,10 @@
         "Devestation" : {
             "Enabled" : false,
             "DefaultRange" : { "MinDevestation" : 0.3, "MaxDevestation" : 0.9 },
-            "RangesByPlanetTag" : {
+            "RangesByPlanetTag" : [
                 { "PlanetTag" : "FOO_FIXME", "MinDevestation" : 0.3, "MaxDevestation" : 0.9 },
-                { "PlanetTag" : "BAR_FIXME", "MinDevestation" : 0.1, "MaxDevestation" : 0.3 },
-            }
+                { "PlanetTag" : "BAR_FIXME", "MinDevestation" : 0.1, "MaxDevestation" : 0.3 }
+            ]
         },
 
         "ExplosionAmbush" : {
@@ -65,8 +65,8 @@
                     "MinSpawns" : 2,
                     "MaxSpawns" : 6,
                      "SpawnPool" : [
-                        { "TurretDefId" : "turretdef_Light_Shredder", "pilotId" : "pilot_d5_turret" },
-                        { "TurretDefId" : "turretdef_Light_Laser", "pilotId" : "pilot_d5_turret" }
+                        { "TurretDefId" : "turretdef_Light_Shredder", "PilotDefId" : "pilot_d5_turret" },
+                        { "TurretDefId" : "turretdef_Light_Laser", "PilotDefId" : "pilot_d5_turret" }
                     ]
                 }
             ]
@@ -83,11 +83,11 @@
                     "MinSpawns" : 1,
                     "MaxSpawns" : 4,
                     "SpawnPool" : [
-                        { "MechDefId" : "mechdef_urbanmech_UM-R60", "pilotId" : "pilot_d3_gunner" },
-                        { "MechDefId" : "mechdef_urbanmech_UM-R60", "pilotId" : "pilot_d3_gunner" },
-                        { "MechDefId" : "mechdef_urbanmech_UM-R60L", "pilotId" : "pilot_d3_gunner" },
-                        { "MechDefId" : "mechdef_panther_PNT-9R", "pilotId" : "pilot_d3_gunner" },
-                        { "MechDefId" : "mechdef_hunchback_HBK-4G", "pilotId" : "pilot_d3_gunner" }
+                        { "MechDefId" : "mechdef_urbanmech_UM-R60", "PilotDefId" : "pilot_d3_gunner" },
+                        { "MechDefId" : "mechdef_urbanmech_UM-R60", "PilotDefId" : "pilot_d3_gunner" },
+                        { "MechDefId" : "mechdef_urbanmech_UM-R60L", "PilotDefId" : "pilot_d3_gunner" },
+                        { "MechDefId" : "mechdef_panther_PNT-9R", "PilotDefId" : "pilot_d3_gunner" },
+                        { "MechDefId" : "mechdef_hunchback_HBK-4G", "PilotDefId" : "pilot_d3_gunner" }
                     ]
                 }
             ]
@@ -104,10 +104,10 @@
                     "MinSpawns" : 2,
                     "MaxSpawns" : 4,
                     "SpawnPool" : [
-                        { "VehicleDefId" : "vehicledef_BULLDOG", "pilotId" : "pilot_d3_gunner" },
-                        { "VehicleDefId" : "vehicledef_MANTICORE", "pilotId" : "pilot_d3_gunner" },
-                        { "VehicleDefId" : "vehicledef_CARRIER_SRM", "pilotId" : "pilot_d3_gunner" },
-                        { "VehicleDefId" : "vehicledef_CARRIER_SRM", "pilotId" : "pilot_d3_gunner" }
+                        { "VehicleDefId" : "vehicledef_BULLDOG", "PilotDefId" : "pilot_d3_gunner" },
+                        { "VehicleDefId" : "vehicledef_MANTICORE", "PilotDefId" : "pilot_d3_gunner" },
+                        { "VehicleDefId" : "vehicledef_CARRIER_SRM", "PilotDefId" : "pilot_d3_gunner" },
+                        { "VehicleDefId" : "vehicledef_CARRIER_SRM", "PilotDefId" : "pilot_d3_gunner" }
                     ]
                 }
             ]
@@ -115,10 +115,10 @@
 
         "Quips" : {
             "ExplosiveAmbush" : [
-                "Watch your step",
+                "Watch your step"
             ],
             "InfantryAmbush" : [
-                "Wrong neighborhood, fucko.",
+                "Wrong neighborhood, fucko."
             ],
             "SpawnAmbush" : [
                 "Charge!",
