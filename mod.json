@@ -19,7 +19,7 @@
         "Ambush" :
         {
             "MaxPerMap" : 2,
-            "MinDistanceBetween" : 600.0,
+            "MinDistanceBetween" : 300.0,
             "BaseChance" : 0.3,
             "ChancePerActor" : 0.05,
             "SearchRadius" : 250,
@@ -30,10 +30,10 @@
 
         "Devastation" : {
             "Enabled" : false,
-            "DefaultRange" : { "MinDevestation" : 0.3, "MaxDevestation" : 0.9 },
+            "DefaultRange" : { "MinDevastation" : 0.3, "MaxDevastation" : 0.9 },
             "RangesByPlanetTag" : [
-                { "PlanetTag" : "FOO_FIXME", "MinDevestation" : 0.3, "MaxDevestation" : 0.9 },
-                { "PlanetTag" : "BAR_FIXME", "MinDevestation" : 0.1, "MaxDevestation" : 0.3 }
+                { "PlanetTag" : "FOO_FIXME", "MinDevastation" : 0.3, "MaxDevastation" : 0.9 },
+                { "PlanetTag" : "BAR_FIXME", "MinDevastation" : 0.1, "MaxDevastation" : 0.3 }
             ]
         },
 

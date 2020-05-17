@@ -34,7 +34,7 @@ namespace ConcreteJungle {
             public bool Enabled = false;
             
             // If no tags match, the range we'll use
-            public DevastationDef DefaultRange = new DevastationDef() { MinDevestation = 0.3f, MaxDevestation = 0.9f };
+            public DevastationDef DefaultRange = new DevastationDef() { MinDevastation = 0.3f, MaxDevastation = 0.9f };
 
             // Ranges specified by planet tags. We'll use the worst effect.
             public List<DevastationDef> RangesByPlanetTag = new List<DevastationDef>();

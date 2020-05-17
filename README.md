@@ -28,7 +28,7 @@ The mod is designed to be heavily configurable, and express that configuration t
 These options are available under the `Settings.Ambush`:
 
 * **MaxPerMap**: The total number of ambushes that will spawn per map (*integer*)
-* **MinDistanceBetween**: A minimum distance between ambush origins. Once an ambush is triggered, another ambush won't spawn until the player's units have moved as least this far away. (*float*)
+* **MinDistanceBetween**: A minimum distance between ambush origins. Once an ambush is triggered, another ambush won't spawn until the player's units have moved as least this far away. Defaults to 300m. (*float*)
 * **BaseChance**: The base chance for an ambush to spring each turn. This base chance increases for each actor that the player activates (see below). Defaults to 0.3 or 30%. (*float*)
 * **ChancePerActor**: The incremental chance for an ambush to spawn for each player actor that activates. Defaults to 0.05f or 5% (*float*).
 * **SearchRadius**: When determining if an ambush should be triggered, the algorithm will search from the origin point up to this radius for suitable buildings. If insufficient buildings are found, the ambush will not occur.
@@ -36,13 +36,16 @@ These options are available under the `Settings.Ambush`:
 
 ### Devastation Configuration
 
-Devastation will pre-destroy a certain percentage of the battle
+Devastation will pre-destroy a certain percentage of the buildings, making the map look war-torn and ravaged. Note that this adds a few extra seconds to Urban map loads, typically on the order of 2-5 seconds.
 
-* Enabled: If true, buildling
+* **Enabled**: If false, devastation will not occur.
+* **DefaultRange**: A default value to use for devastation when planetary tags don't match
+  * **MinDevastation**: The minimum percentage of buildings to remove. Defaults to 0.30 or 30% (*float*).
+  * **MaxDevastation**: The maximum percentage of buildings to remove. Defaults to 0.90 or 90% (*float*).
 
 ### Explosion Ambush Configuration
 
-Loreum ipsum
+An explosion ambush will cause a random number of explosive blasts to occur at the origin position. The explosion will use 
 
 * Enabled
 * SearchRadius

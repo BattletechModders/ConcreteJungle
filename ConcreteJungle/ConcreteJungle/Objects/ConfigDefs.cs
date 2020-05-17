@@ -6,8 +6,8 @@ namespace ConcreteJungle
     public class DevastationDef
     {
         public string PlanetTag = null;
-        public float MinDevestation = 0f;
-        public float MaxDevestation = 0f;
+        public float MinDevastation = 0f;
+        public float MaxDevastation = 0f;
     }
 
     public abstract class AmbushDef
