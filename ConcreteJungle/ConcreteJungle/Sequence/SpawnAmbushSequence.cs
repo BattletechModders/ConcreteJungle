@@ -1,12 +1,9 @@
 ﻿using BattleTech;
-using ConcreteJungle.Extensions;
 using ConcreteJungle.Helper;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using us.frostraptor.modUtils;
-using static BattleTech.AttackDirector;
 
 namespace ConcreteJungle.Sequence
 {
@@ -26,54 +23,52 @@ namespace ConcreteJungle.Sequence
         
         public override bool IsCancelable { get { return false; } }
         
+        public override bool IsComplete { get { return this.state == SpawnAmbushSequenceState.Finished; } }
 
-        public override bool IsComplete { get { return this.state == AmbushExplosionSequenceState.Finished; } }
-
-        public SpawnAmbushSequence(CombatGameState combat, Vector3 ambushPos, Dictionary<AbstractActor, BattleTech.Building> actorToSpawnBuildings, List<ICombatant> targets) : base(combat)
+        public SpawnAmbushSequence(CombatGameState combat, Vector3 ambushPos, List<AbstractActor> spawnedActors, 
+            List<BattleTech.Building> buildingsToLevel, List<ICombatant> targets) : base(combat)
         {
-            Mod.Log.Debug($"Creating SAS for position: {ambushPos}");
             this.AmbushPosition = ambushPos;
-            this.AttackingActors = actorToSpawnBuildings.Keys.ToList();
-            this.BuildingsToCollapse = actorToSpawnBuildings.Values.ToList();
+            this.AttackingActors = spawnedActors;
+            this.BuildingsToCollapse = buildingsToLevel;
             this.AllTargets = targets;
         }
 
         public override void OnAdded()
         {
             base.OnAdded();
-            Mod.Log.Debug("Starting new SpawnAmbushSequence.");
-            this.SetState(AmbushExplosionSequenceState.Taunting);
+            this.SetState(SpawnAmbushSequenceState.Taunting);
+            Mod.Log.Debug($"Starting new SpawnAmbushSequence in state: {this.state}");
         }
 
         public override void OnUpdate()
         {
-            Mod.Log.Trace($"Updating AmbushExplosionSequence in state: {this.state}");
             base.OnUpdate();
             this.timeInCurrentState += Time.deltaTime;
             switch (this.state)
             {
-                case AmbushExplosionSequenceState.Taunting:
+                case SpawnAmbushSequenceState.Taunting:
                     this.Taunt();
                     if (this.timeInCurrentState > this.timeToTaunt)
                     {
-                        this.SetState(AmbushExplosionSequenceState.Collapsing);
+                        this.SetState(SpawnAmbushSequenceState.Collapsing);
                     }
                     break;
-                case AmbushExplosionSequenceState.Collapsing:
+                case SpawnAmbushSequenceState.Collapsing:
                     this.CollapseNextBuilding();
                     if (this.BuildingsToCollapse.Count < 1)
                     {
-                        this.SetState(AmbushExplosionSequenceState.Attacking);
+                        this.SetState(SpawnAmbushSequenceState.Attacking);
                     }
                     break;
-                case AmbushExplosionSequenceState.Attacking:
+                case SpawnAmbushSequenceState.Attacking:
                     this.ResolveNextAttack();
                     if (this.AttackingActors.Count < 1)
                     {
-                        this.SetState(AmbushExplosionSequenceState.Finished);
+                        this.SetState(SpawnAmbushSequenceState.Finished);
                     }
                     break;
-                case AmbushExplosionSequenceState.Finished:
+                case SpawnAmbushSequenceState.Finished:
                     break;
                 default:
                     return;
@@ -90,7 +85,7 @@ namespace ConcreteJungle.Sequence
                     BattleTech.Building buildingToCollapse = this.BuildingsToCollapse[0];
                     this.BuildingsToCollapse.RemoveAt(0);
 
-                    Mod.Log.Debug($"Collapsing shell building: {CombatantUtils.Label(buildingToCollapse)}");
+                    Mod.Log.Debug($"Collapsing ambush building: {CombatantUtils.Label(buildingToCollapse)}");
                     buildingToCollapse.FlagForDeath("Ambush Collapse", DeathMethod.Unknown, DamageType.Artillery, 0, -1, "0", false);
                     buildingToCollapse.HandleDeath("0");
                 }
@@ -138,7 +133,7 @@ namespace ConcreteJungle.Sequence
             }
         }
 
-        private void SetState(AmbushExplosionSequenceState newState)
+        private void SetState(SpawnAmbushSequenceState newState)
         {
             if (this.state == newState) return;
 
@@ -146,14 +141,14 @@ namespace ConcreteJungle.Sequence
             this.timeInCurrentState = 0f;
             switch(newState)
             {
-                case AmbushExplosionSequenceState.Collapsing:
-                    Mod.Log.Debug("Destroying shelter buildings");
+                case SpawnAmbushSequenceState.Collapsing:
+                    Mod.Log.Debug("Destroying ambush buildings");
                     return;
-                case AmbushExplosionSequenceState.Attacking:
+                case SpawnAmbushSequenceState.Attacking:
                     Mod.Log.Debug("Actors are attacking targets");
                     break;
-                case AmbushExplosionSequenceState.Finished:
-                    Mod.Log.Debug("Finished with AmbushExplosionSequence");
+                case SpawnAmbushSequenceState.Finished:
+                    Mod.Log.Debug("Finished with SpawnAmbushSequence");
                     base.ClearCamera();
                     return;
                 default:
@@ -166,12 +161,12 @@ namespace ConcreteJungle.Sequence
         {
             if (!hasTaunted)
             {
+                Mod.Log.Debug("Taunting player.");
                 // Create a quip
                 Guid g = Guid.NewGuid();
-                QuipHelper.PlayQuip(ModState.Combat, g.ToString(),
-                    ModState.CandidateTeams.ElementAt(0), "Vehicle Ambush", Mod.Config.Qips.SpawnAmbush, this.timeToTaunt * 3f);
+                QuipHelper.PlayQuip(ModState.Combat, g.ToString(),AttackingActors[0].team,
+                    "Vehicle Ambush", Mod.Config.Qips.SpawnAmbush, this.timeToTaunt * 3f);
                 hasTaunted = true;
-                Mod.Log.Debug("Taunted player.");
             }
         }
 
@@ -187,9 +182,9 @@ namespace ConcreteJungle.Sequence
         private float timeSinceLastAttack = 0f;
         private float timeBetweenAttacks = 0.25f;
 
-        private AmbushExplosionSequenceState state;
+        private SpawnAmbushSequenceState state;
 
-        private enum AmbushExplosionSequenceState
+        private enum SpawnAmbushSequenceState
         {
             NotSet,
             Taunting,

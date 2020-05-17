@@ -22,7 +22,10 @@
             "MinDistanceBetween" : 600.0,
             "BaseChance" : 0.3,
             "ChancePerActor" : 0.05,
-            "SearchRadius" : 250
+            "SearchRadius" : 250.0,
+            "AmbushWeights" : [ 
+                "Explosion", "Explosion", "Infantry", "Infantry", "Infantry", "Mech", "Vehicle"
+            ]
         },
 
         "Devestation" : {

@@ -39,7 +39,7 @@ namespace ConcreteJungle.Patches
                     }
 
                     // For the given origin, find how many potential buildings there are.
-                    List<BattleTech.Building> originCandidates = CandidateBuildingsHelper.FilterCandidates(origin, Mod.Config.Ambush.SearchRadius);
+                    List<BattleTech.Building> originCandidates = CandidateBuildingsHelper.ClosestCandidatesToPosition(origin, Mod.Config.Ambush.SearchRadius);
                     Mod.Log.Debug($" Found {originCandidates.Count} candidate buildings for originPos: {origin}");
                     ambushSites.Add(origin, originCandidates);
 
@@ -57,23 +57,37 @@ namespace ConcreteJungle.Patches
                     Mod.Log.Debug($"Spawning an ambush at position: {ambushOrigin}");
 
                     // Randomly determine an ambush type by weight
+                    List<AmbushType> shuffledTypes = new List<AmbushType>();
+                    shuffledTypes.AddRange(Mod.Config.Ambush.AmbushTypes);
+                    shuffledTypes.Shuffle<AmbushType>();
+                    AmbushType ambushType = shuffledTypes[0];
+                    Mod.Log.Info($"Ambush type of: {ambushType} will be applied at position: {ambushOrigin}");
+
+                    switch(ambushType)
+                    {
+                        case AmbushType.Explosion:
+                            ExplosionAmbushHelper.SpawnAmbush(ambushOrigin);
+                            break;
+                        case AmbushType.Infantry:
+                            InfantryAmbushHelper.SpawnAmbush(ambushOrigin);
+                            break;
+                        case AmbushType.Mech:
+                            MechAmbushHelper.SpawnAmbush(ambushOrigin);
+                            break;
+                        case AmbushType.Vehicle:
+                            VehicleAmbushHelper.SpawnAmbush(ambushOrigin);
+                            break;
+                        default:
+                            Mod.Log.Error($"UNKNOWN AMBUSH TYPE: {ambushType} - CANNOT PROCEED!");
+                            break;
+
+                    }
+
+                    // Record a successful ambush and reset the weighting
+                    ModState.AmbushOrigins.Add(ambushOrigin);
+                    ModState.CurrentAmbushChance = Mod.Config.Ambush.BaseChance;
                 }
 
-
-
-                Mod.Log.Debug($"Resolving pending ambush at position: {ModState.PendingAmbushOrigin}");
-
-                // Determine trap type - infantry ambush, tank ambush, IED
-                // TODO: Randomize
-                //TrapType trapType = TrapType.TRAP_INFANTRY_AMBUSH;
-
-                //InfantryAmbushHelper.SpawnAmbush(ModState.PendingAmbushOrigin);
-                //ExplosionAmbushHelper.SpawnAmbush(ModState.PendingAmbushOrigin);
-                SpawnAmbushHelper.SpawnAmbush(ModState.PendingAmbushOrigin);
-
-                // Record a successful ambush and reset the weighting
-                ModState.AmbushOrigins.Add(ModState.PendingAmbushOrigin);
-                ModState.CurrentAmbushChance = Mod.Config.Ambush.BaseChance;
             }
         }
     }

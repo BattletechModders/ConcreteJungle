@@ -1,4 +1,5 @@
 ﻿
+using System;
 using System.Collections.Generic;
 
 namespace ConcreteJungle {
@@ -22,8 +23,8 @@ namespace ConcreteJungle {
             // TODO: need a weight for ambushes, from 1-10. S, I, E maybe? 
             // Maybe tie this into tags?
             // Just make this a default
-            public string[] AmbushWeights;
-            public AmbushType[] AmbushTable;
+            public List<string> AmbushWeights;
+            public List<AmbushType> AmbushTypes; // internal only - do not config in mod.json
         }
         public AmbushOpts Ambush = new AmbushOpts();
 
@@ -119,6 +120,8 @@ namespace ConcreteJungle {
             public List<string> SpawnAmbush = new List<string>()
             {
                 "Charge!",
+                "Into the fray",
+                "Push them back!",
                 "Get'em boys!"
             };
 
@@ -207,7 +210,46 @@ namespace ConcreteJungle {
                 });
             }
 
+            Mod.Log.Debug(" -- Initializing weights");
+            this.BuildWeightTable(this.Ambush.AmbushWeights, this.Ambush.AmbushTypes);
+            this.ValidateWeights(this.Ambush.AmbushTypes);
+
             Mod.Log.Debug(" == Configuration Initialized");
+        }
+
+        // Translate the strings in the config to enum types
+        private void BuildWeightTable(List<string> weightStrings, List<AmbushType> enumVals)
+        {
+            foreach(string weightS in weightStrings)
+            {
+                AmbushType enumVal = (AmbushType)Enum.Parse(typeof(AmbushType), weightS);
+                enumVals.Add(enumVal);
+            }
+        }
+
+        // Ensure that someone hasn't configured a weight value that is currently disabled
+        private void ValidateWeights(List<AmbushType> weights)
+        {
+            foreach (AmbushType type in weights)
+            { 
+                switch (type)
+                {
+                    case AmbushType.Explosion:
+                        if (!Mod.Config.ExplosionAmbush.Enabled) throw new InvalidOperationException($"Ambush type: {type} in weight table but marked disabled!");
+                        break;
+                    case AmbushType.Infantry:
+                        if (!Mod.Config.InfantryAmbush.Enabled) throw new InvalidOperationException($"Ambush type: {type} in weight table but marked disabled!");
+                        break;
+                    case AmbushType.Mech:
+                        if (!Mod.Config.MechAmbush.Enabled) throw new InvalidOperationException($"Ambush type: {type} in weight table but marked disabled!");
+                        break;
+                    case AmbushType.Vehicle:
+                        if (!Mod.Config.VehicleAmbush.Enabled) throw new InvalidOperationException($"Ambush type: {type} in weight table but marked disabled!");
+                        break;
+                    default:
+                        throw new InvalidOperationException($"Unknown ambush type: {type}!");
+                }
+            }
         }
     }
 }

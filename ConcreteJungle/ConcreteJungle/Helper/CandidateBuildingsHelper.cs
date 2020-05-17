@@ -7,7 +7,7 @@ namespace ConcreteJungle.Helper
 {
     public static class CandidateBuildingsHelper
     {
-        public static List<BattleTech.Building> FilterCandidates(Vector3 originPos, float searchRadius)
+        public static List<BattleTech.Building> ClosestCandidatesToPosition(Vector3 originPos, float searchRadius)
         {
             List<BattleTech.Building> candidates = new List<BattleTech.Building>();
             foreach (BattleTech.Building building in ModState.CandidateBuildings)
