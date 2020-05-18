@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using us.frostraptor.modUtils;
 
 namespace ConcreteJungle.Helper
 {
@@ -18,7 +17,7 @@ namespace ConcreteJungle.Helper
             Mod.Log.Debug($"Spawning up to {infantrySpawns} infantry spawns as part of this ambush.");
 
             // Create a new lance in the target team
-            Lance ambushLance = TeamHelper.CreateAmbushLance(ModState.TargetAllyTeam);
+            Lance ambushLance = TeamHelper.CreateAmbushLance(ModState.AmbushTeam);
 
             // Build list of candidate trap buildings
             List<BattleTech.Building> candidates = CandidateBuildingsHelper.ClosestCandidatesToPosition(ambushPos, Mod.Config.Ambush.SearchRadius);
@@ -38,7 +37,7 @@ namespace ConcreteJungle.Helper
                 BattleTech.Building spawnBuildingShell = candidates.ElementAt(i);
 
                 // Spawn a turret trap
-                AbstractActor ambushTurret = SpawnAmbushTurret(ModState.TargetAllyTeam, ambushLance, spawnBuildingShell);
+                AbstractActor ambushTurret = SpawnAmbushTurret(ModState.AmbushTeam, ambushLance, spawnBuildingShell);
                 spawnedActors.Add(ambushTurret);
                 spawnBuildings.Add(spawnBuildingShell);
                 Mod.Log.Info($"Spawned turret: {ambushTurret} in building: {spawnBuildingShell}");
@@ -127,7 +126,7 @@ namespace ConcreteJungle.Helper
             newPosition.y += heightDelta;
             Mod.Log.Debug($"Changing transform postition from: {turret.GameRep.transform.position} to {newPosition}");
             //turret.GameRep.transform.position = newPosition;
-            // TODO: Re-enable?
+            // TODO: Fix this... the Y delta is too high and makes them float
 
             // After the position change, notify the game rep and set our visibility to full
             turret.OnPlayerVisibilityChanged(VisibilityLevel.LOSFull);

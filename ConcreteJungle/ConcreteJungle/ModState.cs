@@ -11,8 +11,12 @@ namespace ConcreteJungle {
         // -- General spawn state        
         public static List<BattleTech.Building> CandidateBuildings = new List<BattleTech.Building>();
         public static List<DataloadResourcePair> LoadedResources = new List<DataloadResourcePair>();
+
+        // -- Teams we can use for spawning OpFors
+        public static Team TargetTeam = null;
         public static Team TargetAllyTeam = null;
         public static Team HostileToAllTeam = null;
+        public static Team AmbushTeam = null;
 
         // -- Infantry Ambush state
         public static Dictionary<string, Turret> AmbushBuildingGUIDToTurrets = new Dictionary<string, Turret>();
@@ -40,6 +44,9 @@ namespace ConcreteJungle {
         public static void Reset() {
             // Reinitialize state
             CandidateBuildings.Clear();
+            LoadedResources.Clear();
+
+            TargetTeam = null;
             TargetAllyTeam = null;
             HostileToAllTeam = null;
 

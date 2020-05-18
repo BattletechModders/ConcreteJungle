@@ -31,7 +31,7 @@ namespace ConcreteJungle.Helper
             }
 
             // Create a new lance in the target team
-            Lance ambushLance = TeamHelper.CreateAmbushLance(ModState.TargetAllyTeam);
+            Lance ambushLance = TeamHelper.CreateAmbushLance(ModState.AmbushTeam);
             ModState.CurrentSpawningLance = ambushLance;
 
             EncounterLayerData encounterLayerData = ModState.Combat.EncounterLayerData;
@@ -46,12 +46,12 @@ namespace ConcreteJungle.Helper
                 Mod.Log.Debug("Spawning actor at building origin.");
                 if (ambushType == AmbushType.Mech)
                 {
-                    AbstractActor spawnedActor = SpawnAmbushMech(ModState.TargetAllyTeam, ambushLance, ambushOrigin, building.CurrentPosition, building.CurrentRotation);
+                    AbstractActor spawnedActor = SpawnAmbushMech(ModState.AmbushTeam, ambushLance, ambushOrigin, building.CurrentPosition, building.CurrentRotation);
                     spawnedActors.Add(spawnedActor);
                 }
                 else
                 {
-                    AbstractActor spawnedActor = SpawnAmbushVehicle(ModState.TargetAllyTeam, ambushLance, ambushOrigin, building.CurrentPosition, building.CurrentRotation);
+                    AbstractActor spawnedActor = SpawnAmbushVehicle(ModState.AmbushTeam, ambushLance, ambushOrigin, building.CurrentPosition, building.CurrentRotation);
                     spawnedActors.Add(spawnedActor);
                 }
                 actorsToSpawn--;
@@ -69,12 +69,12 @@ namespace ConcreteJungle.Helper
                         Mod.Log.Debug($"Spawning actor at adjacent hex at position: {adjacentHex}");
                         if (ambushType == AmbushType.Mech)
                         {
-                            AbstractActor spawnedActor = SpawnAmbushMech(ModState.TargetAllyTeam, ambushLance, ambushOrigin, adjacentHex, building.CurrentRotation);
+                            AbstractActor spawnedActor = SpawnAmbushMech(ModState.AmbushTeam, ambushLance, ambushOrigin, adjacentHex, building.CurrentRotation);
                             spawnedActors.Add(spawnedActor);
                         }
                         else
                         {
-                            AbstractActor spawnedActor = SpawnAmbushVehicle(ModState.TargetAllyTeam, ambushLance, ambushOrigin, adjacentHex, building.CurrentRotation);
+                            AbstractActor spawnedActor = SpawnAmbushVehicle(ModState.AmbushTeam, ambushLance, ambushOrigin, adjacentHex, building.CurrentRotation);
                             spawnedActors.Add(spawnedActor);
                         }
                         actorsToSpawn--;

@@ -1,7 +1,7 @@
 {
     "Name": "ConcreteJungle",
     "Enabled": true,
-    "Version": "0.5.0",
+    "Version": "0.5.1",
     "Description": "Provides fun surprises on urban maps.",
     "Author": "IceRaptor",
     "Website": "https://github.com/IceRaptor/ConcreteJungle",
@@ -115,10 +115,19 @@
 
         "Quips" : {
             "ExplosiveAmbush" : [
-                "Watch your step"
+                "Watch your step",
+                "Pushing the plunger",
+                "Boom goes the dynamite",
+                "Not this time invaders",
+                "Salt the earth!",
             ],
             "InfantryAmbush" : [
-                "Wrong neighborhood, fucko."
+                "Wrong neighborhood, fucko.",
+                "Concentrate on the lead!",
+                "Open fire!",
+                "Fire Fire Fire!",
+                "Focus on the critical points!",
+                "Welcome to the jungle!"
             ],
             "SpawnAmbush" : [
                 "Charge!",
