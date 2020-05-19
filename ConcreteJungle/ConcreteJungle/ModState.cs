@@ -20,7 +20,7 @@ namespace ConcreteJungle {
 
         // -- Infantry Ambush state
         public static Dictionary<string, Turret> AmbushBuildingGUIDToTurrets = new Dictionary<string, Turret>();
-        public static Dictionary<string, string> AmbushTurretGUIDtoBuildingGUID = new Dictionary<string, string>();
+        public static Dictionary<string, BattleTech.Building> AmbushTurretGUIDtoBuilding = new Dictionary<string, BattleTech.Building>();
         public static Turret CurrentTurretForLOF = null;
         public static Turret CurrentTurretForLOS = null;
         public static string KillingLinkedUnitsSource = null;
@@ -52,7 +52,7 @@ namespace ConcreteJungle {
             HostileToAllTeam = null;
 
             AmbushBuildingGUIDToTurrets.Clear();
-            AmbushTurretGUIDtoBuildingGUID.Clear();
+            AmbushTurretGUIDtoBuilding.Clear();
             CurrentTurretForLOF = null;
             CurrentTurretForLOS = null;
             KillingLinkedUnitsSource = null;

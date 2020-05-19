@@ -10,8 +10,8 @@ namespace ConcreteJungle.Patches
         static bool Prefix(Turret __instance)
         {
             if (__instance != null && 
-                ModState.AmbushTurretGUIDtoBuildingGUID.ContainsKey(__instance.GUID) &&
-                ModState.AmbushTurretGUIDtoBuildingGUID[__instance.GUID] != ModState.KillingLinkedUnitsSource)
+                ModState.AmbushTurretGUIDtoBuilding.ContainsKey(__instance.GUID) &&
+                ModState.AmbushTurretGUIDtoBuilding[__instance.GUID].GUID != ModState.KillingLinkedUnitsSource)
             {
                 return false;
             }
@@ -26,8 +26,8 @@ namespace ConcreteJungle.Patches
         static bool Prefix(Turret __instance)
         {
             if (__instance != null && 
-                ModState.AmbushTurretGUIDtoBuildingGUID.ContainsKey(__instance.GUID) &&
-                ModState.AmbushTurretGUIDtoBuildingGUID[__instance.GUID] != ModState.KillingLinkedUnitsSource)
+                ModState.AmbushTurretGUIDtoBuilding.ContainsKey(__instance.GUID) &&
+                ModState.AmbushTurretGUIDtoBuilding[__instance.GUID].GUID != ModState.KillingLinkedUnitsSource)
             {
                 return false;
             }                

@@ -17,7 +17,7 @@ namespace ConcreteJungle.Patches
         {
             if (targetedActor != null && !useMultiFire && targetedActor is BattleTech.Building targetedBuilding)
             {
-                Mod.Log.Debug("Drawing line for building-as-target.");
+                Mod.Log.Trace("Drawing line for building-as-target.");
                 // Replicate WeaponRangeIndicators.ShowLineToTarget, because it only supports AbstractActors
                 Traverse drawLineT = Traverse.Create(__instance).Method("DrawLine", new object[] { position, rotation, true, selectedActor, targetedActor, false, false, isMelee });
                 drawLineT.GetValue();

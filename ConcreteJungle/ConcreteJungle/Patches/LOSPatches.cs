@@ -15,10 +15,10 @@ namespace ConcreteJungle.Patches
     {
         static void Postfix(LineOfSight __instance, ref bool __result, AbstractActor attacker, ref string impactTargetId, ref int impactHitLocation, ref AttackDirection attackDirection)
         {
-            if (attacker != null && ModState.AmbushTurretGUIDtoBuildingGUID.ContainsKey(attacker.GUID))
+            if (attacker != null && ModState.AmbushTurretGUIDtoBuilding.ContainsKey(attacker.GUID))
             {
                 // We are an ambush turret - check to see if the secondary target is our shell building
-                if (ModState.AmbushTurretGUIDtoBuildingGUID[attacker.GUID] == impactTargetId)
+                if (ModState.AmbushTurretGUIDtoBuilding[attacker.GUID].GUID == impactTargetId)
                 {
                     Mod.Log.Debug($"Attack from ambush turret would hit it's shell building - preventing!");
                     __result = false;
@@ -39,12 +39,12 @@ namespace ConcreteJungle.Patches
     {
         static void Prefix(AbstractActor source, Vector3 sourcePosition, ICombatant target, Vector3 targetPosition, Quaternion targetRotation)
         {
-            if (source != null && ModState.IsUrbanBiome && ModState.AmbushTurretGUIDtoBuildingGUID.ContainsKey(source.GUID) && !(target is BattleTech.Building))
+            if (source != null && ModState.IsUrbanBiome && ModState.AmbushTurretGUIDtoBuilding.ContainsKey(source.GUID) && !(target is BattleTech.Building))
             {
                 Mod.Log.Trace($"___VISIBILITY: SOURCE {CombatantUtils.Label(source)} TO TARGET {CombatantUtils.Label(target)}");
             }
 
-            if (source is Turret turret && ModState.AmbushTurretGUIDtoBuildingGUID.Keys.Contains(turret.GUID))
+            if (source is Turret turret && ModState.AmbushTurretGUIDtoBuilding.Keys.Contains(turret.GUID))
             {
                 Mod.Log.Trace($"Turret {CombatantUtils.Label(turret)} is calculating it's LOS");
                 ModState.CurrentTurretForLOS = turret;
@@ -54,7 +54,7 @@ namespace ConcreteJungle.Patches
 
         static void Postfix(AbstractActor source, Vector3 sourcePosition, ICombatant target, Vector3 targetPosition, Quaternion targetRotation, VisibilityLevel __result)
         {
-            if (source != null && ModState.IsUrbanBiome && ModState.AmbushTurretGUIDtoBuildingGUID.ContainsKey(source.GUID) && !(target is BattleTech.Building))
+            if (source != null && ModState.IsUrbanBiome && ModState.AmbushTurretGUIDtoBuilding.ContainsKey(source.GUID) && !(target is BattleTech.Building))
             {
                 Mod.Log.Trace($"___VISIBILITY RESULT: {__result}");
             }
@@ -97,7 +97,7 @@ namespace ConcreteJungle.Patches
 
             Traverse projectedHeightAtT = Traverse.Create(__instance).Method("getProjectedHeightAt", new Type[] { typeof(Point), typeof(float), typeof(Point), typeof(float) });
             Traverse visCostOfCellT = Traverse.Create(__instance).Method("visCostOfCell", new Type[] { typeof(MapTerrainDataCell), typeof(float) });
-            string shellBuildingGUID = ModState.AmbushTurretGUIDtoBuildingGUID[ModState.CurrentTurretForLOS.GUID];
+            string shellBuildingGUID = ModState.AmbushTurretGUIDtoBuilding[ModState.CurrentTurretForLOS.GUID].GUID;
             EncounterLayerData encounterLayerData = ___Combat.EncounterLayerData;
 
             List<Point> list = BresenhamLineUtil.BresenhamLine(p0, p1);
@@ -161,7 +161,7 @@ namespace ConcreteJungle.Patches
                 Mod.Log.Trace($"== CALCULATING LOF FROM {CombatantUtils.Label(source)} TO TARGET: {CombatantUtils.Label(source)}");
             }
 
-            if (source is Turret turret && ModState.IsUrbanBiome && ModState.AmbushTurretGUIDtoBuildingGUID.Keys.Contains(turret.GUID))
+            if (source is Turret turret && ModState.IsUrbanBiome && ModState.AmbushTurretGUIDtoBuilding.Keys.Contains(turret.GUID))
             {
                 Mod.Log.Trace($"Turret {CombatantUtils.Label(turret)} is calculating it's LOF");
                 ModState.CurrentTurretForLOF = turret;
@@ -216,7 +216,7 @@ namespace ConcreteJungle.Patches
             EncounterLayerData encounterLayerData = ___Combat.EncounterLayerData;
 
             bool targetIsABuilding = !string.IsNullOrEmpty(targetedBuildingGuid);
-            string shellBuildingGUID = ModState.AmbushTurretGUIDtoBuildingGUID[ModState.CurrentTurretForLOF.GUID];
+            string shellBuildingGUID = ModState.AmbushTurretGUIDtoBuilding[ModState.CurrentTurretForLOF.GUID].GUID;
 
             List<Point> bresenhamLinePoints = BresenhamLineUtil.BresenhamLine(p0, p1);
             float heightDeltaPerPoint = (height1 - height0) / (float)bresenhamLinePoints.Count;

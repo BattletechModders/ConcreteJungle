@@ -19,7 +19,7 @@ namespace ConcreteJungle.Patches
 
             Traverse parentT = Traverse.Create(__instance).Property("parentActor");
             AbstractActor parentActor = parentT.GetValue<AbstractActor>();
-            if (ModState.AmbushTurretGUIDtoBuildingGUID.Keys.Contains(parentActor.GUID))
+            if (ModState.AmbushTurretGUIDtoBuilding.Keys.Contains(parentActor.GUID))
             {
                 Turret turret = parentActor as Turret;
                 if (newLevel == VisibilityLevel.LOSFull)
@@ -44,7 +44,6 @@ namespace ConcreteJungle.Patches
                 Traverse edgeHighlightT = Traverse.Create(__instance).Property("edgeHighlight");
                 MechEdgeSelection edgeHighlight = edgeHighlightT.GetValue<MechEdgeSelection>();
                 edgeHighlight.SetTeam(3);
-                Mod.Log.Debug($"  -- set edge highlight to enemy!");
             }
         }
     }
