@@ -40,7 +40,7 @@ namespace ConcreteJungle.Helper
                 AbstractActor ambushTurret = SpawnAmbushTurret(ModState.AmbushTeam, ambushLance, spawnBuildingShell, ambushOrigin);
                 spawnedActors.Add(ambushTurret);
                 spawnBuildings.Add(spawnBuildingShell);
-                Mod.Log.Info($"Spawned turret: {ambushTurret} in building: {spawnBuildingShell}");
+                Mod.Log.Info($"Spawned turret: {ambushTurret.DisplayName} in building: {spawnBuildingShell.DisplayName}");
             }
 
             // Remove any buildings that are part of this ambush from candidates
@@ -87,29 +87,6 @@ namespace ConcreteJungle.Helper
             TurretDef turretDef = ModState.Combat.DataManager.TurretDefs.GetOrCreate(ambushDef.TurretDefId);
             turretDef.Refresh();
 
-            // Create teh turret
-            Turret turret = ActorFactory.CreateTurret(turretDef, pilotDef, team.EncounterTags, ModState.Combat, team.GetNextSupportUnitGuid(), "", null);
-            turret.Init(building.CurrentPosition, building.CurrentRotation.eulerAngles.y, true);
-            turret.InitGameRep(null);
-
-            if (turret == null) Mod.Log.Error($"Failed to spawn turretDefId: {ambushDef.TurretDefId} + pilotDefId: {ambushDef.PilotDefId} !");
-
-            Mod.Log.Debug($" Spawned trap turret, adding to team.");
-            team.AddUnit(turret);
-            turret.AddToLance(ambushLance);
-
-            turret.BehaviorTree = BehaviorTreeFactory.MakeBehaviorTree(ModState.Combat.BattleTechGame, turret, BehaviorTreeIDEnum.CoreAITree);
-            Mod.Log.Debug("Updated turret behaviorTree");
-
-            ModState.AmbushBuildingGUIDToTurrets.Add(building.GUID, turret);
-            ModState.AmbushTurretGUIDtoBuildingGUID.Add(turret.GUID, building.GUID);
-
-            // Associate the building withe the team
-            building.AddToTeam(team);
-            building.BuildingRep.IsTargetable = true;
-            building.BuildingRep.SetHighlightColor(ModState.Combat, team);
-            building.BuildingRep.RefreshEdgeCache();
-
             // determine a position somewhere up the building's axis
             EncounterLayerData encounterLayerData = ModState.Combat.EncounterLayerData;
             Point cellPoint = new Point(
@@ -118,26 +95,45 @@ namespace ConcreteJungle.Helper
             MapEncounterLayerDataCell melDataCell =
                 encounterLayerData.mapEncounterLayerDataCells[cellPoint.Z, cellPoint.X];
             float buildingHeight = melDataCell.GetBuildingHeight();
-            
+
             float terrainHeight = ModState.Combat.MapMetaData.GetLerpedHeightAt(building.CurrentPosition, true);
-            float heightDelta = (buildingHeight - terrainHeight) * 0.9f;
+            float heightDelta = (buildingHeight - terrainHeight) * 0.7f;
             float adjustedY = terrainHeight + heightDelta;
             Mod.Log.Debug($"At building position, terrain height is: {terrainHeight} while buildingHeight is: {buildingHeight}. " +
                 $" Calculated 70% of building height + terrain as {adjustedY}.");
 
-            Vector3 newPosition = turret.GameRep.transform.position;
+            Vector3 newPosition = building.GameRep.transform.position;
             newPosition.y = adjustedY;
-            Mod.Log.Debug($"Changing transform postition from: {turret.GameRep.transform.position} to {newPosition}");
-            turret.GameRep.transform.position = newPosition;
+            Mod.Log.Debug($"Changing transform position from: {building.GameRep.transform.position} to {newPosition}");
 
             /// Rotate to face the ambush origin
             Vector3 spawnDirection = Vector3.RotateTowards(building.CurrentRotation.eulerAngles, ambushOrigin, 1f, 0f);
             Quaternion spawnRotation = Quaternion.LookRotation(spawnDirection);
 
-            // After the position change, notify the game rep and set our visibility to full
+            // Create the turret
+            Turret turret = ActorFactory.CreateTurret(turretDef, pilotDef, team.EncounterTags, ModState.Combat, team.GetNextSupportUnitGuid(), "", null);
+            turret.Init(newPosition, spawnRotation.eulerAngles.y, true);
+            turret.InitGameRep(null);
             turret.OnPlayerVisibilityChanged(VisibilityLevel.LOSFull);
-            turret.OnPositionUpdate(newPosition, spawnRotation, -1, true, null, false);
-            Mod.Log.Debug("Updated turret visibility and position.");
+
+            if (turret == null) Mod.Log.Error($"Failed to spawn turretDefId: {ambushDef.TurretDefId} + pilotDefId: {ambushDef.PilotDefId} !");
+
+            Mod.Log.Debug($" Spawned trap turret, adding to team.");
+            team.AddUnit(turret);
+            turret.AddToTeam(team);
+            turret.AddToLance(ambushLance);
+
+            turret.BehaviorTree = BehaviorTreeFactory.MakeBehaviorTree(ModState.Combat.BattleTechGame, turret, BehaviorTreeIDEnum.CoreAITree);
+            Mod.Log.Debug("Updated turret behaviorTree");
+
+            ModState.AmbushBuildingGUIDToTurrets.Add(building.GUID, turret);
+            ModState.AmbushTurretGUIDtoBuilding.Add(turret.GUID, building);
+
+            // Associate the building withe the team
+            building.AddToTeam(team);
+            building.BuildingRep.IsTargetable = true;
+            building.BuildingRep.SetHighlightColor(ModState.Combat, team);
+            building.BuildingRep.RefreshEdgeCache();
 
             // Finally notify others
             UnitSpawnedMessage message = new UnitSpawnedMessage("CJ_TRAP", turret.GUID);

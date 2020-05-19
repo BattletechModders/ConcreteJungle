@@ -146,6 +146,7 @@ namespace ConcreteJungle.Helper
 
             Mod.Log.Debug($" Spawned ambush vehicle, adding to team: {team} and lance: {ambushLance}");
             team.AddUnit(vehicle);
+            vehicle.AddToTeam(team);
             vehicle.AddToLance(ambushLance);
 
             vehicle.BehaviorTree = BehaviorTreeFactory.MakeBehaviorTree(ModState.Combat.BattleTechGame, vehicle, BehaviorTreeIDEnum.CoreAITree);
@@ -187,6 +188,7 @@ namespace ConcreteJungle.Helper
 
             Mod.Log.Debug($" Spawned ambush mech, adding to team: {team} and lance: {ambushLance}");
             team.AddUnit(mech);
+            mech.AddToTeam(team);
             mech.AddToLance(ambushLance);
 
             mech.BehaviorTree = BehaviorTreeFactory.MakeBehaviorTree(ModState.Combat.BattleTechGame, mech, BehaviorTreeIDEnum.CoreAITree);
