@@ -9,11 +9,15 @@ namespace ConcreteJungle.Patches
     {
         static bool Prefix(Turret __instance)
         {
-            if (__instance != null && ModState.AmbushTurretGUIDtoBuildingGUID.ContainsKey(__instance.GUID)) return false;
+            if (__instance != null && 
+                ModState.AmbushTurretGUIDtoBuildingGUID.ContainsKey(__instance.GUID) &&
+                ModState.AmbushTurretGUIDtoBuildingGUID[__instance.GUID] != ModState.KillingLinkedUnitsSource)
+            {
+                return false;
+            }
 
             return true;
         }
-
     }
 
     [HarmonyPatch(typeof(Turret), "FlagForDeath")]
@@ -21,10 +25,14 @@ namespace ConcreteJungle.Patches
     {
         static bool Prefix(Turret __instance)
         {
-            if (__instance != null && ModState.AmbushTurretGUIDtoBuildingGUID.ContainsKey(__instance.GUID)) return false;
+            if (__instance != null && 
+                ModState.AmbushTurretGUIDtoBuildingGUID.ContainsKey(__instance.GUID) &&
+                ModState.AmbushTurretGUIDtoBuildingGUID[__instance.GUID] != ModState.KillingLinkedUnitsSource)
+            {
+                return false;
+            }                
 
             return true;
-
         }
     }
 }

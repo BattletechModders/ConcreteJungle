@@ -34,12 +34,18 @@ namespace ConcreteJungle.Patches
     {
         static void Prefix(BattleTech.Building __instance)
         {
+            Mod.Log.Info($"Building {__instance.GUID} is destroyed.");
+
             if (ModState.IsUrbanBiome && ModState.AmbushBuildingGUIDToTurrets.ContainsKey(__instance.GUID))
             {
+                ModState.KillingLinkedUnitsSource = __instance.GUID;
                 // Despawn the associated turret
                 Turret turret = ModState.AmbushBuildingGUIDToTurrets[__instance.GUID];
+                Mod.Log.Info($"Building {__instance.GUID} is destroyed, destroying associated turret: {turret}");
                 DespawnActorMessage despawnMessage = new DespawnActorMessage(__instance.GUID, turret.GUID, DeathMethod.VitalComponentDestroyed);
                 __instance.Combat.MessageCenter.PublishMessage(despawnMessage);
+
+                ModState.KillingLinkedUnitsSource = null;
             }
 
             // Remove any destroyed building from future candidates
@@ -49,4 +55,5 @@ namespace ConcreteJungle.Patches
             }
         }
     }
+
 }
