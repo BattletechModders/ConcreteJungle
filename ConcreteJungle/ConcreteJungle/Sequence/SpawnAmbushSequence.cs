@@ -176,7 +176,7 @@ namespace ConcreteJungle.Sequence
                 Guid g = Guid.NewGuid();
                 QuipHelper.PlayQuip(ModState.Combat, g.ToString(), 
                     AttackingActors[0].team,
-                    "Vehicle Ambush", Mod.Config.Qips.SpawnAmbush, this.timeToTaunt * 3f);
+                    "Vehicle Ambush", Mod.Config.Quips.SpawnAmbush, this.timeToTaunt * 3f);
                 hasTaunted = true;
             }
         }

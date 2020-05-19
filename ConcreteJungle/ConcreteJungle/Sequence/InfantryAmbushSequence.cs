@@ -148,7 +148,7 @@ namespace ConcreteJungle.Sequence
                 // Create a quip
                 Guid g = Guid.NewGuid();
                 QuipHelper.PlayQuip(ModState.Combat, g.ToString(),AttackingActors[0].team,
-                    "Infantry Ambush", Mod.Config.Qips.InfantryAmbush, this.timeToTaunt * 3f);
+                    "Infantry Ambush", Mod.Config.Quips.InfantryAmbush, this.timeToTaunt * 3f);
                 hasTaunted = true;
             }
         }

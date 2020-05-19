@@ -1,6 +1,9 @@
 ﻿
+using BattleTech;
+using Harmony;
 using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace ConcreteJungle {
 
@@ -10,123 +13,13 @@ namespace ConcreteJungle {
 
     public class ModConfig {
 
-        public class AmbushOpts
-        {
-            public int MaxPerMap = 2;
-            public float MinDistanceBetween = 600f;
-            public float BaseChance = 0.3f;
-            public float ChancePerActor = 0.05f;
-
-            // How far from the trigger origin should we search for suitable buildings
-            public float SearchRadius = 250.0f;
-
-            // TODO: need a weight for ambushes, from 1-10. S, I, E maybe? 
-            // Maybe tie this into tags?
-            // Just make this a default
-            public List<string> AmbushWeights = new List<string>();
-            public List<AmbushType> AmbushTypes = new List<AmbushType>(); // internal only - do not config in mod.json
-        }
         public AmbushOpts Ambush = new AmbushOpts();
-
-        public class DevastationOpts
-        {
-            // If false, buildings will not be pre-destroyed
-            public bool Enabled = false;
-            
-            // If no tags match, the range we'll use
-            public DevastationDef DefaultRange = new DevastationDef() { MinDevastation = 0.3f, MaxDevastation = 0.9f };
-
-            // Ranges specified by planet tags. We'll use the worst effect.
-            public List<DevastationDef> RangesByPlanetTag = new List<DevastationDef>();
-        }
         public DevastationOpts Devastation = new DevastationOpts();
-
-        public class ExplosionAmbushOpts
-        {
-            // If false, cannot be selected randomly
-            public bool Enabled = true;
-
-            // The weapons that can be used in the ambush
-            public List<ExplosionAmbushDef> Ambushes = new List<ExplosionAmbushDef>();
-        }
         public ExplosionAmbushOpts ExplosionAmbush = new ExplosionAmbushOpts();
-
-        public class InfantryAmbushOpts
-        {
-            // If false, cannot be selected randomly
-            public bool Enabled = true;
-
-            // If true, every unit will generate an attack sequence against the closest target
-            public bool FreeAttackEnabled = true;
-
-            // If true, the trap turrets will be visible to the player. 
-            public bool VisibleTrapTurrets = true;
-
-            // All of the ambush definitions
-            public List<InfantryAmbushDef> Ambushes = new List<InfantryAmbushDef>();
-
-        }
         public InfantryAmbushOpts InfantryAmbush = new InfantryAmbushOpts();
-
-        public class MechAmbushOpts
-        {
-            // If false, cannot be selected randomly
-            public bool Enabled = true;
-
-            // If true, every unit will generate an attack sequence against the closest target
-            public bool FreeAttackEnabled = true;
-
-            // The actor/pilot pairs that are possible ambushers
-            public List<MechAmbushDef> Ambushes = new List<MechAmbushDef>();
-
-        }
         public MechAmbushOpts MechAmbush = new MechAmbushOpts();
-
-
-        public class VehicleAmbushOpts
-        {
-            // If false, cannot be selected randomly
-            public bool Enabled = true;
-
-            // If true, every unit will generate an attack sequence against the closest target
-            public bool FreeAttackEnabled = true;
-
-            // All of the ambush definitions
-            public List<VehicleAmbushDef> Ambushes = new List<VehicleAmbushDef>();
-
-        }
         public VehicleAmbushOpts VehicleAmbush = new VehicleAmbushOpts();
-
-        public class QipsConfig
-        {
-            public List<string> ExplosiveAmbush = new List<string>()
-            {
-                "Watch your step",
-                //"Pushing the plunger",
-                //"Boom goes the dynamite",
-                //"Not this time invaders",
-                //"Salt the earth!",
-            };
-
-            public List<string> InfantryAmbush = new List<string>() {
-                "Wrong neighborhood, fucko.",
-                //"Concentrate on the lead!",
-                //"Open fire!",
-                //"Fire Fire Fire!",
-                //"Focus on the critical points!",
-                //"Welcome to the jungle!"
-            };
-
-            public List<string> SpawnAmbush = new List<string>()
-            {
-                "Charge!",
-                "Into the fray",
-                "Push them back!",
-                "Get'em boys!"
-            };
-
-        }
-        public QipsConfig Qips = new QipsConfig();
+        public QuipsConfig Quips = new QuipsConfig();
 
         public const string FT_Turret_Death = "TURRET_DEATH";
         public Dictionary<string, string> LocalizedText = new Dictionary<string, string> {
@@ -142,8 +35,99 @@ namespace ConcreteJungle {
             Mod.Log.Info("=== MOD CONFIG BEGIN ===");
             Mod.Log.Info($"  DEBUG:{this.Debug} Trace:{this.Trace}");
 
-            Mod.Log.Debug(" -- Infantry Ambush Options ");
+            Mod.Log.Info(" -- General Ambush Options");
+            Mod.Log.Info($"   MaxPerMap: {this.Ambush.MaxPerMap}  MinDistanceBetween: {this.Ambush.MinDistanceBetween}  " +
+                $"BaseChance: {this.Ambush.BaseChance}  ChancePerActor: {this.Ambush.ChancePerActor}  " +
+                $"SearchRadius: {this.Ambush.SearchRadius}");
+            string ambushWeights = String.Join(", ", this.Ambush.AmbushWeights);
+            Mod.Log.Info($" AmbushWeights: {ambushWeights}");
+            
+            Mod.Log.Info(" -- Devastation Options");
+            Mod.Log.Info($"   Enabled: {this.Devastation.Enabled}  " +
+                $"DefaultMin: {this.Devastation.DefaultRange.MinDevastation}  DefaultMax: {this.Devastation.DefaultRange.MaxDevastation}"
+                );
 
+            Mod.Log.Info(" -- Explosive Ambush Options");
+            Mod.Log.Info($"   Enabled: {this.ExplosionAmbush.Enabled}  ");
+            foreach (ExplosionAmbushDef ambushDef in this.ExplosionAmbush.Ambushes)
+            {
+                Mod.Log.Info("   -- Explosion Ambush Def");
+                Mod.Log.Info($"   Difficulty Min: {ambushDef.MinDifficulty} => Max: {ambushDef.MaxDifficulty}");
+                Mod.Log.Info($"   Spawns Min: {ambushDef.MinSpawns} => Max: {ambushDef.MinSpawns}");
+                StringBuilder sb = new StringBuilder();
+                foreach(WeaponDefRef loadDef in ambushDef.SpawnPool)
+                {
+                    sb.Append(loadDef.WeaponDefId);
+                    sb.Append(", ");
+                }
+                Mod.Log.Info($"   WeaponDefIds: {sb}");
+
+            }
+
+            Mod.Log.Info(" -- Infantry Ambush Options");
+            Mod.Log.Info($"   Enabled: {this.InfantryAmbush.Enabled}  FreeAttackEnabled: {this.InfantryAmbush.FreeAttackEnabled}.");
+            foreach (InfantryAmbushDef ambushDef in this.InfantryAmbush.Ambushes)
+            {
+                Mod.Log.Info("   -- Infantry Ambush Def");
+                Mod.Log.Info($"   Difficulty Min: {ambushDef.MinDifficulty} => Max: {ambushDef.MaxDifficulty}");
+                Mod.Log.Info($"   Spawns Min: {ambushDef.MinSpawns} => Max: {ambushDef.MinSpawns}");
+                StringBuilder sb = new StringBuilder();
+                foreach (TurretAndPilotDef loadDef in ambushDef.SpawnPool)
+                {
+                    sb.Append(loadDef.TurretDefId);
+                    sb.Append("::");
+                    sb.Append(loadDef.PilotDefId);
+                    sb.Append(",");
+                }
+                Mod.Log.Info($"   Turret and PilotDefs: {sb}");
+            }
+
+            Mod.Log.Info(" -- Mech Ambush Options");
+            Mod.Log.Info($"   Enabled: {this.MechAmbush.Enabled}  FreeAttackEnabled: {this.MechAmbush.FreeAttackEnabled}.");
+            foreach (MechAmbushDef ambushDef in this.MechAmbush.Ambushes)
+            {
+                Mod.Log.Info("   -- Mech Ambush Def");
+                Mod.Log.Info($"   Difficulty Min: {ambushDef.MinDifficulty} => Max: {ambushDef.MaxDifficulty}");
+                Mod.Log.Info($"   Spawns Min: {ambushDef.MinSpawns} => Max: {ambushDef.MinSpawns}");
+                StringBuilder sb = new StringBuilder();
+                foreach (MechAndPilotDef loadDef in ambushDef.SpawnPool)
+                {
+                    sb.Append(loadDef.MechDefId);
+                    sb.Append("::");
+                    sb.Append(loadDef.PilotDefId);
+                    sb.Append(",");
+                }
+                Mod.Log.Info($"   Mech and PilotDefs: {sb}");
+            }
+
+            Mod.Log.Info(" -- Vehicle Ambush Options");
+            Mod.Log.Info($"   Enabled: {this.VehicleAmbush.Enabled}  FreeAttackEnabled: {this.VehicleAmbush.FreeAttackEnabled}.");
+            foreach (VehicleAmbushDef ambushDef in this.VehicleAmbush.Ambushes)
+            {
+                Mod.Log.Info("   -- Vehicle Ambush Def");
+                Mod.Log.Info($"   Difficulty Min: {ambushDef.MinDifficulty} => Max: {ambushDef.MaxDifficulty}");
+                Mod.Log.Info($"   Spawns Min: {ambushDef.MinSpawns} => Max: {ambushDef.MinSpawns}");
+                StringBuilder sb = new StringBuilder();
+                foreach (VehicleAndPilotDef loadDef in ambushDef.SpawnPool)
+                {
+                    sb.Append(loadDef.VehicleDefId);
+                    sb.Append("::");
+                    sb.Append(loadDef.PilotDefId);
+                    sb.Append(",");
+                }
+                Mod.Log.Info($"   Mech and PilotDefs: {sb}");
+            }
+
+            Mod.Log.Info(" -- Quips");
+            Mod.Log.Info(" --- Explosive Quips");
+            foreach (string quip in Mod.Config.Quips.ExplosiveAmbush) Mod.Log.Info($"   '{quip}'");
+            Mod.Log.Info(" --- Infantry Quips");
+            foreach (string quip in Mod.Config.Quips.InfantryAmbush) Mod.Log.Info($"   '{quip}'");
+            Mod.Log.Info(" --- Spawn Quips");
+            foreach (string quip in Mod.Config.Quips.SpawnAmbush) Mod.Log.Info($"   '{quip}'");
+
+            Mod.Log.Info(" -- Localized Text");
+            foreach (KeyValuePair<string, string> kvp in Mod.Config.LocalizedText) Mod.Log.Info($"   {kvp.Key}='{kvp.Value}'"); 
 
             Mod.Log.Info("=== MOD CONFIG END ===");
         }

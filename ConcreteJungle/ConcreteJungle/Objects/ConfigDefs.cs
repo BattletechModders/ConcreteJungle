@@ -3,61 +3,100 @@
 namespace ConcreteJungle
 {
 
-    public class DevastationDef
+    public class AmbushOpts
     {
-        public string PlanetTag = null;
-        public float MinDevastation = 0f;
-        public float MaxDevastation = 0f;
+        public int MaxPerMap = 2;
+        public float MinDistanceBetween = 600f;
+        public float BaseChance = 0.3f;
+        public float ChancePerActor = 0.05f;
+
+        // How far from the trigger origin should we search for suitable buildings
+        public float SearchRadius = 250.0f;
+
+        // Maybe tie this into tags? Make this just a default?
+        public List<string> AmbushWeights = new List<string>();
+        public List<AmbushType> AmbushTypes = new List<AmbushType>(); // internal only - do not config in mod.json
     }
 
-    public abstract class AmbushDef
-    {
-        public int MinDifficulty = 1;
-        public int MaxDifficulty = 3;
 
-        public int MinSpawns = 1;
-        public int MaxSpawns = 6;
-    }
-
-    public class WeaponDefRef
+    public class DevastationOpts
     {
-        public string WeaponDefId;
-    }
+        // If false, buildings will not be pre-destroyed
+        public bool Enabled = false;
 
-    public class ExplosionAmbushDef : AmbushDef
-    {
-        public List<WeaponDefRef> SpawnPool = new List<WeaponDefRef>();
+        // If no tags match, the range we'll use
+        public DevastationDef DefaultRange = new DevastationDef() { MinDevastation = 0.3f, MaxDevastation = 0.9f };
+
+        // Ranges specified by planet tags. We'll use the worst effect.
+        public List<DevastationDef> RangesByPlanetTag = new List<DevastationDef>();
     }
 
-    public class TurretAndPilotDef
+    public class ExplosionAmbushOpts
     {
-        public string TurretDefId;
-        public string PilotDefId;
-    }
-    public class InfantryAmbushDef : AmbushDef
-    {
-        public List<TurretAndPilotDef> SpawnPool = new List<TurretAndPilotDef>();
+        // If false, cannot be selected randomly
+        public bool Enabled = true;
+
+        // The weapons that can be used in the ambush
+        public List<ExplosionAmbushDef> Ambushes = new List<ExplosionAmbushDef>();
     }
 
-    public class MechAndPilotDef
+    public class InfantryAmbushOpts
     {
-        public string MechDefId;
-        public string PilotDefId;
-    }
-    public class MechAmbushDef : AmbushDef
-    {
-        public List<MechAndPilotDef> SpawnPool = new List<MechAndPilotDef>();
+        // If false, cannot be selected randomly
+        public bool Enabled = true;
+
+        // If true, every unit will generate an attack sequence against the closest target
+        public bool FreeAttackEnabled = true;
+
+        // If true, the trap turrets will be visible to the player. 
+        public bool VisibleTrapTurrets = true;
+
+        // All of the ambush definitions
+        public List<InfantryAmbushDef> Ambushes = new List<InfantryAmbushDef>();
+
     }
 
-    public class VehicleAndPilotDef
+    public class MechAmbushOpts
     {
-        public string VehicleDefId;
-        public string PilotDefId;
+        // If false, cannot be selected randomly
+        public bool Enabled = true;
+
+        // If true, every unit will generate an attack sequence against the closest target
+        public bool FreeAttackEnabled = true;
+
+        // The actor/pilot pairs that are possible ambushers
+        public List<MechAmbushDef> Ambushes = new List<MechAmbushDef>();
+
     }
-    public class VehicleAmbushDef : AmbushDef
+    public class VehicleAmbushOpts
     {
-        public List<VehicleAndPilotDef> SpawnPool = new List<VehicleAndPilotDef>();
+        // If false, cannot be selected randomly
+        public bool Enabled = true;
+
+        // If true, every unit will generate an attack sequence against the closest target
+        public bool FreeAttackEnabled = true;
+
+        // All of the ambush definitions
+        public List<VehicleAmbushDef> Ambushes = new List<VehicleAmbushDef>();
+
     }
 
+    public class QuipsConfig
+    {
+        public List<string> ExplosiveAmbush = new List<string>()
+            {
+                "Watch your step",
+            };
+
+        public List<string> InfantryAmbush = new List<string>() {
+                "Wrong neighborhood, fucko.",
+            };
+
+        public List<string> SpawnAmbush = new List<string>()
+            {
+                "Charge!",
+            };
+
+    }
 
 }

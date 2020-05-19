@@ -114,7 +114,6 @@ namespace ConcreteJungle.Helper
             Turret turret = ActorFactory.CreateTurret(turretDef, pilotDef, team.EncounterTags, ModState.Combat, team.GetNextSupportUnitGuid(), "", null);
             turret.Init(newPosition, spawnRotation.eulerAngles.y, true);
             turret.InitGameRep(null);
-            turret.OnPlayerVisibilityChanged(VisibilityLevel.LOSFull);
 
             if (turret == null) Mod.Log.Error($"Failed to spawn turretDefId: {ambushDef.TurretDefId} + pilotDefId: {ambushDef.PilotDefId} !");
 
@@ -138,6 +137,9 @@ namespace ConcreteJungle.Helper
             // Finally notify others
             UnitSpawnedMessage message = new UnitSpawnedMessage("CJ_TRAP", turret.GUID);
             ModState.Combat.MessageCenter.PublishMessage(message);
+
+            // Finally force the turret to be fully visible
+            turret.OnPlayerVisibilityChanged(VisibilityLevel.LOSFull);
 
             return turret;
         }

@@ -85,6 +85,7 @@
     <Compile Include="ModConfig.cs" />
     <Compile Include="ModInit.cs" />
     <Compile Include="ModState.cs" />
+    <Compile Include="Objects\AmbushDefs.cs" />
     <Compile Include="Objects\ConfigDefs.cs" />
     <Compile Include="Objects\Enums.cs" />
     <Compile Include="Patches\AbstractActorPatches.cs" />
