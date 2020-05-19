@@ -9,6 +9,27 @@ using us.frostraptor.modUtils;
 namespace ConcreteJungle.Patches
 {
 
+    // Prevent stray shots from hitting the shell buildings in an ambush
+    [HarmonyPatch(typeof(LineOfSight), "FindSecondaryImpactTarget")]
+    static class LineOfSight_FindSecondaryImpactTarget
+    {
+        static void Postfix(LineOfSight __instance, ref bool __result, AbstractActor attacker, ref string impactTargetId, ref int impactHitLocation, ref AttackDirection attackDirection)
+        {
+            if (attacker != null && ModState.AmbushTurretGUIDtoBuildingGUID.ContainsKey(attacker.GUID))
+            {
+                // We are an ambush turret - check to see if the secondary target is our shell building
+                if (ModState.AmbushTurretGUIDtoBuildingGUID[attacker.GUID] == impactTargetId)
+                {
+                    Mod.Log.Debug($"Attack from ambush turret would hit it's shell building - preventing!");
+                    __result = false;
+                    impactTargetId = null;
+                    impactHitLocation = 0;
+                    attackDirection = AttackDirection.FromFront;
+                }
+            }
+        }
+    }
+
     // TODO: The bresenham tests should probably be prefixes
 
     // When a trap turret's line of sight is calculated, give it 'x-ray' vision to see through the shell building.
