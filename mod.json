@@ -1,7 +1,7 @@
 {
     "Name": "ConcreteJungle",
     "Enabled": true,
-    "Version": "0.5.1",
+    "Version": "0.5.2",
     "Description": "Provides fun surprises on urban maps.",
     "Author": "IceRaptor",
     "Website": "https://github.com/IceRaptor/ConcreteJungle",
@@ -22,7 +22,7 @@
             "MinDistanceBetween" : 300.0,
             "BaseChance" : 0.3,
             "ChancePerActor" : 0.05,
-            "SearchRadius" : 250,
+            "SearchRadius" : 250.0,
             "AmbushWeights" : [ 
                 "Explosion", "Explosion", "Infantry", "Infantry", "Infantry", "Mech", "Vehicle"
             ]
@@ -39,7 +39,6 @@
 
         "ExplosionAmbush" : {
             "Enabled" : true,
-            "SearchRadius" : 200.0,
             "Ambushes" : [
                 { 
                     "MinDifficulty" : 1,
@@ -56,7 +55,6 @@
         "InfantryAmbush" : {
             "Enabled" : true,
             "FreeAttackEnabled" : true,
-            "SearchRadius" : 200.0,
             "VisibleTrapTurrets" : false,
             "Ambushes" : [
                 { 
@@ -75,7 +73,6 @@
         "MechAmbush" : {
             "Enabled" : true,
             "FreeAttackEnabled" : true,
-            "SearchRadius" : 200.0,
             "Ambushes" : [
                 { 
                     "MinDifficulty" : 1,
@@ -96,7 +93,6 @@
         "VehicleAmbush" : {
             "Enabled" : true,
             "FreeAttackEnabled" : true,
-            "SearchRadius" : 200.0,
             "Ambushes" : [
                 { 
                     "MinDifficulty" : 1,
@@ -133,6 +129,10 @@
                 "Charge!",
                 "Get'em boys!"
             ]
+        },
+
+        "LocalizedText" : {
+            "TURRET_DEATH" : "{0} DESTROYED"
         }
     }
 }
