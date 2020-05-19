@@ -23,7 +23,7 @@ namespace ConcreteJungle.Patches
 
 			if (__instance.ActivelyShownCombatant is BattleTech.Building building && ModState.AmbushBuildingGUIDToTurrets.ContainsKey(building.GUID))
 			{
-				Mod.Log.Debug($"TargetingHUD target {CombatantUtils.Label(__instance.ActivelyShownCombatant)} is trapped enemy building");
+				Mod.Log.Trace($"TargetingHUD target {CombatantUtils.Label(__instance.ActivelyShownCombatant)} is trapped enemy building");
 
 				// Replicate RefreshWeaponList here as it expects an AbstractActor
 				Turret turret = ModState.AmbushBuildingGUIDToTurrets[building.GUID];

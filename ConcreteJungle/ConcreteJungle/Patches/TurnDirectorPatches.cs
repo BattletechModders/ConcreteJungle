@@ -135,6 +135,7 @@ namespace ConcreteJungle.Patches
             if (!haveAmbushes)
             {
                 ModState.IsUrbanBiome = false;
+                Mod.Log.Warn("Incorrect filter configuration - disabling ambushes!");
                 return;
             }
 
