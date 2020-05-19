@@ -60,7 +60,7 @@ namespace ConcreteJungle {
                     sb.Append(loadDef.WeaponDefId);
                     sb.Append(", ");
                 }
-                Mod.Log.Info($"   WeaponDefIds: {sb}");
+                Mod.Log.Info($"   WeaponDefIds: [ {sb} ]");
 
             }
 
@@ -77,9 +77,9 @@ namespace ConcreteJungle {
                     sb.Append(loadDef.TurretDefId);
                     sb.Append("::");
                     sb.Append(loadDef.PilotDefId);
-                    sb.Append(",");
+                    sb.Append(", ");
                 }
-                Mod.Log.Info($"   Turret and PilotDefs: {sb}");
+                Mod.Log.Info($"   Turret and PilotDefs: [ {sb} ]");
             }
 
             Mod.Log.Info(" -- Mech Ambush Options");
@@ -95,9 +95,9 @@ namespace ConcreteJungle {
                     sb.Append(loadDef.MechDefId);
                     sb.Append("::");
                     sb.Append(loadDef.PilotDefId);
-                    sb.Append(",");
+                    sb.Append(", ");
                 }
-                Mod.Log.Info($"   Mech and PilotDefs: {sb}");
+                Mod.Log.Info($"   Mech and PilotDefs: [ {sb} ]");
             }
 
             Mod.Log.Info(" -- Vehicle Ambush Options");
@@ -113,9 +113,9 @@ namespace ConcreteJungle {
                     sb.Append(loadDef.VehicleDefId);
                     sb.Append("::");
                     sb.Append(loadDef.PilotDefId);
-                    sb.Append(",");
+                    sb.Append(", ");
                 }
-                Mod.Log.Info($"   Mech and PilotDefs: {sb}");
+                Mod.Log.Info($"   Mech and PilotDefs: [ {sb} ]");
             }
 
             Mod.Log.Info(" -- Quips");
