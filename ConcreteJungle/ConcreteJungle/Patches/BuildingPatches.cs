@@ -1,5 +1,7 @@
 ﻿using BattleTech;
 using Harmony;
+using System.Linq;
+using us.frostraptor.modUtils;
 
 namespace ConcreteJungle.Patches
 {
@@ -29,28 +31,44 @@ namespace ConcreteJungle.Patches
     }
 
     // Kill the associated turrets on death.
-    [HarmonyPatch(typeof(BattleTech.Building), "HandleDeath")]
-    static class Building_HandleDeath
+    [HarmonyPatch(typeof(BattleTech.Building), "KillLinkedUnits")]
+    static class Building_KillLinkedUnits
     {
         static void Prefix(BattleTech.Building __instance)
         {
-            Mod.Log.Info($"Building {__instance.GUID} is destroyed.");
 
-            if (ModState.IsUrbanBiome && ModState.AmbushBuildingGUIDToTurrets.ContainsKey(__instance.GUID))
+            // Skip if we aren't enabled or we're not placed on a building
+            if (__instance == null || !ModState.IsUrbanBiome) return;
+
+            Mod.Log.Debug("Current ambush building shells");
+            foreach (string guid in ModState.AmbushBuildingGUIDToTurrets.Keys)
+            {
+                Mod.Log.Debug($" -- Building GUID: {guid}");
+            }
+
+            Turret ambushTurret = ModState.AmbushBuildingGUIDToTurrets[__instance.GUID];
+            Mod.Log.Debug($"Parent building for ambush turret: {CombatantUtils.Label(ambushTurret)} is being destroyed.");
+
+            // If we contain a linked turret, destroy it before we die.
+            if (ModState.AmbushBuildingGUIDToTurrets.ContainsKey(__instance.GUID))
             {
                 ModState.KillingLinkedUnitsSource = __instance.GUID;
+
                 // Despawn the associated turret
                 Turret turret = ModState.AmbushBuildingGUIDToTurrets[__instance.GUID];
-                Mod.Log.Info($"Building {__instance.GUID} is destroyed, destroying associated turret: {turret}");
+                Mod.Log.Info($"Building {CombatantUtils.Label(__instance)} is destroyed, destroying associated turret: {CombatantUtils.Label(turret)}");
                 DespawnActorMessage despawnMessage = new DespawnActorMessage(__instance.GUID, turret.GUID, DeathMethod.VitalComponentDestroyed);
                 __instance.Combat.MessageCenter.PublishMessage(despawnMessage);
 
                 ModState.KillingLinkedUnitsSource = null;
+                ModState.AmbushBuildingGUIDToTurrets.Remove(__instance.GUID);
+                ModState.AmbushTurretGUIDtoBuilding.Remove(ambushTurret.GUID);
             }
 
-            // Remove any destroyed building from future candidates
-            if ((__instance.IsFlaggedForDeath || __instance.IsDead) && ModState.CandidateBuildings.Contains(__instance))
+            // If the building is in candidates, remove it.
+            if (ModState.CandidateBuildings.Contains(__instance))
             {
+                Mod.Log.Debug($"Removing building as a candidate for ambushes: {__instance.GUID}");
                 ModState.CandidateBuildings.Remove(__instance);
             }
         }
