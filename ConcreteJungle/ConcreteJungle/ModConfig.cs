@@ -18,7 +18,7 @@ namespace ConcreteJungle {
             public float ChancePerActor = 0.05f;
 
             // How far from the trigger origin should we search for suitable buildings
-            public int SearchRadius = 250;
+            public float SearchRadius = 250.0f;
 
             // TODO: need a weight for ambushes, from 1-10. S, I, E maybe? 
             // Maybe tie this into tags?
@@ -127,6 +127,11 @@ namespace ConcreteJungle {
 
         }
         public QipsConfig Qips = new QipsConfig();
+
+        public const string FT_Turret_Death = "TURRET_DEATH";
+        public Dictionary<string, string> LocalizedText = new Dictionary<string, string> {
+            { FT_Turret_Death, "{0} DESTROYED" },
+        };
 
         // If true, many logs will be printed
         public bool Debug = false;
