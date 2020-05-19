@@ -9,7 +9,7 @@ namespace ConcreteJungle.Helper
 {
     public static class InfantryAmbushHelper
     {
-        public static void SpawnAmbush(Vector3 ambushPos)
+        public static void SpawnAmbush(Vector3 ambushOrigin)
         {
             if (!Mod.Config.InfantryAmbush.Enabled) return;
 
@@ -20,7 +20,7 @@ namespace ConcreteJungle.Helper
             Lance ambushLance = TeamHelper.CreateAmbushLance(ModState.AmbushTeam);
 
             // Build list of candidate trap buildings
-            List<BattleTech.Building> candidates = CandidateBuildingsHelper.ClosestCandidatesToPosition(ambushPos, Mod.Config.Ambush.SearchRadius);
+            List<BattleTech.Building> candidates = CandidateBuildingsHelper.ClosestCandidatesToPosition(ambushOrigin, Mod.Config.Ambush.SearchRadius);
             if (candidates.Count < ModState.InfantryAmbushDefForContract.MinSpawns)
             {
                 Mod.Log.Debug($"Insufficient candidate buildings to spawn an infantry ambush. Skipping.");
@@ -37,7 +37,7 @@ namespace ConcreteJungle.Helper
                 BattleTech.Building spawnBuildingShell = candidates.ElementAt(i);
 
                 // Spawn a turret trap
-                AbstractActor ambushTurret = SpawnAmbushTurret(ModState.AmbushTeam, ambushLance, spawnBuildingShell);
+                AbstractActor ambushTurret = SpawnAmbushTurret(ModState.AmbushTeam, ambushLance, spawnBuildingShell, ambushOrigin);
                 spawnedActors.Add(ambushTurret);
                 spawnBuildings.Add(spawnBuildingShell);
                 Mod.Log.Info($"Spawned turret: {ambushTurret} in building: {spawnBuildingShell}");
@@ -54,7 +54,7 @@ namespace ConcreteJungle.Helper
                     combatant.team != null &&
                     ModState.Combat.HostilityMatrix.IsLocalPlayerFriendly(combatant.team))
                 {
-                    if (Vector3.Distance(ambushPos, combatant.CurrentPosition) <= Mod.Config.Ambush.SearchRadius)
+                    if (Vector3.Distance(ambushOrigin, combatant.CurrentPosition) <= Mod.Config.Ambush.SearchRadius)
                     {
                         targets.Add(combatant);
                     }
@@ -65,7 +65,7 @@ namespace ConcreteJungle.Helper
             try
             {
                 InfantryAmbushSequence ambushSequence = 
-                    new InfantryAmbushSequence(ModState.Combat, ambushPos, spawnedActors, spawnBuildings, targets, Mod.Config.InfantryAmbush.FreeAttackEnabled);
+                    new InfantryAmbushSequence(ModState.Combat, ambushOrigin, spawnedActors, spawnBuildings, targets, Mod.Config.InfantryAmbush.FreeAttackEnabled);
                 ModState.Combat.MessageCenter.PublishMessage(new AddSequenceToStackMessage(ambushSequence));
             }
             catch (Exception e)
@@ -74,7 +74,7 @@ namespace ConcreteJungle.Helper
             }
         }
 
-        public static AbstractActor SpawnAmbushTurret(Team team, Lance ambushLance, BattleTech.Building building)
+        public static AbstractActor SpawnAmbushTurret(Team team, Lance ambushLance, BattleTech.Building building, Vector3 ambushOrigin)
         {
 
             // Randomly determine one of the spawnpairs from the current ambushdef
@@ -118,19 +118,25 @@ namespace ConcreteJungle.Helper
             MapEncounterLayerDataCell melDataCell =
                 encounterLayerData.mapEncounterLayerDataCells[cellPoint.Z, cellPoint.X];
             float buildingHeight = melDataCell.GetBuildingHeight();
-
-            float heightDelta = (float)Math.Floor(buildingHeight * 0.9f);
-            Mod.Log.Debug($"Building has height: {buildingHeight} and position: {building.CurrentPosition} moving turret to a position 0.9 up the Y axis: {heightDelta}");
+            
+            float terrainHeight = ModState.Combat.MapMetaData.GetLerpedHeightAt(building.CurrentPosition, true);
+            float heightDelta = (buildingHeight - terrainHeight) * 0.9f;
+            float adjustedY = terrainHeight + heightDelta;
+            Mod.Log.Debug($"At building position, terrain height is: {terrainHeight} while buildingHeight is: {buildingHeight}. " +
+                $" Calculated 70% of building height + terrain as {adjustedY}.");
 
             Vector3 newPosition = turret.GameRep.transform.position;
-            newPosition.y += heightDelta;
+            newPosition.y = adjustedY;
             Mod.Log.Debug($"Changing transform postition from: {turret.GameRep.transform.position} to {newPosition}");
-            //turret.GameRep.transform.position = newPosition;
-            // TODO: Fix this... the Y delta is too high and makes them float
+            turret.GameRep.transform.position = newPosition;
+
+            /// Rotate to face the ambush origin
+            Vector3 spawnDirection = Vector3.RotateTowards(building.CurrentRotation.eulerAngles, ambushOrigin, 1f, 0f);
+            Quaternion spawnRotation = Quaternion.LookRotation(spawnDirection);
 
             // After the position change, notify the game rep and set our visibility to full
             turret.OnPlayerVisibilityChanged(VisibilityLevel.LOSFull);
-            turret.OnPositionUpdate(turret.CurrentPosition, turret.CurrentRotation, -1, true, null, false);
+            turret.OnPositionUpdate(newPosition, spawnRotation, -1, true, null, false);
             Mod.Log.Debug("Updated turret visibility and position.");
 
             // Finally notify others
