@@ -31,6 +31,8 @@ namespace ConcreteJungle.Patches
         {
             Mod.Log.Trace("CGS:OCGD - entered.");
             
+            // Remove any trap turrets for salvage
+
             try
             {
                 DataLoadHelper.UnloadAmbushResources(__instance);

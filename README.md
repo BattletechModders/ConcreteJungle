@@ -158,6 +158,8 @@ Loreum ipsum
 
 * Can we make map devastation more efficient? Add it earlier in the processing?
 
+* Infantry trap turret flags are not moved up?
+
 ### Ideas
 
 * Destroy X% number of buildings to represent battle grounds

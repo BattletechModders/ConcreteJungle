@@ -23,6 +23,7 @@ namespace ConcreteJungle {
         public static Dictionary<string, string> AmbushTurretGUIDtoBuildingGUID = new Dictionary<string, string>();
         public static Turret CurrentTurretForLOF = null;
         public static Turret CurrentTurretForLOS = null;
+        public static string KillingLinkedUnitsSource = null;
 
         // -- General ambush state
         public static int Ambushes = 0;
@@ -52,9 +53,9 @@ namespace ConcreteJungle {
 
             AmbushBuildingGUIDToTurrets.Clear();
             AmbushTurretGUIDtoBuildingGUID.Clear();
-
             CurrentTurretForLOF = null;
             CurrentTurretForLOS = null;
+            KillingLinkedUnitsSource = null;
 
             Ambushes = 0;
             AmbushOrigins.Clear();
