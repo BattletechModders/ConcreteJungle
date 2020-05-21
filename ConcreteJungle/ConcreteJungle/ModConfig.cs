@@ -19,8 +19,10 @@ namespace ConcreteJungle {
         public VehicleAmbushOpts VehicleAmbush = new VehicleAmbushOpts();
         public QuipsConfig Quips = new QuipsConfig();
 
+        public const string FT_IED_Default = "FT_IED_DEFAULT";
         public const string FT_Turret_Death = "TURRET_DEATH";
         public Dictionary<string, string> LocalizedText = new Dictionary<string, string> {
+            { FT_IED_Default, "Explosive IED" },
             { FT_Turret_Death, "{0} DESTROYED" },
         };
 
@@ -56,7 +58,7 @@ namespace ConcreteJungle {
                 
                 foreach(AOEBlastDef blastDef in ambushDef.SpawnPool)
                 {
-                    Mod.Log.Info($"   -- floatieLabel: '{blastDef.FloatieLabel}' radius: {blastDef.Radius} damage: {blastDef.Damage} " +
+                    Mod.Log.Info($"   -- floatieLabel: '{blastDef.FloatieTextKey}' radius: {blastDef.Radius} damage: {blastDef.Damage} " +
                         $"heat: {blastDef.Heat} stability: {blastDef.Stability}"); ;
                     Mod.Log.Info($"      fireRadius: {blastDef.FireRadius} fireStrength: {blastDef.FireStrength} " +
                         $"fireChance: {blastDef.FireChance} fireDurationNoForest: {blastDef.FireDurationNoForest}"); ;
@@ -144,7 +146,7 @@ namespace ConcreteJungle {
                     MaxSpawns = 6,
                     SpawnPool = new List<AOEBlastDef>() {
                         new AOEBlastDef { 
-                            FloatieLabel = "IED",
+                            FloatieTextKey = "FT_IED_DEFAULT",
                             Radius = 120.0f,
                             Damage = 40.0f,
                             Heat = 30.0f,

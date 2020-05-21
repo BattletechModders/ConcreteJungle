@@ -38,14 +38,14 @@ namespace ConcreteJungle
 
         // The visual effect to ask CAC to spawn. See CombatGameConstants for artillery_ VFX
         // "WFX_Nuke" provided by KMission
-        public string VFX = "vfxPrfPrtl_artilleryImpact_barrage";
+        public string VFX = "WFX_Nuke";
 
         // The sound effect to ask CAC to spawn. CAC will accept the AudioEventNames?
         // AudioEventList_explosion.explosion_large
         // AudioEventList_impact.impact_thumper
         // AudioEventList_impact.impact_mortar
         // big_explosion provided by KMission
-        public string SFX = "AudioEventList_impact_impact_thumper";
+        public string SFX = "big_explosion";
 
         // The weapons that can be used in the ambush
         public List<ExplosionAmbushDef> Ambushes = new List<ExplosionAmbushDef>();

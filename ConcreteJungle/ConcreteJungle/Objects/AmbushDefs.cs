@@ -20,7 +20,7 @@ namespace ConcreteJungle
 
     public class AOEBlastDef
     {
-        public string FloatieLabel;
+        public string FloatieTextKey;
         public float Radius;
         public float Damage;
         public float Heat;

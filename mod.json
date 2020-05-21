@@ -1,14 +1,14 @@
 {
     "Name": "ConcreteJungle",
     "Enabled": true,
-    "Version": "0.5.2",
+    "Version": "0.6.0",
     "Description": "Provides fun surprises on urban maps.",
     "Author": "IceRaptor",
     "Website": "https://github.com/IceRaptor/ConcreteJungle",
     "Contact": "",
     "DLL": "ConcreteJungle.dll",
     "DLLEntryPoint" : "ConcreteJungle.Mod.Init",
-    "DependsOn" : [ "IRBTModUtils" ],
+    "DependsOn" : [ "IRBTModUtils", "Custom Ammo Categories" ],
     "Manifest" : [
         { "Type": "WeaponDef", "Path": "weapon", "AddToDB": true }
     ],
@@ -37,16 +37,50 @@
             ]
         },
 
-        "ExplosionAmbush" : {
+       "ExplosionAmbush" : {
             "Enabled" : true,
+            "VFX" : "WFX_Nuke",
+            "SFX" : "big_explosion",
             "Ambushes" : [
                 { 
                     "MinDifficulty" : 1,
                     "MaxDifficulty" : 10,
-                    "MinSpawns" : 2,
-                    "MaxSpawns" : 6,
+                    "MinSpawns" : 1,
+                    "MaxSpawns" : 3,
                     "SpawnPool" : [
-                        { "WeaponDefId" : "Weapon_Ambush_Explosion" }
+                        {  
+                            "FloatieTextKey" : "FT_IED_HE",
+                            "Radius" : 60.0,
+                            "Damage" : 60.0,
+                            "Heat" : 5.0,
+                            "Stability" : 5.0,
+                            "FireRadius" : 1,
+                            "FireStrength" : 3,
+                            "FireChance" : 30.0,
+                            "FireDurationNoForest" : 2
+                        },
+                         {  
+                            "FloatieTextKey" : "FT_IED_INFERNO",
+                            "Radius" : 60.0,
+                            "Damage" : 5.0,
+                            "Heat" : 60.0,
+                            "Stability" : 5.0,
+                            "FireRadius" : 3,
+                            "FireStrength" : 15,
+                            "FireChance" : 99.0,
+                            "FireDurationNoForest" : 3
+                        }, 
+                        {  
+                            "FloatieTextKey" : "FT_IED_VBIED",
+                            "Radius" : 60.0,
+                            "Damage" : 5.0,
+                            "Heat" : 5.0,
+                            "Stability" : 60.0,
+                            "FireRadius" : 0,
+                            "FireStrength" : 0,
+                            "FireChance" : 0.0,
+                            "FireDurationNoForest" : 0
+                        }
                     ]
                 }
             ]
@@ -132,6 +166,10 @@
         },
 
         "LocalizedText" : {
+            "FT_IED_DEFAULT" : "Explosive IED",
+            "FT_IED_HE" : "High Explosive IED",
+            "FT_IED_INFERNO" : "Inferno IED",
+            "FT_IED_VBIED" : "Vibration IED",
             "TURRET_DEATH" : "{0} DESTROYED"
         }
     }

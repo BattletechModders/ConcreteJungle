@@ -70,7 +70,7 @@ namespace ConcreteJungle.Helper
 			{
 				shuffledAOEDefs.Shuffle();
 				AOEBlastDef blastDef = shuffledAOEDefs[0];
-				Mod.Log.Debug($"  [{i}] = blastDef.label: {blastDef.FloatieLabel}");
+				Mod.Log.Debug($"  [{i}] = blastDef.label: {blastDef.FloatieTextKey}");
 				randomizedBlasts.Add(blastDef);
 			}
 
