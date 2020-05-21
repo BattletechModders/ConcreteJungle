@@ -25,6 +25,9 @@ namespace ConcreteJungle.Patches
                 Dictionary<Vector3, List<BattleTech.Building>> ambushSites = new Dictionary<Vector3, List<BattleTech.Building>>();
                 foreach (Vector3 origin in ModState.PotentialAmbushOrigins)
                 {
+                    // Check that we haven't exhausted the max traps for this mission
+                    if (ModState.Ambushes >= Mod.Config.Ambush.MaxPerMap) break;
+
                     float roll = Mod.Random.Next(1, 100);
                     int threshold = (int)Math.Ceiling(ModState.CurrentAmbushChance * 100f);
                     if (roll <= threshold)
@@ -44,6 +47,7 @@ namespace ConcreteJungle.Patches
                     ambushSites.Add(origin, originCandidates);
 
                 }
+
                 ModState.PotentialAmbushOrigins.Clear(); // reset potential origins for next round
 
                 if (wasAmbushed)
@@ -85,6 +89,7 @@ namespace ConcreteJungle.Patches
 
                     // Record a successful ambush and reset the weighting
                     ModState.AmbushOrigins.Add(ambushOrigin);
+                    ModState.Ambushes++;
                     ModState.CurrentAmbushChance = Mod.Config.Ambush.BaseChance;
                 }
 

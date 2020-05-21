@@ -148,7 +148,11 @@ Loreum ipsum
 
 * Add ambushes that are hostile to all
 
-* Explosion should put up a floatie that gives the blast name
+* Explosion should put up a floatie that gives the blast name and position
+
+* Explosives should be compatible with CAC
+
+* Explosives should determine target points... then conditional switch on attack type?
 
 * Should explosions use CAC AoE weapons?
 
@@ -159,6 +163,8 @@ Loreum ipsum
 * Can we make map devastation more efficient? Add it earlier in the processing?
 
 * Infantry trap turret flags are not moved up?
+
+* 
 
 ### Ideas
 
