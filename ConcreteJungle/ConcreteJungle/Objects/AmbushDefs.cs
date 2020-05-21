@@ -18,14 +18,22 @@ namespace ConcreteJungle
         public int MaxSpawns = 6;
     }
 
-    public class WeaponDefRef
+    public class AOEBlastDef
     {
-        public string WeaponDefId;
+        public string FloatieLabel;
+        public float Radius;
+        public float Damage;
+        public float Heat;
+        public float Stability;
+        public int FireRadius;
+        public int FireStrength;
+        public float FireChance;
+        public int FireDurationNoForest;
     }
 
     public class ExplosionAmbushDef : AmbushDef
     {
-        public List<WeaponDefRef> SpawnPool = new List<WeaponDefRef>();
+        public List<AOEBlastDef> SpawnPool = new List<AOEBlastDef>();
     }
 
     public class TurretAndPilotDef

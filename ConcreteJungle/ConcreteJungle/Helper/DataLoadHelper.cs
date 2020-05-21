@@ -18,12 +18,6 @@ namespace ConcreteJungle.Helper
                 $"turretDefs: {combat.DataManager.TurretDefs.Count}  vehicleDefs: {combat.DataManager.VehicleDefs.Count}");
 
             // Filter requests so we don't load multiple times
-            HashSet<string> weaponsToLoad = new HashSet<string>();
-            foreach (WeaponDefRef ambushDef in ModState.ExplosionAmbushDefForContract.SpawnPool)
-            {
-                weaponsToLoad.Add(ambushDef.WeaponDefId);
-            }
-
             HashSet<string> turretsToLoad = new HashSet<string>();
             HashSet<string> pilotsToLoad = new HashSet<string>();
             foreach (TurretAndPilotDef ambushDef in ModState.InfantryAmbushDefForContract.SpawnPool)
@@ -47,11 +41,6 @@ namespace ConcreteJungle.Helper
             }
 
             // Add the filtered requests to the async load
-            foreach (string defId in weaponsToLoad)
-            {
-                Mod.Log.Info($"  - WeaponDefId: {defId}");
-                asyncSpawnReq.AddBlindLoadRequest(BattleTechResourceType.WeaponDef, defId, new bool?(false));
-            }
             foreach (string defId in turretsToLoad)
             {
                 Mod.Log.Info($"  - TurretDefId: {defId}");

@@ -1,6 +1,4 @@
 ﻿
-using BattleTech;
-using Harmony;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -54,14 +52,15 @@ namespace ConcreteJungle {
                 Mod.Log.Info("   -- Explosion Ambush Def");
                 Mod.Log.Info($"   Difficulty Min: {ambushDef.MinDifficulty} => Max: {ambushDef.MaxDifficulty}");
                 Mod.Log.Info($"   Spawns Min: {ambushDef.MinSpawns} => Max: {ambushDef.MinSpawns}");
-                StringBuilder sb = new StringBuilder();
-                foreach(WeaponDefRef loadDef in ambushDef.SpawnPool)
+                Mod.Log.Info($"   AOEBlastDefs:");
+                
+                foreach(AOEBlastDef blastDef in ambushDef.SpawnPool)
                 {
-                    sb.Append(loadDef.WeaponDefId);
-                    sb.Append(", ");
+                    Mod.Log.Info($"   -- floatieLabel: '{blastDef.FloatieLabel}' radius: {blastDef.Radius} damage: {blastDef.Damage} " +
+                        $"heat: {blastDef.Heat} stability: {blastDef.Stability}"); ;
+                    Mod.Log.Info($"      fireRadius: {blastDef.FireRadius} fireStrength: {blastDef.FireStrength} " +
+                        $"fireChance: {blastDef.FireChance} fireDurationNoForest: {blastDef.FireDurationNoForest}"); ;
                 }
-                Mod.Log.Info($"   WeaponDefIds: [ {sb} ]");
-
             }
 
             Mod.Log.Info(" -- Infantry Ambush Options");
@@ -143,8 +142,18 @@ namespace ConcreteJungle {
                     MaxDifficulty = 10,
                     MinSpawns = 1,
                     MaxSpawns = 6,
-                    SpawnPool = new List<WeaponDefRef>() {
-                        new WeaponDefRef{ WeaponDefId = "Weapon_Ambush_Explosion" }
+                    SpawnPool = new List<AOEBlastDef>() {
+                        new AOEBlastDef { 
+                            FloatieLabel = "IED",
+                            Radius = 120.0f,
+                            Damage = 40.0f,
+                            Heat = 30.0f,
+                            Stability = 50.0f,
+                            FireRadius = 40,
+                            FireStrength = 2,
+                            FireChance = 50.0f,
+                            FireDurationNoForest = 2
+                        }
                     }
                 });
             }
