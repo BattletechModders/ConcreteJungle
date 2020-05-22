@@ -124,10 +124,6 @@ Most ambushes will play a short taunt before the effects are resolves. These are
 
 ### Todo
 
-* Spawns should be rotated towards ambush origin
-
-* Need to move turret spawns upwards
-
 * Remove turrets when you move more than N meters away / lose LoS to the building
 
 * Need to store association of turret -> building in a stat for save loading purposes
@@ -161,23 +157,10 @@ Most ambushes will play a short taunt before the effects are resolves. These are
 
 * Add ambushes that are hostile to all
 
-* Explosion should put up a floatie that gives the blast name and position
-
 * Explosives should be compatible with CAC
-
-* Explosives should determine target points... then conditional switch on attack type?
-
-* Should explosions use CAC AoE weapons?
-
-  * I think if they use a weapon with 1 or 2 range, this should work by default... need to test
-
-* Add mech ambush (equivalent to vehicle)
 
 * Can we make map devastation more efficient? Add it earlier in the processing?
 
-* Infantry trap turret flags are not moved up?
-
-* 
 
 ### Ideas
 
