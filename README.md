@@ -12,9 +12,10 @@ In addition, the mod can pre-destroy a certain percentage of buildings to reflec
 
 This mod relies heavily upon buildings, some of which can be contract targets or objectives. Every effort has been made to exclude contract objectives and important buildings from the list of possible ambush sites. If you notice an error, please open an issue so I can refine the selection filtering.
 
-:warning: This mod requires [IRBTModUtils](https://github.com/iceraptor/IRBTModUtils/) - download the latest copy and include in your Mods/ folder.
+:warning: This mod requires several other mods to function properly. For each of them, you should download the latest copy and include them in your Mods/ folder.
 
-
+* [IRBTModUtils](https://github.com/iceraptor/IRBTModUtils/)
+* [CustomAmmoCategories](https://github.com/BattletechModders/CustomBundle/tree/master/CustomAmmoCategories)
 
 ## Configuration
 
@@ -47,65 +48,77 @@ Devastation will pre-destroy a certain percentage of the buildings, making the m
 
 ### Explosion Ambush Configuration
 
-An explosion ambush will cause a random number of explosive blasts to occur at the origin position. The explosion will use 
+An explosion ambush spawns multiple explosive blasts around an origin point. These blasts will do damage using the [CustomAmmoCategory](https://github.com/BattletechModders/CustomBundle/tree/master/CustomAmmoCategories) AoE semantics, with damage falloff the further the target is from the blast origin. If multiple blasts are configured, each blast past the first occurs in a hex adjacent to the origin hex.
 
-* Enabled
+* **Enabled**: Must be true for explosive ambushes to occur. If this is false, and `Explosion`is defined in `Ambush.AmbushWeights`, the mod treats this as a configuration error and will disable all mod functions.
 
-* SearchRadius
+* **VFX**: The visual effect that will be used for blasts. Defaults to `WFX_Nuke` and I suggest you leave it there. Other VFX may have timings that don't work will with the hardcoded durations in the mod.
 
-* Ambushes
+* **SFX**: The sound effect that will be used for blasts. Defaults to `big_explosion` and I suggest you leave it there, for the same reasons as above.
 
-  * MinDifficulty
-  * MaxDifficulty
-  * MinSpawns
-  * MaxSpawns
-  * SpawnPool
+* **Ambushes**: A list of ambush options for a given difficulty range. Multiple ambush definitions are possible, allowing you to specify values that scale as difficulty increases. You must include ambush definitions for the standard 1-10 difficulty values. No ambush definition can overlap with another ambush definition's difficulty range. 
+
+  * **MinDifficulty** and **MaxDifficulty**: The minimum and maximum contract difficulty that this ambush definition will apply to. All contract difficulties between are included as well, so min of 2 and max of 5 means the ambush definition will apply to difficulty 2, 3, 4 and 5.
+  * **MinSpawns** and **MaxSpawns**: When the ambush is spawned, a random value between *MinSpawns* and *MaxSpawns* (inclusive) determines how many blasts will be generated. For a min of 1 and max of 3, between 1 and 3 blasts will trigger on the ambush. Each blast will use a randomly selected value from the **SpawnPool** to resolve the blast.
+  * **SpawnPool**: A *weighted* list of blasts that can occur from this ambush definition. Each blast will randomly use one element from this list, so elements that occur more often have a greater chance to be selected.
+    * **FloatieTextKey**: A key to a value in the `LocalizedText` dictionary. The associated value will be used as a floatie over the origin of the blast to indicate to the player what type of attack occurred. You should use something short here, like 'HE IED' or 'Inferno Blast'.
+    * **Radius**: The range from the origin point in which the targets take damage. This is a float value, representing meters from the origin.
+    * **Damage**: The armor and structure damage a target should take from the blast. Recall that this uses the CAC falloff mechanics which will reduce the damage the further from the blast the target is.
+    * **Heat**: The heat damage a target should take from the blast. Recall that this uses the CAC falloff mechanics which will reduce the damage the further from the blast the target is.
+    * **Stability**: The stability damage a target should take from the blast. Recall that this uses the CAC falloff mechanics which will reduce the damage the further from the blast the target is.
+    * **FireRadius**: The number of hexes from the origin that will be set on fire after the blast. This is an integer value, with each hex corresponding to the CAC fire mechanics. See the CAC `settings.json` for `BurningForestCellRadius` , which defaults to 4 cells (where a cell is 5m wide).
+    * **FireStrength**: The CAC 'strength' of the fire hexes that will be generated. An integer value that determines how much additional heat a unit takes.
+    * **FireChance**: The chance (as an float) that a hex will be set on fire by the hex. 
+    * **FireDurationNoForest**: The number of turns (as an integer) a non-forest hex should remain on fire from the blast. 
 
   
 
 ### Infantry Ambush Configuration
 
-Loreum ipsum
+An Infantry Ambush spawns an invisible, invincible turret within a building. The outer building then is marked as having weapons, and will display the turret's name on the building's combat HUD. This allows a building to approximate being inhabited by infantry, who then attack their targets from within. This turret exists so long as the building exists, and will be removed when the building is destroyed. It fires from a position approximately 70% up the building's height, to better represent infantry shooting from the higher floors of a building.
 
-* Enabled
-* FreeAttackEnabled 
-* SearchRadius
-* Ambushes
-  * MinDifficulty
-  * MaxDifficulty
-  * MinSpawns
-  * MaxSpawns
-  * SpawnPool
+* **Enabled**: Must be true for infantry ambushes to occur. If this is false, and `Infantry`is defined in `Ambush.AmbushWeights`, the mod treats this as a configuration error and will disable all mod functions.
+* **FreeAttackEnabled**: If true, the spawned turrets will resolve a free round of attacks against the closest target on the turn the spawn. This provides an 'ambush' feeling, but can be very crippling.
+* **Ambushes**: A list of ambush options for a given difficulty range. Multiple ambush definitions are possible, allowing you to specify values that scale as difficulty increases. You must include ambush definitions for the standard 1-10 difficulty values. No ambush definition can overlap with another ambush definition's difficulty range. 
+  * **MinDifficulty** and **MaxDifficulty**: The minimum and maximum contract difficulty that this ambush definition will apply to. All contract difficulties between are included as well, so min of 2 and max of 5 means the ambush definition will apply to difficulty 2, 3, 4 and 5.
+  * **MinSpawns** and **MaxSpawns**: When the ambush is spawned, a random value between *MinSpawns* and *MaxSpawns* (inclusive) determines how many blasts will be generated. For a min of 1 and max of 3, between 1 and 3 blasts will trigger on the ambush. Each blast will use a randomly selected value from the **SpawnPool** to resolve the blast.
+  * **SpawnPool**: A *weighted* list of blasts that can occur from this ambush definition. Each blast will randomly use one element from this list, so elements that occur more often have a greater chance to be selected. 
+    * **TurretDefId**: The turret definition that should be used to represent the infantry. Example: *turretdef_Light_Shredder*
+    * **PilotDefId**: The pilot definition that will be attached to the spawned turret. Example: *pilot_d5_turret*
 
 ### Mech Ambush Configuration
 
-Loreum ipsum
+A Mech Ambush spawns one or more units within nearby buildings. The buildings will be destroyed during the spawning process, with a small quip being played beforehand to taunt the player. 
 
-* Enabled
-* FreeAttackEnabled 
-* SearchRadius
-* Ambushes
-  * MinDifficulty
-  * MaxDifficulty
-  * MinSpawns
-  * MaxSpawns
-  * SpawnPool
+* **Enabled**: Must be true for mech ambushes to occur. If this is false, and `Mech` is defined in `Ambush.AmbushWeights`, the mod treats this as a configuration error and will disable all mod functions.
+* **FreeAttackEnabled**: If true, the spawned units will resolve a free round of attacks against the closest target on the turn the spawn. This provides an 'ambush' feeling, but can be very crippling.
+* **Ambushes**: A list of ambush options for a given difficulty range. Multiple ambush definitions are possible, allowing you to specify values that scale as difficulty increases. You must include ambush definitions for the standard 1-10 difficulty values. No ambush definition can overlap with another ambush definition's difficulty range. 
+  * **MinDifficulty** and **MaxDifficulty**: The minimum and maximum contract difficulty that this ambush definition will apply to. All contract difficulties between are included as well, so min of 2 and max of 5 means the ambush definition will apply to difficulty 2, 3, 4 and 5.
+  * **MinSpawns** and **MaxSpawns**: When the ambush is spawned, a random value between *MinSpawns* and *MaxSpawns* (inclusive) determines how many blasts will be generated. For a min of 1 and max of 3, between 1 and 3 blasts will trigger on the ambush. Each blast will use a randomly selected value from the **SpawnPool** to resolve the blast.
+  * **SpawnPool**: A *weighted* list of blasts that can occur from this ambush definition. Each blast will randomly use one element from this list, so elements that occur more often have a greater chance to be selected. 
+    * **MechDefId**: The mech definition that should be used to represent the infantry. Example: *mechdef_urbanmech_UM-R60*
+    * **PilotDefId**: The pilot definition that will be attached to the spawned turret. Example: *pilot_d3_gunner*
 
 ### Vehicle Ambush Configuration
 
-Loreum ipsum
+A Vehicle Ambush spawns one or more units within nearby buildings. The buildings will be destroyed during the spawning process, with a small quip being played beforehand to taunt the player. 
 
-* Enabled
-* FreeAttackEnabled 
-* SearchRadius
-* Ambushes
-  * MinDifficulty
-  * MaxDifficulty
-  * MinSpawns
-  * MaxSpawns
-  * SpawnPool
+* **Enabled**: Must be true for mech ambushes to occur. If this is false, and `Vehicle` is defined in `Ambush.AmbushWeights`, the mod treats this as a configuration error and will disable all mod functions.
+* **FreeAttackEnabled**: If true, the spawned units will resolve a free round of attacks against the closest target on the turn the spawn. This provides an 'ambush' feeling, but can be very crippling.
+* **Ambushes**: A list of ambush options for a given difficulty range. Multiple ambush definitions are possible, allowing you to specify values that scale as difficulty increases. You must include ambush definitions for the standard 1-10 difficulty values. No ambush definition can overlap with another ambush definition's difficulty range. 
+  * **MinDifficulty** and **MaxDifficulty**: The minimum and maximum contract difficulty that this ambush definition will apply to. All contract difficulties between are included as well, so min of 2 and max of 5 means the ambush definition will apply to difficulty 2, 3, 4 and 5.
+  * **MinSpawns** and **MaxSpawns**: When the ambush is spawned, a random value between *MinSpawns* and *MaxSpawns* (inclusive) determines how many blasts will be generated. For a min of 1 and max of 3, between 1 and 3 blasts will trigger on the ambush. Each blast will use a randomly selected value from the **SpawnPool** to resolve the blast.
+  * **SpawnPool**: A *weighted* list of blasts that can occur from this ambush definition. Each blast will randomly use one element from this list, so elements that occur more often have a greater chance to be selected. 
+    * **VehicleDefId**: The mech definition that should be used to represent the infantry. Example: *vehicledef_CARRIER_SRM*
+    * **PilotDefId**: The pilot definition that will be attached to the spawned turret. Example: *pilot_d3_gunner*
 
+### Quips Configuration
 
+Most ambushes will play a short taunt before the effects are resolves. These are configured through the `Quips` element in mod.json. All quips sections are lists of strings, one of which will be randomly determined and used during an ambush. The different types of ambushes are served by different quips:
+
+* **ExplosiveAmbush**: One of these will be used during an explosive ambush.
+* **InfantryAmbush**: One of these will be used during an infantry ambush
+* **SpawnAmbush**: One of these will be used during Mech or Vehicle ambushes.
 
 ## DEV NOTES
 
