@@ -157,19 +157,15 @@ Most ambushes will play a short taunt before the effects are resolves. These are
 
 * Add ambushes that are hostile to all
 
-* Explosives should be compatible with CAC
-
 * Can we make map devastation more efficient? Add it earlier in the processing?
 
 
 ### Ideas
 
-* Destroy X% number of buildings to represent battle grounds
-* Trigger a building destruction and spawn a handful of units
-* Trigger a turret to spawn within a building as an 'infantry attack'
 * Create vbied mines with an indicator that they are present
-* Trigger an explosion centered on a building
 * Could turret spawns represent Dropships? 
+* Could we land a dropship?
+* Can we use the strafe effects?
 
 ### Interesting methods
 
