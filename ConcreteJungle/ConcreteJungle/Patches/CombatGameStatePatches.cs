@@ -2,8 +2,6 @@
 using ConcreteJungle.Helper;
 using Harmony;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace ConcreteJungle.Patches
 {

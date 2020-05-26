@@ -134,6 +134,12 @@ namespace ConcreteJungle.Helper
             building.BuildingRep.SetHighlightColor(ModState.Combat, team);
             building.BuildingRep.RefreshEdgeCache();
 
+            // Increase the building's health to the current value + turret structure
+            float combinedStructure = (float)Math.Ceiling(building.CurrentStructure + turret.GetCurrentStructure(BuildingLocation.Structure));
+            Mod.Log.Debug($"Setting ambush structure to: {combinedStructure} = building.currentStructure: {building.CurrentStructure} + " +
+                $"turret.currentStructure: {turret.GetCurrentStructure(BuildingLocation.Structure)}");
+            building.StatCollection.Set<float>("Structure", combinedStructure);
+
             // Finally notify others
             UnitSpawnedMessage message = new UnitSpawnedMessage("CJ_TRAP", turret.GUID);
             ModState.Combat.MessageCenter.PublishMessage(message);
