@@ -46,23 +46,20 @@ namespace ConcreteJungle.Patches
                 Mod.Log.Debug($" -- Building GUID: {guid}");
             }
 
-            Turret ambushTurret = ModState.AmbushBuildingGUIDToTurrets[__instance.GUID];
-            Mod.Log.Debug($"Parent building for ambush turret: {CombatantUtils.Label(ambushTurret)} is being destroyed.");
-
             // If we contain a linked turret, destroy it before we die.
             if (ModState.AmbushBuildingGUIDToTurrets.ContainsKey(__instance.GUID))
             {
                 ModState.KillingLinkedUnitsSource = __instance.GUID;
 
                 // Despawn the associated turret
-                Turret turret = ModState.AmbushBuildingGUIDToTurrets[__instance.GUID];
-                Mod.Log.Info($"Building {CombatantUtils.Label(__instance)} is destroyed, destroying associated turret: {CombatantUtils.Label(turret)}");
-                DespawnActorMessage despawnMessage = new DespawnActorMessage(__instance.GUID, turret.GUID, DeathMethod.VitalComponentDestroyed);
+                Turret linkedTurret = ModState.AmbushBuildingGUIDToTurrets[__instance.GUID];
+                Mod.Log.Info($"Building {CombatantUtils.Label(__instance)} is destroyed, destroying associated turret: {CombatantUtils.Label(linkedTurret)}");
+                DespawnActorMessage despawnMessage = new DespawnActorMessage(__instance.GUID, linkedTurret.GUID, DeathMethod.VitalComponentDestroyed);
                 __instance.Combat.MessageCenter.PublishMessage(despawnMessage);
 
                 ModState.KillingLinkedUnitsSource = null;
                 ModState.AmbushBuildingGUIDToTurrets.Remove(__instance.GUID);
-                ModState.AmbushTurretGUIDtoBuilding.Remove(ambushTurret.GUID);
+                ModState.AmbushTurretGUIDtoBuilding.Remove(linkedTurret.GUID);
             }
 
             // If the building is in candidates, remove it.
