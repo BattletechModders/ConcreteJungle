@@ -14,7 +14,7 @@ namespace ConcreteJungle.Helper
             if (!Mod.Config.InfantryAmbush.Enabled) return;
 
             int infantrySpawns = Mod.Random.Next(ModState.InfantryAmbushDefForContract.MinSpawns, ModState.InfantryAmbushDefForContract.MaxSpawns);
-            Mod.Log.Debug($"Spawning up to {infantrySpawns} infantry spawns as part of this ambush.");
+            Mod.Log.Debug?.Write($"Spawning up to {infantrySpawns} infantry spawns as part of this ambush.");
 
             // Create a new lance in the target team
             Lance ambushLance = TeamHelper.CreateAmbushLance(ModState.AmbushTeam);
@@ -23,7 +23,7 @@ namespace ConcreteJungle.Helper
             List<BattleTech.Building> candidates = CandidateBuildingsHelper.ClosestCandidatesToPosition(ambushOrigin, Mod.Config.Ambush.SearchRadius);
             if (candidates.Count < ModState.InfantryAmbushDefForContract.MinSpawns)
             {
-                Mod.Log.Debug($"Insufficient candidate buildings to spawn an infantry ambush. Skipping.");
+                Mod.Log.Debug?.Write($"Insufficient candidate buildings to spawn an infantry ambush. Skipping.");
                 return;
             }
 
@@ -40,7 +40,7 @@ namespace ConcreteJungle.Helper
                 AbstractActor ambushTurret = SpawnAmbushTurret(ModState.AmbushTeam, ambushLance, spawnBuildingShell, ambushOrigin);
                 spawnedActors.Add(ambushTurret);
                 spawnBuildings.Add(spawnBuildingShell);
-                Mod.Log.Info($"Spawned turret: {ambushTurret.DisplayName} in building: {spawnBuildingShell.DisplayName}");
+                Mod.Log.Info?.Write($"Spawned turret: {ambushTurret.DisplayName} in building: {spawnBuildingShell.DisplayName}");
             }
 
             // Remove any buildings that are part of this ambush from candidates
@@ -61,7 +61,7 @@ namespace ConcreteJungle.Helper
                 }
             }
 
-            Mod.Log.Info($"Adding InfantryAmbushSequence for {spawnedActors.Count} actors.");
+            Mod.Log.Info?.Write($"Adding InfantryAmbushSequence for {spawnedActors.Count} actors.");
             try
             {
                 InfantryAmbushSequence ambushSequence = 
@@ -70,7 +70,7 @@ namespace ConcreteJungle.Helper
             }
             catch (Exception e)
             {
-                Mod.Log.Error("Failed to create AES sequence due to error!", e);
+                Mod.Log.Error?.Write(e, "Failed to create AES sequence due to error!");
             }
         }
 
@@ -99,12 +99,12 @@ namespace ConcreteJungle.Helper
             float terrainHeight = ModState.Combat.MapMetaData.GetLerpedHeightAt(building.CurrentPosition, true);
             float heightDelta = (buildingHeight - terrainHeight) * 0.7f;
             float adjustedY = terrainHeight + heightDelta;
-            Mod.Log.Debug($"At building position, terrain height is: {terrainHeight} while buildingHeight is: {buildingHeight}. " +
+            Mod.Log.Debug?.Write($"At building position, terrain height is: {terrainHeight} while buildingHeight is: {buildingHeight}. " +
                 $" Calculated 70% of building height + terrain as {adjustedY}.");
 
             Vector3 newPosition = building.GameRep.transform.position;
             newPosition.y = adjustedY;
-            Mod.Log.Debug($"Changing transform position from: {building.GameRep.transform.position} to {newPosition}");
+            Mod.Log.Debug?.Write($"Changing transform position from: {building.GameRep.transform.position} to {newPosition}");
 
             /// Rotate to face the ambush origin
             Vector3 spawnDirection = Vector3.RotateTowards(building.CurrentRotation.eulerAngles, ambushOrigin, 1f, 0f);
@@ -115,15 +115,15 @@ namespace ConcreteJungle.Helper
             turret.Init(newPosition, spawnRotation.eulerAngles.y, true);
             turret.InitGameRep(null);
 
-            if (turret == null) Mod.Log.Error($"Failed to spawn turretDefId: {ambushDef.TurretDefId} + pilotDefId: {ambushDef.PilotDefId} !");
+            if (turret == null) Mod.Log.Error?.Write($"Failed to spawn turretDefId: {ambushDef.TurretDefId} + pilotDefId: {ambushDef.PilotDefId} !");
 
-            Mod.Log.Debug($" Spawned trap turret, adding to team.");
+            Mod.Log.Debug?.Write($" Spawned trap turret, adding to team.");
             team.AddUnit(turret);
             turret.AddToTeam(team);
             turret.AddToLance(ambushLance);
 
             turret.BehaviorTree = BehaviorTreeFactory.MakeBehaviorTree(ModState.Combat.BattleTechGame, turret, BehaviorTreeIDEnum.CoreAITree);
-            Mod.Log.Debug("Updated turret behaviorTree");
+            Mod.Log.Debug?.Write("Updated turret behaviorTree");
 
             ModState.AmbushBuildingGUIDToTurrets.Add(building.GUID, turret);
             ModState.AmbushTurretGUIDtoBuilding.Add(turret.GUID, building);
@@ -136,7 +136,7 @@ namespace ConcreteJungle.Helper
 
             // Increase the building's health to the current value + turret structure
             float combinedStructure = (float)Math.Ceiling(building.CurrentStructure + turret.GetCurrentStructure(BuildingLocation.Structure));
-            Mod.Log.Debug($"Setting ambush structure to: {combinedStructure} = building.currentStructure: {building.CurrentStructure} + " +
+            Mod.Log.Debug?.Write($"Setting ambush structure to: {combinedStructure} = building.currentStructure: {building.CurrentStructure} + " +
                 $"turret.currentStructure: {turret.GetCurrentStructure(BuildingLocation.Structure)}");
             building.StatCollection.Set<float>("Structure", combinedStructure);
 

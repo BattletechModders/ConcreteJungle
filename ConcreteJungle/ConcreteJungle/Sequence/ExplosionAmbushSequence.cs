@@ -33,19 +33,19 @@ namespace ConcreteJungle.Sequence
             this.AmbushTeam = team;
             this.AmbushPositions = new Stack<Vector3>(ambushOrigins);
             this.AmbushBlasts = new Stack<AOEBlastDef>(ambushBlasts);
-            Mod.Log.Debug($"Positions count: {AmbushPositions.Count}  blasts count: {AmbushBlasts.Count}");
+            Mod.Log.Debug?.Write($"Positions count: {AmbushPositions.Count}  blasts count: {AmbushBlasts.Count}");
         }
 
         public override void OnAdded()
         {
             base.OnAdded();
-            Mod.Log.Debug("Starting new AmbushExplosionSequence.");
+            Mod.Log.Debug?.Write("Starting new AmbushExplosionSequence.");
             this.SetState(AmbushExplosionSequenceState.Taunting);
         }
 
         public override void OnUpdate()
         {
-            Mod.Log.Trace($"Updating AmbushExplosionSequence in state: {this.state}");
+            Mod.Log.Trace?.Write($"Updating AmbushExplosionSequence in state: {this.state}");
             base.OnUpdate();
             this.timeInCurrentState += Time.deltaTime;
             switch (this.state)
@@ -83,10 +83,10 @@ namespace ConcreteJungle.Sequence
             switch(newState)
             {
                 case AmbushExplosionSequenceState.Attacking:
-                    Mod.Log.Debug("Invoking CAC for blast effects");
+                    Mod.Log.Debug?.Write("Invoking CAC for blast effects");
                     break;
                 case AmbushExplosionSequenceState.Finished:
-                    Mod.Log.Debug("Finished with AmbushExplosionSequence");
+                    Mod.Log.Debug?.Write("Finished with AmbushExplosionSequence");
                     base.ClearCamera();
                     return;
                 default:
@@ -115,7 +115,7 @@ namespace ConcreteJungle.Sequence
             {
                 Vector3 blastOrigin = this.AmbushPositions.Pop();
                 AOEBlastDef blastDef = this.AmbushBlasts.Pop();
-                Mod.Log.Info($"Spawning blast at position: {blastOrigin} that does {blastDef.Damage} damage, {blastDef.Heat} heat, and {blastDef.Stability} stability.");
+                Mod.Log.Info?.Write($"Spawning blast at position: {blastOrigin} that does {blastDef.Damage} damage, {blastDef.Heat} heat, and {blastDef.Stability} stability.");
 
                 // Publish the floatie first
                 string floatieText = new Text(Mod.Config.LocalizedText[blastDef.FloatieTextKey]).ToString();                
@@ -123,7 +123,7 @@ namespace ConcreteJungle.Sequence
                     new FloatieMessage(null, null, floatieText, 16.0f, FloatieMessage.MessageNature.CriticalHit, 
                     blastOrigin.x, blastOrigin.y, blastOrigin.z)
                     );
-                Mod.Log.Debug($"Sent floatie with text: '{floatieText}'");
+                Mod.Log.Debug?.Write($"Sent floatie with text: '{floatieText}'");
 
                 // Now do the CAC explosion
                 ExplosionAPIHelper.AoEExplode(
@@ -132,7 +132,7 @@ namespace ConcreteJungle.Sequence
                     new List<EffectData>(), false, 
                     blastDef.FireRadius, blastDef.FireStrength, blastDef.FireChance, blastDef.FireDurationNoForest,
                     string.Empty, Vector3.zero, string.Empty, 0, 0);
-                Mod.Log.Debug($"Asked CAC for AoE explosion");
+                Mod.Log.Debug?.Write($"Asked CAC for AoE explosion");
 
                 this.timeSinceLastExplosion = 0f;
             }

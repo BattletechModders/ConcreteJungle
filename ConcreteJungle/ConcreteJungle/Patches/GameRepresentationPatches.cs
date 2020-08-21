@@ -15,7 +15,7 @@ namespace ConcreteJungle.Patches
 
         static void Postfix(PilotableActorRepresentation __instance, VisibilityLevel newLevel)
         {
-            Mod.Log.Trace("PAR:OPVC entered.");
+            Mod.Log.Trace?.Write("PAR:OPVC entered.");
 
             Traverse parentT = Traverse.Create(__instance).Property("parentActor");
             AbstractActor parentActor = parentT.GetValue<AbstractActor>();
@@ -39,7 +39,7 @@ namespace ConcreteJungle.Patches
         {
             if (__instance != null && __instance.parentCombatant != null && ModState.AmbushBuildingGUIDToTurrets.Keys.Contains(__instance.parentCombatant.GUID))
             {
-                Mod.Log.Debug($"Building {CombatantUtils.Label(__instance.parentCombatant)} contains a trap, marking it as hostile.");
+                Mod.Log.Debug?.Write($"Building {CombatantUtils.Label(__instance.parentCombatant)} contains a trap, marking it as hostile.");
 
                 Traverse edgeHighlightT = Traverse.Create(__instance).Property("edgeHighlight");
                 MechEdgeSelection edgeHighlight = edgeHighlightT.GetValue<MechEdgeSelection>();

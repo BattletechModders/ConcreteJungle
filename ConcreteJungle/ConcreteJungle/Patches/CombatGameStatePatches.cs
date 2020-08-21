@@ -10,7 +10,7 @@ namespace ConcreteJungle.Patches
     {
         static void Postfix(CombatGameState __instance)
         {
-            Mod.Log.Trace("CGS:_I - entered.");
+            Mod.Log.Trace?.Write("CGS:_I - entered.");
 
             // Re-initialize everything to give us a clean slate.
             ModState.Reset();
@@ -27,7 +27,7 @@ namespace ConcreteJungle.Patches
     {
         static void Postfix(CombatGameState __instance)
         {
-            Mod.Log.Trace("CGS:OCGD - entered.");
+            Mod.Log.Trace?.Write("CGS:OCGD - entered.");
             
             // Remove any trap turrets for salvage
 
@@ -37,7 +37,7 @@ namespace ConcreteJungle.Patches
             }
             catch (Exception e)
             {
-                Mod.Log.Error("Failed to unload ambush resources due to exception!", e);
+                Mod.Log.Error?.Write(e, "Failed to unload ambush resources due to exception!");
                 ModState.IsUrbanBiome = false;
             }
 

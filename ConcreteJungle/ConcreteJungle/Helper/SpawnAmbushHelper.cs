@@ -20,13 +20,13 @@ namespace ConcreteJungle.Helper
             int maxSpawns = ambushType == AmbushType.Mech ? ModState.MechAmbushDefForContract.MaxSpawns : ModState.VehicleAmbushDefForContract.MaxSpawns;
 
             int actorsToSpawn = Mod.Random.Next(minSpawns, maxSpawns);
-            Mod.Log.Debug($"Spawning {actorsToSpawn} actors as part of this ambush.");
+            Mod.Log.Debug?.Write($"Spawning {actorsToSpawn} actors as part of this ambush.");
 
             // Starting with the closest building, look through the buildings and determine how many locations can support a unit.
             List<BattleTech.Building> candidates = CandidateBuildingsHelper.ClosestCandidatesToPosition(ambushOrigin, Mod.Config.Ambush.SearchRadius);
             if (candidates.Count < minSpawns)
             {
-                Mod.Log.Debug($"Insufficient candidate buildings for a spawn ambush. Skipping.");
+                Mod.Log.Debug?.Write($"Insufficient candidate buildings for a spawn ambush. Skipping.");
                 return;
             }
 
@@ -43,7 +43,7 @@ namespace ConcreteJungle.Helper
 
                 // Spawn one unit at the origin of the building
                 buildingsToLevel.Add(building);
-                Mod.Log.Debug("Spawning actor at building origin.");
+                Mod.Log.Debug?.Write("Spawning actor at building origin.");
                 if (ambushType == AmbushType.Mech)
                 {
                     AbstractActor spawnedActor = SpawnAmbushMech(ModState.AmbushTeam, ambushLance, ambushOrigin, building.CurrentPosition, building.CurrentRotation);
@@ -63,10 +63,10 @@ namespace ConcreteJungle.Helper
                     if (actorsToSpawn == 0) break;
 
                     Point cellPoint = new Point(ModState.Combat.MapMetaData.GetXIndex(adjacentHex.x), ModState.Combat.MapMetaData.GetZIndex(adjacentHex.z));
-                    Mod.Log.Debug($" Evaluating point {cellPoint.X}, {cellPoint.Z} for potential ambush.");
+                    Mod.Log.Debug?.Write($" Evaluating point {cellPoint.X}, {cellPoint.Z} for potential ambush.");
                     if (encounterLayerData.mapEncounterLayerDataCells[cellPoint.Z, cellPoint.X].HasSpecifiedBuilding(building.GUID))
                     {
-                        Mod.Log.Debug($"Spawning actor at adjacent hex at position: {adjacentHex}");
+                        Mod.Log.Debug?.Write($"Spawning actor at adjacent hex at position: {adjacentHex}");
                         if (ambushType == AmbushType.Mech)
                         {
                             AbstractActor spawnedActor = SpawnAmbushMech(ModState.AmbushTeam, ambushLance, ambushOrigin, adjacentHex, building.CurrentRotation);
@@ -81,7 +81,7 @@ namespace ConcreteJungle.Helper
                     }
                     else
                     {
-                        Mod.Log.Debug($" Hex {adjacentHex} is outside of the main building, skipping.");
+                        Mod.Log.Debug?.Write($" Hex {adjacentHex} is outside of the main building, skipping.");
                     }
                 }
             }
@@ -105,7 +105,7 @@ namespace ConcreteJungle.Helper
             }
 
             bool applyAttacks = ambushType == AmbushType.Mech ? Mod.Config.MechAmbush.FreeAttackEnabled : Mod.Config.VehicleAmbush.FreeAttackEnabled;
-            Mod.Log.Info($"Adding SpawnAmbushSequence for {spawnedActors.Count} actors and {buildingsToLevel.Count} buildings to be leveled.");
+            Mod.Log.Info?.Write($"Adding SpawnAmbushSequence for {spawnedActors.Count} actors and {buildingsToLevel.Count} buildings to be leveled.");
             try
             {
                 SpawnAmbushSequence ambushSequence = new SpawnAmbushSequence(ModState.Combat, ambushOrigin, spawnedActors, buildingsToLevel, targets, applyAttacks);
@@ -113,7 +113,7 @@ namespace ConcreteJungle.Helper
             }
             catch (Exception e)
             {
-                Mod.Log.Error("Failed to create AES sequence due to error!", e);
+                Mod.Log.Error?.Write(e, "Failed to create AES sequence due to error!");
             }
         }
 
@@ -140,17 +140,17 @@ namespace ConcreteJungle.Helper
             Vehicle vehicle = ActorFactory.CreateVehicle(vehicleDef, pilotDef, team.EncounterTags, ModState.Combat, team.GetNextSupportUnitGuid(), "", null);
             vehicle.Init(spawnPos, spawnRotation.eulerAngles.y, true);
             vehicle.InitGameRep(null);
-            Mod.Log.Debug($"Spawned vehicle {CombatantUtils.Label(vehicle)} at position: {spawnPos}");
+            Mod.Log.Debug?.Write($"Spawned vehicle {CombatantUtils.Label(vehicle)} at position: {spawnPos}");
 
-            if (vehicle == null) Mod.Log.Error($"Failed to spawn vehicleDefId: {ambushDef.VehicleDefId} / pilotDefId: {ambushDef.PilotDefId} !");
+            if (vehicle == null) Mod.Log.Error?.Write($"Failed to spawn vehicleDefId: {ambushDef.VehicleDefId} / pilotDefId: {ambushDef.PilotDefId} !");
 
-            Mod.Log.Debug($" Spawned ambush vehicle, adding to team: {team} and lance: {ambushLance}");
+            Mod.Log.Debug?.Write($" Spawned ambush vehicle, adding to team: {team} and lance: {ambushLance}");
             team.AddUnit(vehicle);
             vehicle.AddToTeam(team);
             vehicle.AddToLance(ambushLance);
 
             vehicle.BehaviorTree = BehaviorTreeFactory.MakeBehaviorTree(ModState.Combat.BattleTechGame, vehicle, BehaviorTreeIDEnum.CoreAITree);
-            Mod.Log.Debug("Enabled vehicle behavior tree");
+            Mod.Log.Debug?.Write("Enabled vehicle behavior tree");
 
             UnitSpawnedMessage message = new UnitSpawnedMessage("CJ_VEHICLE", vehicle.GUID);
             ModState.Combat.MessageCenter.PublishMessage(message);
@@ -182,17 +182,17 @@ namespace ConcreteJungle.Helper
             Mech mech = ActorFactory.CreateMech(mechDef, pilotDef, team.EncounterTags, ModState.Combat, team.GetNextSupportUnitGuid(), "", null);
             mech.Init(spawnPos, spawnRotation.eulerAngles.y, true);
             mech.InitGameRep(null);
-            Mod.Log.Debug($"Spawned mech {CombatantUtils.Label(mech)} at position: {spawnPos}");
+            Mod.Log.Debug?.Write($"Spawned mech {CombatantUtils.Label(mech)} at position: {spawnPos}");
 
-            if (mech == null) Mod.Log.Error($"Failed to spawn mechDefId: {ambushDef.MechDefId} / pilotDefId: {ambushDef.PilotDefId} !");
+            if (mech == null) Mod.Log.Error?.Write($"Failed to spawn mechDefId: {ambushDef.MechDefId} / pilotDefId: {ambushDef.PilotDefId} !");
 
-            Mod.Log.Debug($" Spawned ambush mech, adding to team: {team} and lance: {ambushLance}");
+            Mod.Log.Debug?.Write($" Spawned ambush mech, adding to team: {team} and lance: {ambushLance}");
             team.AddUnit(mech);
             mech.AddToTeam(team);
             mech.AddToLance(ambushLance);
 
             mech.BehaviorTree = BehaviorTreeFactory.MakeBehaviorTree(ModState.Combat.BattleTechGame, mech, BehaviorTreeIDEnum.CoreAITree);
-            Mod.Log.Debug("Enabled mech behavior tree");
+            Mod.Log.Debug?.Write("Enabled mech behavior tree");
 
             UnitSpawnedMessage message = new UnitSpawnedMessage("CJ_MECH", mech.GUID);
             ModState.Combat.MessageCenter.PublishMessage(message);

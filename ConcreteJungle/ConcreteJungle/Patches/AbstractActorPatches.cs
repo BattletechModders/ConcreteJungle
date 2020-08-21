@@ -26,7 +26,7 @@ namespace ConcreteJungle.Patches
                     float magnitude = (__instance.CurrentPosition - ambushOrigin).magnitude;
                     if (magnitude < Mod.Config.Ambush.MinDistanceBetween)
                     {
-                        Mod.Log.Debug($" Actor {CombatantUtils.Label(__instance)} at pos: {__instance.CurrentPosition} is {magnitude}m away from " +
+                        Mod.Log.Debug?.Write($" Actor {CombatantUtils.Label(__instance)} at pos: {__instance.CurrentPosition} is {magnitude}m away from " +
                             $"previous trap origin: {ambushOrigin}. Skipping.");
                         return;
                     }
@@ -56,7 +56,7 @@ namespace ConcreteJungle.Patches
                     __instance.LanceId == ModState.CurrentSpawningLance.GUID
                     )
                 {
-                    Mod.Log.Debug("Intercepted displacement message for ambush spawns.");
+                    Mod.Log.Debug?.Write("Intercepted displacement message for ambush spawns.");
 
                     // Replay displacement w/o effects 
                     Vector3 vector = __instance.CurrentPosition;

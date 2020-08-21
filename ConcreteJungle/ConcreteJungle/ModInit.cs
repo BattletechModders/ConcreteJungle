@@ -1,4 +1,5 @@
 ﻿using Harmony;
+using IRBTModUtils.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Diagnostics;
@@ -13,7 +14,7 @@ namespace ConcreteJungle {
         public const string LogName = "concrete_jungle";
         public const string LogLabel = "CJUNGLE";
 
-        public static IntraModLogger Log;
+        public static DeferringLogger Log;
         public static string ModDir;
         public static ModConfig Config;
 
@@ -30,23 +31,23 @@ namespace ConcreteJungle {
                 Mod.Config = new ModConfig();
             }
 
-            Log = new IntraModLogger(modDirectory, LogName, LogLabel, Config.Debug, Config.Trace);
+            Log = new DeferringLogger(modDirectory, LogName, LogLabel, Config.Debug, Config.Trace);
 
             Assembly asm = Assembly.GetExecutingAssembly();
             FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(asm.Location);
-            Log.Info($"Assembly version: {fvi.ProductVersion}");
+            Log.Info?.Write($"Assembly version: {fvi.ProductVersion}");
 
             // Initialize the mod settings
             Mod.Config.Init();
 
-            Log.Debug($"ModDir is:{modDirectory}");
-            Log.Debug($"mod.json settings are:({settingsJSON})");
+            Log.Debug?.Write($"ModDir is:{modDirectory}");
+            Log.Debug?.Write($"mod.json settings are:({settingsJSON})");
             Mod.Config.LogConfig();
 
             if (settingsE != null) {
-                Log.Info($"ERROR reading settings file! Error was: {settingsE}");
+                Log.Info?.Write($"ERROR reading settings file! Error was: {settingsE}");
             } else {
-                Log.Info($"INFO: No errors reading settings file.");
+                Log.Info?.Write($"INFO: No errors reading settings file.");
             }
 
             // Initialize modules

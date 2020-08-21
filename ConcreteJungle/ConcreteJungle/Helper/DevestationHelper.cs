@@ -13,7 +13,7 @@ namespace ConcreteJungle.Helper
         {
             if (!Mod.Config.Devastation.Enabled) return;
 
-            Mod.Log.Debug("Processing buildings for pre-battle devestation.");
+            Mod.Log.Debug?.Write("Processing buildings for pre-battle devestation.");
 
             List<BattleTech.Building> shuffledBuildings = new List<BattleTech.Building>();
             shuffledBuildings.AddRange(ModState.CandidateBuildings);
@@ -26,12 +26,12 @@ namespace ConcreteJungle.Helper
             int destroyPercentile = Mod.Random.Next(minNum, maxNum);
             float destroyPercent = (float) destroyPercentile / 100f;
             int destroyedBuildings = (int)Math.Floor(shuffledBuildings.Count * destroyPercent);
-            Mod.Log.Debug($"Destruction percentile: {destroyPercent} applied to {shuffledBuildings.Count} buildings = {destroyedBuildings} destroyed buildings.");
+            Mod.Log.Debug?.Write($"Destruction percentile: {destroyPercent} applied to {shuffledBuildings.Count} buildings = {destroyedBuildings} destroyed buildings.");
 
             for (int i = 0; i < destroyedBuildings; i++)
             {
                 BattleTech.Building building = shuffledBuildings.ElementAt(i);
-                Mod.Log.Debug($"Destroying building: {CombatantUtils.Label(building)}");
+                Mod.Log.Debug?.Write($"Destroying building: {CombatantUtils.Label(building)}");
 
                 building.FlagForDeath("CG_PREMAP_DESTROY", DeathMethod.DespawnedNoMessage, DamageType.NOT_SET, 1, -1, "0", true);
                 building.HandleDeath("0");

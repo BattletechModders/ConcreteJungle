@@ -20,7 +20,7 @@ namespace ConcreteJungle.Patches
                 // We are an ambush turret - check to see if the secondary target is our shell building
                 if (ModState.AmbushTurretGUIDtoBuilding[attacker.GUID].GUID == impactTargetId)
                 {
-                    Mod.Log.Debug($"Attack from ambush turret would hit it's shell building - preventing!");
+                    Mod.Log.Debug?.Write($"Attack from ambush turret would hit it's shell building - preventing!");
                     __result = false;
                     impactTargetId = null;
                     impactHitLocation = 0;
@@ -41,12 +41,12 @@ namespace ConcreteJungle.Patches
         {
             if (source != null && ModState.IsUrbanBiome && ModState.AmbushTurretGUIDtoBuilding.ContainsKey(source.GUID) && !(target is BattleTech.Building))
             {
-                Mod.Log.Trace($"___VISIBILITY: SOURCE {CombatantUtils.Label(source)} TO TARGET {CombatantUtils.Label(target)}");
+                Mod.Log.Trace?.Write($"___VISIBILITY: SOURCE {CombatantUtils.Label(source)} TO TARGET {CombatantUtils.Label(target)}");
             }
 
             if (source is Turret turret && ModState.AmbushTurretGUIDtoBuilding.Keys.Contains(turret.GUID))
             {
-                Mod.Log.Trace($"Turret {CombatantUtils.Label(turret)} is calculating it's LOS");
+                Mod.Log.Trace?.Write($"Turret {CombatantUtils.Label(turret)} is calculating it's LOS");
                 ModState.CurrentTurretForLOS = turret;
             }
 
@@ -56,7 +56,7 @@ namespace ConcreteJungle.Patches
         {
             if (source != null && ModState.IsUrbanBiome && ModState.AmbushTurretGUIDtoBuilding.ContainsKey(source.GUID) && !(target is BattleTech.Building))
             {
-                Mod.Log.Trace($"___VISIBILITY RESULT: {__result}");
+                Mod.Log.Trace?.Write($"___VISIBILITY RESULT: {__result}");
             }
 
             if (ModState.CurrentTurretForLOS != null)
@@ -116,7 +116,7 @@ namespace ConcreteJungle.Patches
                 // Increment vision cost only slightly if it's inside our shell building
                 if (encounterLayerData.mapEncounterLayerDataCells[list[i].Z, list[i].X].HasSpecifiedBuilding(shellBuildingGUID))
                 {
-                    Mod.Log.Trace($" Point x={list[i].X} z={list[i].Z} is inside the shell building, adding vision cost normally.");
+                    Mod.Log.Trace?.Write($" Point x={list[i].X} z={list[i].Z} is inside the shell building, adding vision cost normally.");
                     sumVisionCost += stepDelta;
                 }
                 else
@@ -158,12 +158,12 @@ namespace ConcreteJungle.Patches
         {
             if (!source.team.IsLocalPlayer && !(target is BattleTech.Building building))
             {
-                Mod.Log.Trace($"== CALCULATING LOF FROM {CombatantUtils.Label(source)} TO TARGET: {CombatantUtils.Label(source)}");
+                Mod.Log.Trace?.Write($"== CALCULATING LOF FROM {CombatantUtils.Label(source)} TO TARGET: {CombatantUtils.Label(source)}");
             }
 
             if (source is Turret turret && ModState.IsUrbanBiome && ModState.AmbushTurretGUIDtoBuilding.Keys.Contains(turret.GUID))
             {
-                Mod.Log.Trace($"Turret {CombatantUtils.Label(turret)} is calculating it's LOF");
+                Mod.Log.Trace?.Write($"Turret {CombatantUtils.Label(turret)} is calculating it's LOF");
                 ModState.CurrentTurretForLOF = turret;
             }
         }
@@ -177,7 +177,7 @@ namespace ConcreteJungle.Patches
 
             if (!source.team.IsLocalPlayer && !(target is BattleTech.Building building))
             {
-                Mod.Log.Trace($"== LOF RESULT: {__result}");
+                Mod.Log.Trace?.Write($"== LOF RESULT: {__result}");
             }
         }
     }
@@ -193,7 +193,7 @@ namespace ConcreteJungle.Patches
 
             if (ModState.CurrentTurretForLOF == null) return;
 
-            Mod.Log.Trace($"Recalculating LOF from {CombatantUtils.Label(ModState.CurrentTurretForLOF)} due to collision on building shell. " +
+            Mod.Log.Trace?.Write($"Recalculating LOF from {CombatantUtils.Label(ModState.CurrentTurretForLOF)} due to collision on building shell. " +
                 $"CollisonWorldPos=> x={collisionWorldPos.X} z={collisionWorldPos.Z}");
 
             collisionWorldPos = p1;
@@ -229,13 +229,13 @@ namespace ConcreteJungle.Patches
 
                 if (encounterLayerData.mapEncounterLayerDataCells[point.Z, point.X].HasSpecifiedBuilding(shellBuildingGUID))
                 {
-                    Mod.Log.Trace($" Point x={point.X} z={point.Z} is inside the shell building, continuing.");
+                    Mod.Log.Trace?.Write($" Point x={point.X} z={point.Z} is inside the shell building, continuing.");
                     continue;
                 }
 
                 if (targetIsABuilding && encounterLayerData.mapEncounterLayerDataCells[point.Z, point.X].HasSpecifiedBuilding(targetedBuildingGuid))
                 {
-                    Mod.Log.Trace($" Building {targetedBuildingGuid} conflicts with the LoS, collision at x={collisionWorldPos.X} z={collisionWorldPos.Z}");
+                    Mod.Log.Trace?.Write($" Building {targetedBuildingGuid} conflicts with the LoS, collision at x={collisionWorldPos.X} z={collisionWorldPos.Z}");
                     collisionWorldPos = bresenhamLinePoints[i];
                     __result = true;
                     return;
@@ -243,14 +243,14 @@ namespace ConcreteJungle.Patches
 
                 if (mapMetaData.mapTerrainDataCells[point.Z, point.X].cachedHeight > collisionPointHeight)
                 {
-                    Mod.Log.Trace($" Collision on terrain at position x={collisionWorldPos.X} z={collisionWorldPos.Z}");
+                    Mod.Log.Trace?.Write($" Collision on terrain at position x={collisionWorldPos.X} z={collisionWorldPos.Z}");
                     collisionWorldPos = bresenhamLinePoints[i];
                     __result = false;
                     return;
                 }
             }
 
-            Mod.Log.Trace($"No collision detected, changing LoF to true. CollisonWorldPos => x ={ collisionWorldPos.X} z ={ collisionWorldPos.Z}");
+            Mod.Log.Trace?.Write($"No collision detected, changing LoF to true. CollisonWorldPos => x ={ collisionWorldPos.X} z ={ collisionWorldPos.Z}");
 
             __result = true;
             return;

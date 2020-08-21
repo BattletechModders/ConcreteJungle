@@ -12,30 +12,30 @@ namespace ConcreteJungle.Extensions
 
             float totalDamage = damageAmount + directStructureDamage;
             ModState.Combat.MessageCenter.PublishMessage(new TakeDamageMessage(hitInfo.attackerId, target.GUID, totalDamage));
-            Mod.Log.Debug("Published damage message for building.");
+            Mod.Log.Debug?.Write("Published damage message for building.");
 
             target.StatCollection.ModifyStat<float>(hitInfo.attackerId, hitInfo.stackItemUID, "Structure", StatCollection.StatOperation.Float_Subtract, totalDamage, -1, true);
-            Mod.Log.Debug("Modified structure");
+            Mod.Log.Debug?.Write("Modified structure");
 
             Vector3 vector = hitInfo.hitPositions[0] - attackOrigin;
             vector.Normalize();
-            Mod.Log.Debug($"Normalized attack vector is: {vector}");
+            Mod.Log.Debug?.Write($"Normalized attack vector is: {vector}");
 
             if (target.DestructibleObjectGroup != null)
             {
                 target.DestructibleObjectGroup.TakeDamage(hitInfo.hitPositions[hitIndex], vector,
                     totalDamage + ModState.Combat.Constants.ResolutionConstants.BuildingDestructionForceMultiplier, totalDamage);
             }
-            Mod.Log.Debug($"Post destructible objects");
+            Mod.Log.Debug?.Write($"Post destructible objects");
 
             if (target.UrbanDestructible != null)
             {
                 target.UrbanDestructible.TakeDamage(hitInfo, hitIndex, weapon, vector, totalDamage);
             }
-            Mod.Log.Debug($"Post urban destructible");
+            Mod.Log.Debug?.Write($"Post urban destructible");
 
             target.ResolveWeaponDamage(hitInfo);
-            Mod.Log.Debug($"Resolving damage outcomes");
+            Mod.Log.Debug?.Write($"Resolving damage outcomes");
         }
     }
 }

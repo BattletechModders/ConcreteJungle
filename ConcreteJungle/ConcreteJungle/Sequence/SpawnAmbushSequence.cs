@@ -41,7 +41,7 @@ namespace ConcreteJungle.Sequence
         {
             base.OnAdded();
             this.SetState(SpawnAmbushSequenceState.Taunting);
-            Mod.Log.Debug($"Starting new SpawnAmbushSequence in state: {this.state}");
+            Mod.Log.Debug?.Write($"Starting new SpawnAmbushSequence in state: {this.state}");
         }
 
         public override void OnUpdate()
@@ -95,7 +95,7 @@ namespace ConcreteJungle.Sequence
                     BattleTech.Building buildingToCollapse = this.BuildingsToCollapse[0];
                     this.BuildingsToCollapse.RemoveAt(0);
 
-                    Mod.Log.Debug($"Collapsing ambush building: {CombatantUtils.Label(buildingToCollapse)}");
+                    Mod.Log.Debug?.Write($"Collapsing ambush building: {CombatantUtils.Label(buildingToCollapse)}");
                     buildingToCollapse.FlagForDeath("Ambush Collapse", DeathMethod.Unknown, DamageType.Artillery, 0, -1, "0", false);
                     buildingToCollapse.HandleDeath("0");
                 }
@@ -134,7 +134,7 @@ namespace ConcreteJungle.Sequence
                         }
                     }
                     
-                    Mod.Log.Debug($"Ambush attack from actor: {CombatantUtils.Label(actor)}");
+                    Mod.Log.Debug?.Write($"Ambush attack from actor: {CombatantUtils.Label(actor)}");
                     AttackStackSequence attackSequence = new AttackStackSequence(actor, closestTarget, actor.CurrentPosition, actor.CurrentRotation,
                         selectedWeapons);
                     ModState.Combat.MessageCenter.PublishMessage(new AddSequenceToStackMessage(attackSequence));
@@ -152,13 +152,13 @@ namespace ConcreteJungle.Sequence
             switch(newState)
             {
                 case SpawnAmbushSequenceState.Collapsing:
-                    Mod.Log.Debug("Destroying ambush buildings");
+                    Mod.Log.Debug?.Write("Destroying ambush buildings");
                     return;
                 case SpawnAmbushSequenceState.Attacking:
-                    Mod.Log.Debug("Actors are attacking targets");
+                    Mod.Log.Debug?.Write("Actors are attacking targets");
                     break;
                 case SpawnAmbushSequenceState.Finished:
-                    Mod.Log.Debug("Finished with SpawnAmbushSequence");
+                    Mod.Log.Debug?.Write("Finished with SpawnAmbushSequence");
                     base.ClearCamera();
                     return;
                 default:
@@ -171,7 +171,7 @@ namespace ConcreteJungle.Sequence
         {
             if (!hasTaunted)
             {
-                Mod.Log.Debug("Taunting player.");
+                Mod.Log.Debug?.Write("Taunting player.");
                 // Create a quip
                 Guid g = Guid.NewGuid();
                 QuipHelper.PlayQuip(ModState.Combat, g.ToString(), 

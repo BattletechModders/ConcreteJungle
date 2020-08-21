@@ -32,18 +32,18 @@ namespace ConcreteJungle.Patches
                     int threshold = (int)Math.Ceiling(ModState.CurrentAmbushChance * 100f);
                     if (roll <= threshold)
                     {                        
-                        Mod.Log.Info($" Roll: {roll} is under current threshold: {threshold}, enabling possible ambush");
+                        Mod.Log.Info?.Write($" Roll: {roll} is under current threshold: {threshold}, enabling possible ambush");
                         wasAmbushed = true;
                     }
                     else
                     {
                         ModState.CurrentAmbushChance += Mod.Config.Ambush.ChancePerActor;
-                        Mod.Log.Info($" Roll: {roll} was over threshold: {threshold}, increasing ambush chance to: {ModState.CurrentAmbushChance} for next position.");
+                        Mod.Log.Info?.Write($" Roll: {roll} was over threshold: {threshold}, increasing ambush chance to: {ModState.CurrentAmbushChance} for next position.");
                     }
 
                     // For the given origin, find how many potential buildings there are.
                     List<BattleTech.Building> originCandidates = CandidateBuildingsHelper.ClosestCandidatesToPosition(origin, Mod.Config.Ambush.SearchRadius);
-                    Mod.Log.Debug($" Found {originCandidates.Count} candidate buildings for originPos: {origin}");
+                    Mod.Log.Debug?.Write($" Found {originCandidates.Count} candidate buildings for originPos: {origin}");
                     ambushSites.Add(origin, originCandidates);
 
                 }
@@ -53,19 +53,19 @@ namespace ConcreteJungle.Patches
                 if (wasAmbushed)
                 {
                     // Sort the ambushSites by number of buildings to maximize ambush success
-                    Mod.Log.Debug("Sorting sites by potential buildings.");
+                    Mod.Log.Debug?.Write("Sorting sites by potential buildings.");
                     List<KeyValuePair<Vector3, List<BattleTech.Building>>> sortedSites = ambushSites.ToList();
                     sortedSites.Sort((x, y) => x.Value.Count.CompareTo(y.Value.Count));
 
                     Vector3 ambushOrigin = sortedSites[0].Key;
-                    Mod.Log.Debug($"Spawning an ambush at position: {ambushOrigin}");
+                    Mod.Log.Debug?.Write($"Spawning an ambush at position: {ambushOrigin}");
 
                     // Randomly determine an ambush type by weight
                     List<AmbushType> shuffledTypes = new List<AmbushType>();
                     shuffledTypes.AddRange(Mod.Config.Ambush.AmbushTypes);
                     shuffledTypes.Shuffle<AmbushType>();
                     AmbushType ambushType = shuffledTypes[0];
-                    Mod.Log.Info($"Ambush type of: {ambushType} will be applied at position: {ambushOrigin}");
+                    Mod.Log.Info?.Write($"Ambush type of: {ambushType} will be applied at position: {ambushOrigin}");
 
                     switch(ambushType)
                     {
@@ -82,7 +82,7 @@ namespace ConcreteJungle.Patches
                             SpawnAmbushHelper.SpawnAmbush(ambushOrigin, AmbushType.Vehicle);
                             break;
                         default:
-                            Mod.Log.Error($"UNKNOWN AMBUSH TYPE: {ambushType} - CANNOT PROCEED!");
+                            Mod.Log.Error?.Write($"UNKNOWN AMBUSH TYPE: {ambushType} - CANNOT PROCEED!");
                             break;
 
                     }
@@ -105,18 +105,18 @@ namespace ConcreteJungle.Patches
     {
         public static void Postfix(TurnDirector __instance, MessageCenterMessage message)
         {
-            Mod.Log.Trace("TD:OICC - entered.");
+            Mod.Log.Trace?.Write("TD:OICC - entered.");
 
             ModState.IsUrbanBiome = ModState.Combat.ActiveContract.ContractBiome == Biome.BIOMESKIN.urbanHighTech;
             if (!ModState.IsUrbanBiome)
             {
-                Mod.Log.Info("Contract has non-urban biome. Skipping processing.");
+                Mod.Log.Info?.Write("Contract has non-urban biome. Skipping processing.");
                 return;
             }
-            Mod.Log.Info($"Contract has Urban High Tech biome, enabling mod features.");
+            Mod.Log.Info?.Write($"Contract has Urban High Tech biome, enabling mod features.");
 
             ModState.ContractDifficulty = ModState.Combat.ActiveContract.Override.finalDifficulty;
-            Mod.Log.Info($"Using contractOverride finalDifficulty of: {ModState.ContractDifficulty}");
+            Mod.Log.Info?.Write($"Using contractOverride finalDifficulty of: {ModState.ContractDifficulty}");
 
             foreach (Team team in ModState.Combat.Teams)
             {
@@ -124,14 +124,14 @@ namespace ConcreteJungle.Patches
                 else if (team.GUID == TeamDefinition.TargetsAllyTeamDefinitionGuid) ModState.TargetAllyTeam = team;
                 else if (team.GUID == TeamDefinition.HostileToAllTeamDefinitionGuid) ModState.HostileToAllTeam = team;
             }
-            Mod.Log.Info($"" +
+            Mod.Log.Info?.Write($"" +
                 $"TargetTeam identified as: {ModState.TargetTeam?.DisplayName}  " +
                 $"TargetAllyTeam identified as: {ModState.TargetAllyTeam?.DisplayName}  " +
                 $"HostileToAllTeam identified as: {ModState.HostileToAllTeam?.DisplayName}.");
 
             // TODO: Make this much more powerful and varied.
             ModState.AmbushTeam = ModState.TargetTeam;
-            Mod.Log.Info($"Using team: {ModState.AmbushTeam.DisplayName} as Ambush team.");
+            Mod.Log.Info?.Write($"Using team: {ModState.AmbushTeam.DisplayName} as Ambush team.");
 
             // Filter the AmbushDefs by contract difficulty. If we don't have ambushes for our contract difficulty,
             //   there's a configuration error - abort! This has to come before data loading as it sets
@@ -140,7 +140,7 @@ namespace ConcreteJungle.Patches
             if (!haveAmbushes)
             {
                 ModState.IsUrbanBiome = false;
-                Mod.Log.Warn("Incorrect filter configuration - disabling ambushes!");
+                Mod.Log.Warn?.Write("Incorrect filter configuration - disabling ambushes!");
                 return;
             }
 
@@ -151,18 +151,18 @@ namespace ConcreteJungle.Patches
             }
             catch (Exception e)
             {
-                Mod.Log.Error("Failed to load ambush resources due to exception!", e);
+                Mod.Log.Error?.Write(e, "Failed to load ambush resources due to exception!");
                 ModState.IsUrbanBiome = false;
             }
 
             // Find candidate buildings
             CandidateBuildingsHelper.DoInitialFilter(__instance.Combat);
-            Mod.Log.Info($"Contract initially has: {ModState.CandidateBuildings.Count} candidate buildings");
+            Mod.Log.Info?.Write($"Contract initially has: {ModState.CandidateBuildings.Count} candidate buildings");
 
             // Devestate buildings
             DevestationHelper.DevestateBuildings();
 
-            Mod.Log.Info($"After devestation, map has {ModState.CandidateBuildings.Count} candidate buildings.");
+            Mod.Log.Info?.Write($"After devestation, map has {ModState.CandidateBuildings.Count} candidate buildings.");
         }
 
         static private bool FilterAmbushes()
@@ -175,8 +175,8 @@ namespace ConcreteJungle.Patches
                 .ToList();
             if (filteredExpAmbushes.Count != 1)
             {
-                Mod.Log.Error("Mod is misconfigured! Ambush defs cannot have overlapping or missing difficulty ranges!  Disabling mod.");
-                Mod.Log.Error("  Error in ExplosionAmbush.Ambushes.SpawnPool!");
+                Mod.Log.Error?.Write("Mod is misconfigured! Ambush defs cannot have overlapping or missing difficulty ranges!  Disabling mod.");
+                Mod.Log.Error?.Write("  Error in ExplosionAmbush.Ambushes.SpawnPool!");
                 success = false;
             }
             else
@@ -189,8 +189,8 @@ namespace ConcreteJungle.Patches
                 .ToList();
             if (filteredInfantryAmbushes.Count != 1)
             {
-                Mod.Log.Error("Mod is misconfigured! Ambush defs cannot have overlapping or missing difficulty ranges!  Disabling mod.");
-                Mod.Log.Error("  Error in InfantryAmbushes.Ambushes.SpawnPool!");
+                Mod.Log.Error?.Write("Mod is misconfigured! Ambush defs cannot have overlapping or missing difficulty ranges!  Disabling mod.");
+                Mod.Log.Error?.Write("  Error in InfantryAmbushes.Ambushes.SpawnPool!");
                 success = false;
             }
             else
@@ -203,8 +203,8 @@ namespace ConcreteJungle.Patches
                 .ToList();
             if (filteredMechAmbushes.Count != 1)
             {
-                Mod.Log.Error("Mod is misconfigured! Ambush defs cannot have overlapping or missing difficulty ranges!  Disabling mod.");
-                Mod.Log.Error("  Error in MechAmbush.Ambushes.SpawnPool!");
+                Mod.Log.Error?.Write("Mod is misconfigured! Ambush defs cannot have overlapping or missing difficulty ranges!  Disabling mod.");
+                Mod.Log.Error?.Write("  Error in MechAmbush.Ambushes.SpawnPool!");
                 success = false;
             }
             else
@@ -217,8 +217,8 @@ namespace ConcreteJungle.Patches
                 .ToList();
             if (filteredVehicleAmbushes.Count != 1)
             {
-                Mod.Log.Error("Mod is misconfigured! Ambush defs cannot have overlapping or missing difficulty ranges!  Disabling mod.");
-                Mod.Log.Error("  Error in VehicleAmbush.Ambushes.SpawnPool!");
+                Mod.Log.Error?.Write("Mod is misconfigured! Ambush defs cannot have overlapping or missing difficulty ranges!  Disabling mod.");
+                Mod.Log.Error?.Write("  Error in VehicleAmbush.Ambushes.SpawnPool!");
                 success = false;
             }
             else

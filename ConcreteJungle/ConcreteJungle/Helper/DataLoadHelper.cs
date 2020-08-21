@@ -9,11 +9,11 @@ namespace ConcreteJungle.Helper
         public static void LoadAmbushResources(CombatGameState combat)
         {
             // Load the necessary turret defs
-            Mod.Log.Info($"== BEGIN load request for all possible ambush spawns");
+            Mod.Log.Info?.Write($"== BEGIN load request for all possible ambush spawns");
             LoadRequest asyncSpawnReq = combat.DataManager.CreateLoadRequest(
                 delegate (LoadRequest loadRequest) { OnLoadComplete(combat); }, false
                 );
-            Mod.Log.Info($" -- Pre-load counts => weaponDefs: {combat.DataManager.WeaponDefs.Count}  " +
+            Mod.Log.Info?.Write($" -- Pre-load counts => weaponDefs: {combat.DataManager.WeaponDefs.Count}  " +
                 $"pilotDefs: {combat.DataManager.PilotDefs.Count}  mechDefs: {combat.DataManager.MechDefs.Count}" +
                 $"turretDefs: {combat.DataManager.TurretDefs.Count}  vehicleDefs: {combat.DataManager.VehicleDefs.Count}");
 
@@ -43,22 +43,22 @@ namespace ConcreteJungle.Helper
             // Add the filtered requests to the async load
             foreach (string defId in turretsToLoad)
             {
-                Mod.Log.Info($"  - TurretDefId: {defId}");
+                Mod.Log.Info?.Write($"  - TurretDefId: {defId}");
                 asyncSpawnReq.AddBlindLoadRequest(BattleTechResourceType.TurretDef, defId, new bool?(false));
             }
             foreach (string defId in pilotsToLoad)
             {
-                Mod.Log.Info($"  - PilotDefId: {defId}");
+                Mod.Log.Info?.Write($"  - PilotDefId: {defId}");
                 asyncSpawnReq.AddBlindLoadRequest(BattleTechResourceType.PilotDef, defId, new bool?(false));
             }
             foreach (string defId in mechToLoad)
             {
-                Mod.Log.Info($"  - MechDefId: {defId}");
+                Mod.Log.Info?.Write($"  - MechDefId: {defId}");
                 asyncSpawnReq.AddBlindLoadRequest(BattleTechResourceType.MechDef, defId, new bool?(false));
             }
             foreach (string defId in vehiclesToLoad)
             {
-                Mod.Log.Info($"  - VehicleDefId: {defId}");
+                Mod.Log.Info?.Write($"  - VehicleDefId: {defId}");
                 asyncSpawnReq.AddBlindLoadRequest(BattleTechResourceType.VehicleDef, defId, new bool?(false));
             }
 
@@ -68,8 +68,8 @@ namespace ConcreteJungle.Helper
 
         private static void OnLoadComplete(CombatGameState combat)
         {
-            Mod.Log.Info($"== END load request for all possible ambush spawns");
-            Mod.Log.Info($" -- Post-load counts => weaponDefs: {combat.DataManager.WeaponDefs.Count}  " +
+            Mod.Log.Info?.Write($"== END load request for all possible ambush spawns");
+            Mod.Log.Info?.Write($" -- Post-load counts => weaponDefs: {combat.DataManager.WeaponDefs.Count}  " +
                 $"pilotDefs: {combat.DataManager.PilotDefs.Count}  mechDefs: {combat.DataManager.MechDefs.Count}" +
                 $"turretDefs: {combat.DataManager.TurretDefs.Count}  vehicleDefs: {combat.DataManager.VehicleDefs.Count}");
         }

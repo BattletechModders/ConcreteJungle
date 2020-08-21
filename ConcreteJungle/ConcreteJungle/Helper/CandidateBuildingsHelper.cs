@@ -14,12 +14,12 @@ namespace ConcreteJungle.Helper
             {
                 if (!building.IsDead && (building.CurrentPosition - originPos).magnitude < searchRadius)
                 {
-                    Mod.Log.Debug($" -- Candidate building: {CombatantUtils.Label(building)} at position: {building.CurrentPosition} is within search range.");
+                    Mod.Log.Debug?.Write($" -- Candidate building: {CombatantUtils.Label(building)} at position: {building.CurrentPosition} is within search range.");
                     candidates.Add(building);
                 }
                 else
                 {
-                    Mod.Log.Trace($" -- Candidate building: {CombatantUtils.Label(building)} at position: {building.CurrentPosition} is beyond search range");
+                    Mod.Log.Trace?.Write($" -- Candidate building: {CombatantUtils.Label(building)} at position: {building.CurrentPosition} is beyond search range");
                 }
             }
 
@@ -43,54 +43,54 @@ namespace ConcreteJungle.Helper
                 // Remove any that have become objective targets
                 if (building.objectiveGUIDS.Contains(combat.GUID))
                 {
-                    Mod.Log.Debug($"   -- Building is an objective, needs to be removed.");
+                    Mod.Log.Debug?.Write($"   -- Building is an objective, needs to be removed.");
                     guidsToRemove.Add(building.GUID);
                 }
 
                 // Remove any that are dead
                 if (building.IsDead || building.IsFlaggedForDeath)
                 {
-                    Mod.Log.Debug($"   -- Building is an dead or dying, must be removed.");
+                    Mod.Log.Debug?.Write($"   -- Building is an dead or dying, must be removed.");
                     guidsToRemove.Add(building.GUID);
                 }
 
                 // Sanity check infantry spawn
                 if (ModState.AmbushBuildingGUIDToTurrets.ContainsKey(building.GUID))
                 {
-                    Mod.Log.Debug($"   -- didn't clean up after myself in infantry ambush, removing trap shell.");
+                    Mod.Log.Debug?.Write($"   -- didn't clean up after myself in infantry ambush, removing trap shell.");
                     guidsToRemove.Add(building.GUID);
                 }
             }
 
             ModState.CandidateBuildings.RemoveAll(x => guidsToRemove.Contains(x.GUID));
-            Mod.Log.Debug($"Cleanup - removed {guidsToRemove.Count} buildings.");
+            Mod.Log.Debug?.Write($"Cleanup - removed {guidsToRemove.Count} buildings.");
 
         }
 
         // Invoke when the contract is initialized, but after all Destructible assets have been created
         public static void DoInitialFilter(CombatGameState combat)
         {
-            Mod.Log.Debug("Filtering candidate buidlings:");
+            Mod.Log.Debug?.Write("Filtering candidate buidlings:");
             ModState.CandidateBuildings.Clear();
             foreach (ICombatant combatant in combat.GetAllCombatants())
             {
                 if (combatant is BattleTech.Building building)
                 {
-                    Mod.Log.Debug($" Found building {CombatantUtils.Label(building)}");
-                    Mod.Log.Trace($"  -- isTabTarget: {building.IsTabTarget}");
+                    Mod.Log.Debug?.Write($" Found building {CombatantUtils.Label(building)}");
+                    Mod.Log.Trace?.Write($"  -- isTabTarget: {building.IsTabTarget}");
 
                     if (building.BuildingDef != null)
                     {
-                        Mod.Log.Trace($"   -- BuildingDef:");
-                        Mod.Log.Trace($"     description: '{building.BuildingDef.Description}' ");
-                        Mod.Log.Trace($"     isDestructible: {building.BuildingDef.Destructible} " +
+                        Mod.Log.Trace?.Write($"   -- BuildingDef:");
+                        Mod.Log.Trace?.Write($"     description: '{building.BuildingDef.Description}' ");
+                        Mod.Log.Trace?.Write($"     isDestructible: {building.BuildingDef.Destructible} " +
                             $"structurePoints: {building.BuildingDef.StructurePoints} ");
                     }
                     else { continue; }
 
                     if (building.UrbanDestructible != null)
                     {
-                        Mod.Log.Trace($"   -- UrbanDestructible: " +
+                        Mod.Log.Trace?.Write($"   -- UrbanDestructible: " +
                             $"name: {building.UrbanDestructible.name} " +
                             $"canBeDesolation: {building.UrbanDestructible.CanBeDesolation} " +
                             $"currentDesolationState: {building.UrbanDestructible.CurDesolationState}"
@@ -100,7 +100,7 @@ namespace ConcreteJungle.Helper
 
                     if (building.objectiveGUIDS.Contains(combat.GUID))
                     {
-                        Mod.Log.Debug($"   -- Building is an objective, skipping.");
+                        Mod.Log.Debug?.Write($"   -- Building is an objective, skipping.");
                         continue;
                     }
 
@@ -108,7 +108,7 @@ namespace ConcreteJungle.Helper
                         building.UrbanDestructible != null && building.UrbanDestructible.CanBeDesolation &&
                         !building.IsTabTarget)
                     {
-                        Mod.Log.Debug($"  -- Building {CombatantUtils.Label(building)} meets criteria, adding as trap candidate.");
+                        Mod.Log.Debug?.Write($"  -- Building {CombatantUtils.Label(building)} meets criteria, adding as trap candidate.");
                         ModState.CandidateBuildings.Add(building);
                     }
 
