@@ -110,7 +110,7 @@ namespace ConcreteJungle.Patches
             ModState.IsUrbanBiome = ModState.Combat.ActiveContract.ContractBiome == Biome.BIOMESKIN.urbanHighTech;
             if (!ModState.IsUrbanBiome)
             {
-                Mod.Log.Info?.Write("Contract has non-urban biome. Skipping processing.");
+                Mod.Log.Info?.Write($"Contract has non-urban biome ({ModState.Combat.ActiveContract.ContractBiome}). Skipping processing.");
                 return;
             }
             Mod.Log.Info?.Write($"Contract has Urban High Tech biome, enabling mod features.");
