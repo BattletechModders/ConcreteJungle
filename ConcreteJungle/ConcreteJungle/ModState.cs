@@ -27,8 +27,8 @@ namespace ConcreteJungle {
 
         // -- General ambush state
         public static int Ambushes = 0;
-        public static List<Vector3> AmbushOrigins = new List<Vector3>();
-        public static List<Vector3> PotentialAmbushOrigins = new List<Vector3>();
+        public static HashSet<Vector3> AmbushOrigins = new HashSet<Vector3>();
+        public static HashSet<Vector3> PotentialAmbushOrigins = new HashSet<Vector3>();
         public static float CurrentAmbushChance = Mod.Config.Ambush.BaseChance;
         public static Lance CurrentSpawningLance = null;
 

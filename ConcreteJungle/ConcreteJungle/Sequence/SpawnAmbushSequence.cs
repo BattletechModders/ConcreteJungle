@@ -1,5 +1,6 @@
 ﻿using BattleTech;
 using ConcreteJungle.Helper;
+using IRBTModUtils.Extension;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -112,6 +113,7 @@ namespace ConcreteJungle.Sequence
                 {
                     AbstractActor actor = this.AttackingActors[0];
                     this.AttackingActors.RemoveAt(0);
+                    Mod.Log.Info?.Write($"Ambush attack from actor: {actor.DistinctId()}");
 
                     // Find the closest target
                     ICombatant closestTarget = AllTargets[0];
@@ -125,16 +127,18 @@ namespace ConcreteJungle.Sequence
                     }
 
                     float currentRange = (closestTarget.CurrentPosition - actor.CurrentPosition).magnitude;
+                    Mod.Log.Info?.Write($" -- ambush attack targets closest actor: {closestTarget.DistinctId()} at distance: {currentRange}");
+
                     List<Weapon> selectedWeapons = new List<Weapon>();
                     foreach (Weapon weapon in actor.Weapons)
                     {
                         if (weapon.CanFire && weapon.MinRange < currentRange)
                         {
                             selectedWeapons.Add(weapon);
+                            Mod.Log.Info?.Write($" -- ambush weapon: {weapon.UIName}");
                         }
                     }
                     
-                    Mod.Log.Debug?.Write($"Ambush attack from actor: {CombatantUtils.Label(actor)}");
                     AttackStackSequence attackSequence = new AttackStackSequence(actor, closestTarget, actor.CurrentPosition, actor.CurrentRotation,
                         selectedWeapons);
                     ModState.Combat.MessageCenter.PublishMessage(new AddSequenceToStackMessage(attackSequence));
