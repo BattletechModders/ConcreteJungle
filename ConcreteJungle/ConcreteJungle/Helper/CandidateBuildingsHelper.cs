@@ -70,7 +70,7 @@ namespace ConcreteJungle.Helper
         // Invoke when the contract is initialized, but after all Destructible assets have been created
         public static void DoInitialFilter(CombatGameState combat)
         {
-            Mod.Log.Debug?.Write("Filtering candidate buidlings:");
+            Mod.Log.Debug?.Write("Filtering candidate buildings:");
             ModState.CandidateBuildings.Clear();
             foreach (ICombatant combatant in combat.GetAllCombatants())
             {
@@ -100,7 +100,7 @@ namespace ConcreteJungle.Helper
 
                     if (building.objectiveGUIDS.Contains(combat.GUID))
                     {
-                        Mod.Log.Debug?.Write($"   -- Building is an objective, skipping.");
+                        Mod.Log.Info?.Write($"   -- Building is an objective, skipping.");
                         continue;
                     }
 
@@ -108,7 +108,7 @@ namespace ConcreteJungle.Helper
                         building.UrbanDestructible != null && building.UrbanDestructible.CanBeDesolation &&
                         !building.IsTabTarget)
                     {
-                        Mod.Log.Debug?.Write($"  -- Building {CombatantUtils.Label(building)} meets criteria, adding as trap candidate.");
+                        Mod.Log.Info?.Write($"  -- Building {CombatantUtils.Label(building)} meets criteria, adding as trap candidate.");
                         ModState.CandidateBuildings.Add(building);
                     }
 

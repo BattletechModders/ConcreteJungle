@@ -22,17 +22,26 @@ namespace ConcreteJungle.Patches
                 // Re-Filter the candidates to try to catch buildings that were marked contract objectives
                 CandidateBuildingsHelper.FilterOnTurnActorIncrement(__instance.Combat);
 
-                bool wasAmbushed = false;
+
+                // Determine potential ambush sites based upon the origins
                 Dictionary<Vector3, List<BattleTech.Building>> ambushSites = new Dictionary<Vector3, List<BattleTech.Building>>();
                 foreach (Vector3 origin in ModState.PotentialAmbushOrigins)
                 {
-                    // Check that we haven't exhausted the max traps for this mission
-                    if (ModState.Ambushes >= Mod.Config.Ambush.MaxPerMap) break;
+                    // For the given origin, find how many potential buildings there are.
+                    List<BattleTech.Building> originCandidates = CandidateBuildingsHelper.ClosestCandidatesToPosition(origin, Mod.Config.Ambush.SearchRadius);
+                    Mod.Log.Debug?.Write($" Found {originCandidates.Count} candidate buildings for originPos: {origin}");
+                    ambushSites.Add(origin, originCandidates);
+                }
+                ModState.PotentialAmbushOrigins.Clear(); // reset potential origins for next round
 
+                // Determine if the unit was ambushed this turn
+                bool wasAmbushed = false;
+                if (ModState.Ambushes < Mod.Config.Ambush.MaxPerMap && ambushSites.Count > 0)
+                {
                     float roll = Mod.Random.Next(1, 100);
                     int threshold = (int)Math.Ceiling(ModState.CurrentAmbushChance * 100f);
                     if (roll <= threshold)
-                    {                        
+                    {
                         Mod.Log.Info?.Write($" Roll: {roll} is under current threshold: {threshold}, enabling possible ambush");
                         wasAmbushed = true;
                     }
@@ -41,15 +50,7 @@ namespace ConcreteJungle.Patches
                         ModState.CurrentAmbushChance += Mod.Config.Ambush.ChancePerActor;
                         Mod.Log.Info?.Write($" Roll: {roll} was over threshold: {threshold}, increasing ambush chance to: {ModState.CurrentAmbushChance} for next position.");
                     }
-
-                    // For the given origin, find how many potential buildings there are.
-                    List<BattleTech.Building> originCandidates = CandidateBuildingsHelper.ClosestCandidatesToPosition(origin, Mod.Config.Ambush.SearchRadius);
-                    Mod.Log.Debug?.Write($" Found {originCandidates.Count} candidate buildings for originPos: {origin}");
-                    ambushSites.Add(origin, originCandidates);
-
                 }
-
-                ModState.PotentialAmbushOrigins.Clear(); // reset potential origins for next round
 
                 if (wasAmbushed)
                 {
@@ -122,6 +123,7 @@ namespace ConcreteJungle.Patches
                 if (overrrideId.Equals(ModState.Combat.ActiveContract.Override.ID, StringComparison.InvariantCultureIgnoreCase))
                 {
                     Mod.Log.Info?.Write($"Contract with override ID '{overrrideId}' is excluded, skipping processing.");
+                    ModState.IsUrbanBiome = false;
                     return;
                 }
             }
