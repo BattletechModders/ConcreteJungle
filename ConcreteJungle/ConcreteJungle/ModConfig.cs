@@ -40,8 +40,10 @@ namespace ConcreteJungle {
                 $"BaseChance: {this.Ambush.BaseChance}  ChancePerActor: {this.Ambush.ChancePerActor}  " +
                 $"SearchRadius: {this.Ambush.SearchRadius}");
             string ambushWeights = String.Join(", ", this.Ambush.AmbushWeights);
-            Mod.Log.Info?.Write($" AmbushWeights: {ambushWeights}");
-            
+            Mod.Log.Info?.Write($" AmbushWeights: {ambushWeights}  EnableOnRound: {Ambush.EnableOnRound}");
+            string blacklistedContracts = String.Join(", ", this.Ambush.BlacklistedContracts);
+            Mod.Log.Info?.Write($" Blacklisted Contracts: {blacklistedContracts}");
+
             Mod.Log.Info?.Write(" -- Devastation Options");
             Mod.Log.Info?.Write($"   Enabled: {this.Devastation.Enabled}  " +
                 $"DefaultMin: {this.Devastation.DefaultRange.MinDevastation}  DefaultMax: {this.Devastation.DefaultRange.MaxDevastation}"

@@ -10,6 +10,9 @@ namespace ConcreteJungle
         public float BaseChance = 0.3f;
         public float ChancePerActor = 0.05f;
 
+        public int EnableOnRound = 3;
+        public string[] BlacklistedContracts = { };
+
         // How far from the trigger origin should we search for suitable buildings
         public float SearchRadius = 250.0f;
 

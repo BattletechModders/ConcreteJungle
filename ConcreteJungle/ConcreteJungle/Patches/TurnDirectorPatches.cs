@@ -15,8 +15,9 @@ namespace ConcreteJungle.Patches
         static void Prefix(TurnDirector __instance)
         {
             if (!__instance.IsInterleaved && ! __instance.IsInterleavePending &&
-                __instance.ActiveTurnActor is Team activeTeam && activeTeam.IsLocalPlayer &&
-                ModState.PotentialAmbushOrigins.Count != 0)
+                __instance.CurrentRound >= Mod.Config.Ambush.EnableOnRound &&
+                ModState.PotentialAmbushOrigins.Count != 0 &&
+                __instance.ActiveTurnActor is Team activeTeam && activeTeam.IsLocalPlayer)
             {
                 // Re-Filter the candidates to try to catch buildings that were marked contract objectives
                 CandidateBuildingsHelper.FilterOnTurnActorIncrement(__instance.Combat);
@@ -114,6 +115,17 @@ namespace ConcreteJungle.Patches
                 return;
             }
             Mod.Log.Info?.Write($"Contract has Urban High Tech biome, enabling mod features.");
+
+            // Check contract exclusions
+            foreach (string overrrideId in Mod.Config.Ambush.BlacklistedContracts)
+            {
+                if (overrrideId.Equals(ModState.Combat.ActiveContract.Override.ID, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    Mod.Log.Info?.Write($"Contract with override ID '{overrrideId}' is excluded, skipping processing.");
+                    return;
+                }
+            }
+            Mod.Log.Info?.Write($"Contract with override ID: {ModState.Combat.ActiveContract.Override.ID} is not blacklisted, enabling ambushes.");
 
             ModState.ContractDifficulty = ModState.Combat.ActiveContract.Override.finalDifficulty;
             Mod.Log.Info?.Write($"Using contractOverride finalDifficulty of: {ModState.ContractDifficulty}");
