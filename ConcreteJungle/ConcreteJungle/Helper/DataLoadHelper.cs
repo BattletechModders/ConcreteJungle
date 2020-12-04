@@ -26,6 +26,13 @@ namespace ConcreteJungle.Helper
                 pilotsToLoad.Add(ambushDef.PilotDefId);
             }
 
+            HashSet<string> battleArmorToLoad = new HashSet<string>();
+            foreach (MechAndPilotDef ambushDef in ModState.BattleArmorAmbushDefForContract.SpawnPool)
+            {
+                battleArmorToLoad.Add(ambushDef.MechDefId);
+                pilotsToLoad.Add(ambushDef.PilotDefId);
+            }
+
             HashSet<string> mechToLoad = new HashSet<string>();
             foreach (MechAndPilotDef ambushDef in ModState.MechAmbushDefForContract.SpawnPool)
             {
@@ -50,6 +57,11 @@ namespace ConcreteJungle.Helper
             {
                 Mod.Log.Info?.Write($"  - PilotDefId: {defId}");
                 asyncSpawnReq.AddBlindLoadRequest(BattleTechResourceType.PilotDef, defId, new bool?(false));
+            }
+            foreach (string defId in battleArmorToLoad)
+            {
+                Mod.Log.Info?.Write($"  - MechDefId: {defId}");
+                asyncSpawnReq.AddBlindLoadRequest(BattleTechResourceType.MechDef, defId, new bool?(false));
             }
             foreach (string defId in mechToLoad)
             {

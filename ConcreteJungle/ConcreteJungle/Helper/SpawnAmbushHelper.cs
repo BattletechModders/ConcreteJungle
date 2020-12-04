@@ -12,12 +12,26 @@ namespace ConcreteJungle.Helper
     {
         public static void SpawnAmbush(Vector3 ambushOrigin, AmbushType ambushType)
         {
-            if (ambushType == AmbushType.Mech && !Mod.Config.MechAmbush.Enabled) return;
-            if (ambushType == AmbushType.Vehicle && !Mod.Config.VehicleAmbush.Enabled) return;
-
             // Determine how many units we're spawning
-            int minSpawns = ambushType == AmbushType.Mech ? ModState.MechAmbushDefForContract.MinSpawns : ModState.VehicleAmbushDefForContract.MinSpawns;
-            int maxSpawns = ambushType == AmbushType.Mech ? ModState.MechAmbushDefForContract.MaxSpawns : ModState.VehicleAmbushDefForContract.MaxSpawns;
+            int minSpawns = 0, maxSpawns = 0;
+            if (ambushType == AmbushType.BattleArmor)
+            {
+                if (!Mod.Config.BattleArmorAmbush.Enabled) return;
+                minSpawns = ModState.BattleArmorAmbushDefForContract.MinSpawns;
+                maxSpawns = ModState.BattleArmorAmbushDefForContract.MaxSpawns;
+            }
+            else if (ambushType == AmbushType.Mech)
+            {
+                if (!Mod.Config.MechAmbush.Enabled) return;
+                minSpawns = ModState.MechAmbushDefForContract.MinSpawns;
+                maxSpawns = ModState.MechAmbushDefForContract.MaxSpawns;
+            }
+            else if (ambushType == AmbushType.Vehicle)
+            {
+                if (!Mod.Config.VehicleAmbush.Enabled) return;
+                minSpawns = ModState.VehicleAmbushDefForContract.MinSpawns;
+                maxSpawns = ModState.VehicleAmbushDefForContract.MaxSpawns;
+            }
 
             int actorsToSpawn = Mod.Random.Next(minSpawns, maxSpawns);
             Mod.Log.Debug?.Write($"Spawning {actorsToSpawn} actors as part of this ambush.");
@@ -44,16 +58,16 @@ namespace ConcreteJungle.Helper
                 // Spawn one unit at the origin of the building
                 buildingsToLevel.Add(building);
                 Mod.Log.Debug?.Write("Spawning actor at building origin.");
-                if (ambushType == AmbushType.Mech)
-                {
-                    AbstractActor spawnedActor = SpawnAmbushMech(ModState.AmbushTeam, ambushLance, ambushOrigin, building.CurrentPosition, building.CurrentRotation);
-                    spawnedActors.Add(spawnedActor);
-                }
-                else
-                {
-                    AbstractActor spawnedActor = SpawnAmbushVehicle(ModState.AmbushTeam, ambushLance, ambushOrigin, building.CurrentPosition, building.CurrentRotation);
-                    spawnedActors.Add(spawnedActor);
-                }
+                
+                AbstractActor spawnedActor = null;
+                if (ambushType == AmbushType.BattleArmor)
+                    spawnedActor = SpawnAmbushMech(ModState.AmbushTeam, ambushLance, ambushOrigin, building.CurrentPosition, building.CurrentRotation, ModState.BattleArmorAmbushDefForContract.SpawnPool);
+                else if (ambushType == AmbushType.Mech)
+                    spawnedActor = SpawnAmbushMech(ModState.AmbushTeam, ambushLance, ambushOrigin, building.CurrentPosition, building.CurrentRotation, ModState.MechAmbushDefForContract.SpawnPool);
+                else if (ambushType == AmbushType.Vehicle)
+                    spawnedActor = SpawnAmbushVehicle(ModState.AmbushTeam, ambushLance, ambushOrigin, building.CurrentPosition, building.CurrentRotation);
+
+                spawnedActors.Add(spawnedActor);
                 actorsToSpawn--;
 
                 // Iterate through adjacent hexes to see if we can spawn more units in the building
@@ -67,16 +81,15 @@ namespace ConcreteJungle.Helper
                     if (encounterLayerData.mapEncounterLayerDataCells[cellPoint.Z, cellPoint.X].HasSpecifiedBuilding(building.GUID))
                     {
                         Mod.Log.Debug?.Write($"Spawning actor at adjacent hex at position: {adjacentHex}");
-                        if (ambushType == AmbushType.Mech)
-                        {
-                            AbstractActor spawnedActor = SpawnAmbushMech(ModState.AmbushTeam, ambushLance, ambushOrigin, adjacentHex, building.CurrentRotation);
-                            spawnedActors.Add(spawnedActor);
-                        }
-                        else
-                        {
-                            AbstractActor spawnedActor = SpawnAmbushVehicle(ModState.AmbushTeam, ambushLance, ambushOrigin, adjacentHex, building.CurrentRotation);
-                            spawnedActors.Add(spawnedActor);
-                        }
+                        AbstractActor additionalSpawn = null;
+                        if (ambushType == AmbushType.BattleArmor)
+                            additionalSpawn = SpawnAmbushMech(ModState.AmbushTeam, ambushLance, ambushOrigin, adjacentHex, building.CurrentRotation, ModState.BattleArmorAmbushDefForContract.SpawnPool);
+                        else if (ambushType == AmbushType.Mech)
+                            additionalSpawn = SpawnAmbushMech(ModState.AmbushTeam, ambushLance, ambushOrigin, adjacentHex, building.CurrentRotation, ModState.MechAmbushDefForContract.SpawnPool);
+                        else if (ambushType == AmbushType.Vehicle)
+                            additionalSpawn = SpawnAmbushVehicle(ModState.AmbushTeam, ambushLance, ambushOrigin, adjacentHex, building.CurrentRotation);
+
+                        spawnedActors.Add(additionalSpawn);
                         actorsToSpawn--;
                     }
                     else
@@ -104,7 +117,11 @@ namespace ConcreteJungle.Helper
                 }
             }
 
-            bool applyAttacks = ambushType == AmbushType.Mech ? Mod.Config.MechAmbush.FreeAttackEnabled : Mod.Config.VehicleAmbush.FreeAttackEnabled;
+            bool applyAttacks = false;
+            if (ambushType == AmbushType.BattleArmor && Mod.Config.BattleArmorAmbush.FreeAttackEnabled) applyAttacks = true;
+            if (ambushType == AmbushType.Mech && Mod.Config.MechAmbush.FreeAttackEnabled) applyAttacks = true;
+            if (ambushType == AmbushType.Vehicle && Mod.Config.VehicleAmbush.FreeAttackEnabled) applyAttacks = true;
+
             Mod.Log.Info?.Write($"Adding SpawnAmbushSequence for {spawnedActors.Count} actors and {buildingsToLevel.Count} buildings to be leveled.");
             try
             {
@@ -158,12 +175,12 @@ namespace ConcreteJungle.Helper
             return vehicle;
         }
 
-        public static AbstractActor SpawnAmbushMech(Team team, Lance ambushLance, Vector3 ambushOrigin, Vector3 spawnPos, Quaternion spawnRot)
+        public static AbstractActor SpawnAmbushMech(Team team, Lance ambushLance, Vector3 ambushOrigin, Vector3 spawnPos, Quaternion spawnRot, List<MechAndPilotDef> spawnPool)
         {
 
             // Randomly determine one of the spawnpairs from the current ambushdef
             List<MechAndPilotDef> shuffledSpawns = new List<MechAndPilotDef>();
-            shuffledSpawns.AddRange(ModState.MechAmbushDefForContract.SpawnPool);
+            shuffledSpawns.AddRange(spawnPool);
             shuffledSpawns.Shuffle();
 
             MechAndPilotDef ambushDef = shuffledSpawns[0];

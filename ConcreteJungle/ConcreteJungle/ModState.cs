@@ -39,6 +39,7 @@ namespace ConcreteJungle {
         
         public static ExplosionAmbushDef ExplosionAmbushDefForContract = null;
         public static InfantryAmbushDef InfantryAmbushDefForContract = null;
+        public static MechAmbushDef BattleArmorAmbushDefForContract = null;
         public static MechAmbushDef MechAmbushDefForContract = null;
         public static VehicleAmbushDef VehicleAmbushDefForContract = null;
 
@@ -69,6 +70,7 @@ namespace ConcreteJungle {
 
             ExplosionAmbushDefForContract = null;
             InfantryAmbushDefForContract = null;
+            BattleArmorAmbushDefForContract = null;
             MechAmbushDefForContract = null;
             VehicleAmbushDefForContract = null;
     }

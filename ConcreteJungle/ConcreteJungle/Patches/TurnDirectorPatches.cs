@@ -77,6 +77,9 @@ namespace ConcreteJungle.Patches
                         case AmbushType.Infantry:
                             InfantryAmbushHelper.SpawnAmbush(ambushOrigin);
                             break;
+                        case AmbushType.BattleArmor:
+                            SpawnAmbushHelper.SpawnAmbush(ambushOrigin, AmbushType.BattleArmor);
+                            break;
                         case AmbushType.Mech:
                             SpawnAmbushHelper.SpawnAmbush(ambushOrigin, AmbushType.Mech);
                             break;
@@ -210,6 +213,20 @@ namespace ConcreteJungle.Patches
             else
             {
                 ModState.InfantryAmbushDefForContract = filteredInfantryAmbushes[0];
+            }
+
+            List<MechAmbushDef> filteredBattleArmorAmbushes = Mod.Config.BattleArmorAmbush.Ambushes
+                .Where(x => filterByDifficulty(x))
+                .ToList();
+            if (filteredBattleArmorAmbushes.Count != 1)
+            {
+                Mod.Log.Error?.Write("Mod is misconfigured! Ambush defs cannot have overlapping or missing difficulty ranges!  Disabling mod.");
+                Mod.Log.Error?.Write("  Error in BattleArmorAmbush.Ambushes.SpawnPool!");
+                success = false;
+            }
+            else
+            {
+                ModState.BattleArmorAmbushDefForContract = filteredBattleArmorAmbushes[0];
             }
 
             List<MechAmbushDef> filteredMechAmbushes = Mod.Config.MechAmbush.Ambushes

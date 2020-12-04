@@ -15,6 +15,7 @@ namespace ConcreteJungle {
         public DevastationOpts Devastation = new DevastationOpts();
         public ExplosionAmbushOpts ExplosionAmbush = new ExplosionAmbushOpts();
         public InfantryAmbushOpts InfantryAmbush = new InfantryAmbushOpts();
+        public MechAmbushOpts BattleArmorAmbush = new MechAmbushOpts();
         public MechAmbushOpts MechAmbush = new MechAmbushOpts();
         public VehicleAmbushOpts VehicleAmbush = new VehicleAmbushOpts();
         public QuipsConfig Quips = new QuipsConfig();
@@ -83,6 +84,24 @@ namespace ConcreteJungle {
                     sb.Append(", ");
                 }
                 Mod.Log.Info?.Write($"   Turret and PilotDefs: [ {sb} ]");
+            }
+
+            Mod.Log.Info?.Write(" -- Battle Armor Ambush Options");
+            Mod.Log.Info?.Write($"   Enabled: {this.BattleArmorAmbush.Enabled}  FreeAttackEnabled: {this.BattleArmorAmbush.FreeAttackEnabled}.");
+            foreach (MechAmbushDef ambushDef in this.BattleArmorAmbush.Ambushes)
+            {
+                Mod.Log.Info?.Write("   -- Battle Armor Ambush Def");
+                Mod.Log.Info?.Write($"   Difficulty Min: {ambushDef.MinDifficulty} => Max: {ambushDef.MaxDifficulty}");
+                Mod.Log.Info?.Write($"   Spawns Min: {ambushDef.MinSpawns} => Max: {ambushDef.MinSpawns}");
+                StringBuilder sb = new StringBuilder();
+                foreach (MechAndPilotDef loadDef in ambushDef.SpawnPool)
+                {
+                    sb.Append(loadDef.MechDefId);
+                    sb.Append("::");
+                    sb.Append(loadDef.PilotDefId);
+                    sb.Append(", ");
+                }
+                Mod.Log.Info?.Write($"   BA and PilotDefs: [ {sb} ]");
             }
 
             Mod.Log.Info?.Write(" -- Mech Ambush Options");
@@ -177,6 +196,22 @@ namespace ConcreteJungle {
                 });
             }
 
+            if (Mod.Config.BattleArmorAmbush.Ambushes.Count == 0)
+            {
+                Mod.Config.BattleArmorAmbush.Ambushes.Add(new MechAmbushDef
+                {
+                    MinDifficulty = 1,
+                    MaxDifficulty = 10,
+                    MinSpawns = 2,
+                    MaxSpawns = 6,
+                    SpawnPool = new List<MechAndPilotDef>() {
+                        new MechAndPilotDef{ MechDefId = "mechdef_ba_is_standard", PilotDefId = "pilot_d3_gunner" },
+                        new MechAndPilotDef{ MechDefId = "mechdef_ba_infiltratormkii", PilotDefId = "pilot_d3_gunner" },
+                        new MechAndPilotDef{ MechDefId = "mechdef_ba_fashih", PilotDefId = "pilot_d3_gunner" }
+                    }
+                });
+            }
+
             if (Mod.Config.MechAmbush.Ambushes.Count == 0)
             {
                 Mod.Config.MechAmbush.Ambushes.Add(new MechAmbushDef
@@ -241,6 +276,9 @@ namespace ConcreteJungle {
                         break;
                     case AmbushType.Infantry:
                         if (!Mod.Config.InfantryAmbush.Enabled) throw new InvalidOperationException($"Ambush type: {type} in weight table but marked disabled!");
+                        break;
+                    case AmbushType.BattleArmor:
+                        if (!Mod.Config.BattleArmorAmbush.Enabled) throw new InvalidOperationException($"Ambush type: {type} in weight table but marked disabled!");
                         break;
                     case AmbushType.Mech:
                         if (!Mod.Config.MechAmbush.Enabled) throw new InvalidOperationException($"Ambush type: {type} in weight table but marked disabled!");

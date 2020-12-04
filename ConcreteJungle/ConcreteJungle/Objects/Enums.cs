@@ -11,6 +11,7 @@ namespace ConcreteJungle
         Explosion,
         Infantry,
         Mech,
-        Vehicle
+        Vehicle,
+        BattleArmor
     }
 }

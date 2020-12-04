@@ -2,7 +2,7 @@
     "Name": "ConcreteJungle",
     "Enabled": true,
 	"Hidden": true,
-    "Version": "0.6.3",
+    "Version": "0.6.6",
     "Description": "Provides fun surprises on urban maps.",
     "Author": "IceRaptor",
     "Website": "https://github.com/IceRaptor/ConcreteJungle",
@@ -25,7 +25,7 @@
             "ChancePerActor" : 0.05,
             "SearchRadius" : 250.0,
             "AmbushWeights" : [ 
-                "Explosion", "Explosion", "Infantry", "Infantry", "Infantry", "Mech", "Vehicle"
+                "Explosion", "Explosion", "Infantry", "Infantry", "Infantry", "BattleArmor", "Mech", "Vehicle"
             ],
             "EnableOnRound" : 2,
             "BlacklistedContracts" : [
@@ -218,6 +218,49 @@
                         { "TurretDefId" : "turretdef_infantrymrm", "PilotDefId" : "pilot_d7_turret" },
                         { "TurretDefId" : "turretdef_infantryflamer", "PilotDefId" : "pilot_d7_turret" },
                         { "TurretDefId" : "turretdef_infantryflamer", "PilotDefId" : "pilot_d7_turret" }
+                    ]
+                }
+            ]
+        },
+
+		"BattleArmorAmbush" : {
+            "Enabled" : true,
+            "FreeAttackEnabled" : true,
+            "Ambushes" : [
+                { 
+                    "MinDifficulty" : 1,
+                    "MaxDifficulty" : 4,
+                    "MinSpawns" : 1,
+                    "MaxSpawns" : 2,
+                    "SpawnPool" : [
+                        { "MechDefId" : "mechdef_ba_is_standard", "PilotDefId" : "pilot_d3_gunner" },
+                        { "MechDefId" : "mechdef_ba_is_standard", "PilotDefId" : "pilot_d3_gunner" },
+                        { "MechDefId" : "mechdef_ba_infiltratormkii", "PilotDefId" : "pilot_d3_gunner" },
+                        { "MechDefId" : "mechdef_ba_fashih", "PilotDefId" : "pilot_d3_gunner" }
+                    ]
+                },
+				{ 
+                    "MinDifficulty" : 5,
+                    "MaxDifficulty" : 7,
+                    "MinSpawns" : 1,
+                    "MaxSpawns" : 2,
+                    "SpawnPool" : [
+                        { "MechDefId" : "mechdef_ba_is_standard", "PilotDefId" : "pilot_d5_gunner" },
+                        { "MechDefId" : "mechdef_ba_is_standard", "PilotDefId" : "pilot_d5_gunner" },
+                        { "MechDefId" : "mechdef_ba_infiltratormkii", "PilotDefId" : "pilot_d5_gunner" },
+                        { "MechDefId" : "mechdef_ba_fashih", "PilotDefId" : "pilot_d5_gunner" }
+                    ]
+                },
+				{ 
+                    "MinDifficulty" : 8,
+                    "MaxDifficulty" : 10,
+                    "MinSpawns" : 2,
+                    "MaxSpawns" : 3,
+                    "SpawnPool" : [
+						{ "MechDefId" : "mechdef_ba_is_standard", "PilotDefId" : "pilot_d7_gladiator" },
+                        { "MechDefId" : "mechdef_ba_is_standard", "PilotDefId" : "pilot_d7_gladiator" },
+                        { "MechDefId" : "mechdef_ba_infiltratormkii", "PilotDefId" : "pilot_d7_gladiator" },
+                        { "MechDefId" : "mechdef_ba_fashih", "PilotDefId" : "pilot_d7_gladiator" }
                     ]
                 }
             ]
