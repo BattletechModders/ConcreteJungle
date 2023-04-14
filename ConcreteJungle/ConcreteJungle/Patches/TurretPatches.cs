@@ -17,14 +17,15 @@
         }
     }
 
-    [HarmonyPatch(typeof(Turret), "FlagForDeath")]
+    [HarmonyPatch(typeof(AbstractActor), "FlagForDeath")]
     static class Turret_FlagForDeath
     {
-        static void Prefix(ref bool __runOriginal, Turret __instance)
+        static void Prefix(ref bool __runOriginal, AbstractActor __instance)
         {
             if (!__runOriginal) return;
 
-            if (__instance != null &&
+            Turret turret = __instance as Turret;
+            if (turret != null && 
                 ModState.AmbushTurretGUIDtoBuilding.ContainsKey(__instance.GUID) &&
                 ModState.AmbushTurretGUIDtoBuilding[__instance.GUID].GUID != ModState.KillingLinkedUnitsSource)
             {
