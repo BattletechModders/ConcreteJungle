@@ -3,8 +3,10 @@
     [HarmonyPatch(typeof(CritChanceRules), "GetCritMultiplier")]
     static class CritChanceRules_GetCritMultiplier
     {
-        public static bool Prefix(CritChanceRules __instance, ICombatant target, Weapon weapon, bool shouldLog, ref float __result)
+        public static void Prefix(ref bool __runOriginal, CritChanceRules __instance, ICombatant target, Weapon weapon, bool shouldLog, ref float __result)
         {
+            if (!__runOriginal) return;
+
             // We are in a weapon without parent - so we're coming from one of our sourceless attacks. Don't break.
             if (weapon != null && weapon.parent == null)
             {
@@ -24,10 +26,8 @@
                 }
 
                 __result = totalCritChance;
-                return false;
+                __runOriginal = false;
             }
-
-            return true;
         }
     }
 }

@@ -43,8 +43,10 @@ namespace ConcreteJungle.Patches
     [HarmonyPatch(typeof(AbstractActor), "OnActorDestroyed")]
     static class AbstractActor_OnActorDestroyed
     {
-        static bool Prefix(AbstractActor __instance, MessageCenterMessage message)
+        static void Prefix(ref bool __runOriginal, AbstractActor __instance, MessageCenterMessage message)
         {
+            if (!__runOriginal) return;
+
             if (ModState.CurrentSpawningLance != null && __instance != null)
             {
                 ActorDestroyedMessage actorDestroyedMessage = message as ActorDestroyedMessage;
@@ -67,11 +69,9 @@ namespace ConcreteJungle.Patches
 
                     __instance.OnPositionUpdate(vector, __instance.CurrentRotation, -1, true, null, false);
 
-                    return false;
+                    __runOriginal = false;
                 }
             }
-
-            return true;
         }
     }
 }

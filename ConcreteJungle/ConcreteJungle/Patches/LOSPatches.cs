@@ -35,8 +35,10 @@ namespace ConcreteJungle.Patches
     [HarmonyPatch(new Type[] { typeof(AbstractActor), typeof(Vector3), typeof(ICombatant), typeof(Vector3), typeof(Quaternion) })]
     static class LineOfSight_GetVisibilityToTargetWithPositionsAndRotations
     {
-        static void Prefix(AbstractActor source, Vector3 sourcePosition, ICombatant target, Vector3 targetPosition, Quaternion targetRotation)
+        static void Prefix(ref bool __runOriginal, AbstractActor source, Vector3 sourcePosition, ICombatant target, Vector3 targetPosition, Quaternion targetRotation)
         {
+            if (!__runOriginal) return;
+
             if (source != null && ModState.IsUrbanBiome && ModState.AmbushTurretGUIDtoBuilding.ContainsKey(source.GUID) && !(target is BattleTech.Building))
             {
                 Mod.Log.Trace?.Write($"___VISIBILITY: SOURCE {CombatantUtils.Label(source)} TO TARGET {CombatantUtils.Label(target)}");
@@ -153,8 +155,10 @@ namespace ConcreteJungle.Patches
     static class LOFCache_GetLineOfFire
     {
 
-        static void Prefix(AbstractActor source, ICombatant target, LineOfFireLevel __result)
+        static void Prefix(ref bool __runOriginal, AbstractActor source, ICombatant target, LineOfFireLevel __result)
         {
+            if (!__runOriginal) return;
+
             if (!source.team.IsLocalPlayer && !(target is BattleTech.Building building))
             {
                 Mod.Log.Trace?.Write($"== CALCULATING LOF FROM {CombatantUtils.Label(source)} TO TARGET: {CombatantUtils.Label(source)}");

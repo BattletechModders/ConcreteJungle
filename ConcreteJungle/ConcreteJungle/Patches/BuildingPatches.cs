@@ -31,8 +31,9 @@ namespace ConcreteJungle.Patches
     [HarmonyPatch(typeof(BattleTech.Building), "KillLinkedUnits")]
     static class Building_KillLinkedUnits
     {
-        static void Prefix(BattleTech.Building __instance)
+        static void Prefix(ref bool __runOriginal, BattleTech.Building __instance)
         {
+            if (!__runOriginal) return;
 
             // Skip if we aren't enabled or we're not placed on a building
             if (__instance == null || !ModState.IsUrbanBiome) return;

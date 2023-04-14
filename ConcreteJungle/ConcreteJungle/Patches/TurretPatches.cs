@@ -4,32 +4,32 @@
     [HarmonyPatch(typeof(Turret), "HandleDeath")]
     static class Turret_HandleDeath
     {
-        static bool Prefix(Turret __instance)
+        static void Prefix(ref bool __runOriginal, Turret __instance)
         {
+            if (!__runOriginal) return;
+
             if (__instance != null &&
                 ModState.AmbushTurretGUIDtoBuilding.ContainsKey(__instance.GUID) &&
                 ModState.AmbushTurretGUIDtoBuilding[__instance.GUID].GUID != ModState.KillingLinkedUnitsSource)
             {
-                return false;
+                __runOriginal = false;
             }
-
-            return true;
         }
     }
 
     [HarmonyPatch(typeof(Turret), "FlagForDeath")]
     static class Turret_FlagForDeath
     {
-        static bool Prefix(Turret __instance)
+        static void Prefix(ref bool __runOriginal, Turret __instance)
         {
+            if (!__runOriginal) return;
+
             if (__instance != null &&
                 ModState.AmbushTurretGUIDtoBuilding.ContainsKey(__instance.GUID) &&
                 ModState.AmbushTurretGUIDtoBuilding[__instance.GUID].GUID != ModState.KillingLinkedUnitsSource)
             {
-                return false;
+                __runOriginal = false;
             }
-
-            return true;
         }
     }
 }

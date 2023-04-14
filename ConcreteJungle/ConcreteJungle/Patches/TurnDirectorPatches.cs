@@ -10,8 +10,10 @@ namespace ConcreteJungle.Patches
     [HarmonyPatch(typeof(TurnDirector), "IncrementActiveTurnActor")]
     static class TurnDirector_IncrementActiveTurnActor
     {
-        static void Prefix(TurnDirector __instance)
+        static void Prefix(ref bool __runOriginal, TurnDirector __instance)
         {
+            if (!__runOriginal) return;
+
             //if (!__instance.IsInterleaved && ! __instance.IsInterleavePending &&
             //    __instance.CurrentRound >= Mod.Config.Ambush.EnableOnRound &&
             //    ModState.PotentialAmbushOrigins.Count != 0 &&
