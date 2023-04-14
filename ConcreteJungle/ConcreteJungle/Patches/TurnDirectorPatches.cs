@@ -1,6 +1,4 @@
-﻿using BattleTech;
-using ConcreteJungle.Helper;
-using Harmony;
+﻿using ConcreteJungle.Helper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,14 +12,18 @@ namespace ConcreteJungle.Patches
     {
         static void Prefix(TurnDirector __instance)
         {
-            if (!__instance.IsInterleaved && ! __instance.IsInterleavePending &&
+            //if (!__instance.IsInterleaved && ! __instance.IsInterleavePending &&
+            //    __instance.CurrentRound >= Mod.Config.Ambush.EnableOnRound &&
+            //    ModState.PotentialAmbushOrigins.Count != 0 &&
+            //    __instance.ActiveTurnActor is Team activeTeam && activeTeam.IsLocalPlayer)
+            //{
+            if (
                 __instance.CurrentRound >= Mod.Config.Ambush.EnableOnRound &&
-                ModState.PotentialAmbushOrigins.Count != 0 &&
-                __instance.ActiveTurnActor is Team activeTeam && activeTeam.IsLocalPlayer)
+                ModState.PotentialAmbushOrigins.Count != 0)
             {
+                Mod.Log.Info?.Write("Incremented active turn actor, checking buildings.");
                 // Re-Filter the candidates to try to catch buildings that were marked contract objectives
                 CandidateBuildingsHelper.FilterOnTurnActorIncrement(__instance.Combat);
-
 
                 // Determine potential ambush sites based upon the origins
                 Dictionary<Vector3, List<BattleTech.Building>> ambushSites = new Dictionary<Vector3, List<BattleTech.Building>>();
@@ -69,7 +71,7 @@ namespace ConcreteJungle.Patches
                     AmbushType ambushType = shuffledTypes[0];
                     Mod.Log.Info?.Write($"Ambush type of: {ambushType} will be applied at position: {ambushOrigin}");
 
-                    switch(ambushType)
+                    switch (ambushType)
                     {
                         case AmbushType.Explosion:
                             ExplosionAmbushHelper.SpawnAmbush(ambushOrigin);
@@ -116,7 +118,7 @@ namespace ConcreteJungle.Patches
             if (!ModState.IsUrbanBiome)
             {
                 Mod.Log.Info?.Write($"Contract has non-urban biome ({ModState.Combat.ActiveContract.ContractBiome}). Skipping processing.");
-                return;
+                //return;
             }
             Mod.Log.Info?.Write($"Contract has Urban High Tech biome, enabling mod features.");
 
@@ -187,6 +189,8 @@ namespace ConcreteJungle.Patches
             bool success = true;
             Func<AmbushDef, bool> filterByDifficulty = x => x.MinDifficulty <= ModState.ContractDifficulty && x.MaxDifficulty >= ModState.ContractDifficulty;
 
+
+            Mod.Log.Info?.Write($"Filtering ambushes for contract difficulty: {ModState.ContractDifficulty}");
             List<ExplosionAmbushDef> filteredExpAmbushes = Mod.Config.ExplosionAmbush.Ambushes
                 .Where(x => filterByDifficulty(x))
                 .ToList();

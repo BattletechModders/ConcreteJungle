@@ -1,6 +1,4 @@
-﻿using BattleTech;
-using BattleTech.Rendering;
-using Harmony;
+﻿using BattleTech.Rendering;
 using System.Linq;
 using us.frostraptor.modUtils;
 
@@ -11,7 +9,7 @@ namespace ConcreteJungle.Patches
     [HarmonyBefore("us.frostraptor.LowVisibility")]
     static class PilotableActorRepresentation_OnPlayerVisibilityChanged
     {
-        static bool Prepare() { return !Mod.Config.InfantryAmbush.VisibleTrapTurrets;  }
+        static bool Prepare() { return !Mod.Config.InfantryAmbush.VisibleTrapTurrets; }
 
         static void Postfix(PilotableActorRepresentation __instance, VisibilityLevel newLevel)
         {
@@ -31,8 +29,8 @@ namespace ConcreteJungle.Patches
         }
     }
 
-   // Change the building highlight color if it contains a trap
-   [HarmonyPatch(typeof(GameRepresentation), "SetHighlightColor")]
+    // Change the building highlight color if it contains a trap
+    [HarmonyPatch(typeof(GameRepresentation), "SetHighlightColor")]
     static class GameRepresentation_SetHighlightColor
     {
         static void Postfix(GameRepresentation __instance, CombatGameState combat, Team team)

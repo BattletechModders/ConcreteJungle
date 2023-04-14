@@ -3,13 +3,15 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace ConcreteJungle {
+namespace ConcreteJungle
+{
 
-    public static class ModStats 
+    public static class ModStats
     {
     }
 
-    public class ModConfig {
+    public class ModConfig
+    {
 
         public AmbushOpts Ambush = new AmbushOpts();
         public DevastationOpts Devastation = new DevastationOpts();
@@ -32,7 +34,8 @@ namespace ConcreteJungle {
         // If true, all logs will be printed
         public bool Trace = false;
 
-        public void LogConfig() {
+        public void LogConfig()
+        {
             Mod.Log.Info?.Write("=== MOD CONFIG BEGIN ===");
             Mod.Log.Info?.Write($"  DEBUG:{this.Debug} Trace:{this.Trace}");
 
@@ -58,8 +61,8 @@ namespace ConcreteJungle {
                 Mod.Log.Info?.Write($"   Difficulty Min: {ambushDef.MinDifficulty} => Max: {ambushDef.MaxDifficulty}");
                 Mod.Log.Info?.Write($"   Spawns Min: {ambushDef.MinSpawns} => Max: {ambushDef.MinSpawns}");
                 Mod.Log.Info?.Write($"   AOEBlastDefs:");
-                
-                foreach(AOEBlastDef blastDef in ambushDef.SpawnPool)
+
+                foreach (AOEBlastDef blastDef in ambushDef.SpawnPool)
                 {
                     Mod.Log.Info?.Write($"   -- floatieLabel: '{blastDef.FloatieTextKey}' radius: {blastDef.Radius} damage: {blastDef.Damage} " +
                         $"heat: {blastDef.Heat} stability: {blastDef.Stability}"); ;
@@ -149,12 +152,13 @@ namespace ConcreteJungle {
             foreach (string quip in Mod.Config.Quips.SpawnAmbush) Mod.Log.Info?.Write($"   '{quip}'");
 
             Mod.Log.Info?.Write(" -- Localized Text");
-            foreach (KeyValuePair<string, string> kvp in Mod.Config.LocalizedText) Mod.Log.Info?.Write($"   {kvp.Key}='{kvp.Value}'"); 
+            foreach (KeyValuePair<string, string> kvp in Mod.Config.LocalizedText) Mod.Log.Info?.Write($"   {kvp.Key}='{kvp.Value}'");
 
             Mod.Log.Info?.Write("=== MOD CONFIG END ===");
         }
 
-        public void Init() {
+        public void Init()
+        {
             Mod.Log.Debug?.Write(" == Initializing Configuration");
 
             if (Mod.Config.ExplosionAmbush.Ambushes.Count == 0)
@@ -166,7 +170,7 @@ namespace ConcreteJungle {
                     MinSpawns = 1,
                     MaxSpawns = 6,
                     SpawnPool = new List<AOEBlastDef>() {
-                        new AOEBlastDef { 
+                        new AOEBlastDef {
                             FloatieTextKey = "FT_IED_DEFAULT",
                             Radius = 120.0f,
                             Damage = 40.0f,
@@ -180,7 +184,7 @@ namespace ConcreteJungle {
                     }
                 });
             }
-            
+
             if (Mod.Config.InfantryAmbush.Ambushes.Count == 0)
             {
                 Mod.Config.InfantryAmbush.Ambushes.Add(new InfantryAmbushDef
@@ -257,7 +261,7 @@ namespace ConcreteJungle {
         // Translate the strings in the config to enum types
         private void BuildWeightTable()
         {
-            foreach(string weightS in this.Ambush.AmbushWeights)
+            foreach (string weightS in this.Ambush.AmbushWeights)
             {
                 AmbushType enumVal = (AmbushType)Enum.Parse(typeof(AmbushType), weightS);
                 this.Ambush.AmbushTypes.Add(enumVal);
@@ -268,7 +272,7 @@ namespace ConcreteJungle {
         private void ValidateWeights()
         {
             foreach (AmbushType type in this.Ambush.AmbushTypes)
-            { 
+            {
                 switch (type)
                 {
                     case AmbushType.Explosion:

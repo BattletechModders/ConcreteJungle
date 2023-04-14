@@ -1,7 +1,4 @@
-﻿using BattleTech;
-using Harmony;
-
-namespace ConcreteJungle.Patches
+﻿namespace ConcreteJungle.Patches
 {
     // Attempt to make turrets that are trap turrets invulnerable
     [HarmonyPatch(typeof(Turret), "HandleDeath")]
@@ -9,7 +6,7 @@ namespace ConcreteJungle.Patches
     {
         static bool Prefix(Turret __instance)
         {
-            if (__instance != null && 
+            if (__instance != null &&
                 ModState.AmbushTurretGUIDtoBuilding.ContainsKey(__instance.GUID) &&
                 ModState.AmbushTurretGUIDtoBuilding[__instance.GUID].GUID != ModState.KillingLinkedUnitsSource)
             {
@@ -25,12 +22,12 @@ namespace ConcreteJungle.Patches
     {
         static bool Prefix(Turret __instance)
         {
-            if (__instance != null && 
+            if (__instance != null &&
                 ModState.AmbushTurretGUIDtoBuilding.ContainsKey(__instance.GUID) &&
                 ModState.AmbushTurretGUIDtoBuilding[__instance.GUID].GUID != ModState.KillingLinkedUnitsSource)
             {
                 return false;
-            }                
+            }
 
             return true;
         }

@@ -1,5 +1,4 @@
-﻿using BattleTech;
-using System;
+﻿using System;
 
 namespace ConcreteJungle.Helper
 {

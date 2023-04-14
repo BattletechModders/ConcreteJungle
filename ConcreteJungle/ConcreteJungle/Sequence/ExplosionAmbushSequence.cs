@@ -1,33 +1,30 @@
-﻿using BattleTech;
-using ConcreteJungle.Extensions;
-using ConcreteJungle.Helper;
+﻿using ConcreteJungle.Helper;
 using CustAmmoCategories;
 using Localize;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using us.frostraptor.modUtils;
 
 namespace ConcreteJungle.Sequence
 {
     public class ExplosionAmbushSequence : MultiSequence
     {
         private Stack<Vector3> AmbushPositions { get; set; }
-        
+
         private Stack<AOEBlastDef> AmbushBlasts { get; set; }
 
         private Team AmbushTeam { get; set; }
 
-        public override bool IsValidMultiSequenceChild {  get { return false;  } }
+        public override bool IsValidMultiSequenceChild { get { return false; } }
 
         public override bool IsParallelInterruptable { get { return false; } }
-        
+
         public override bool IsCancelable { get { return false; } }
-        
+
 
         public override bool IsComplete { get { return this.state == AmbushExplosionSequenceState.Finished; } }
 
-        public ExplosionAmbushSequence(CombatGameState combat, List<Vector3> ambushOrigins, 
+        public ExplosionAmbushSequence(CombatGameState combat, List<Vector3> ambushOrigins,
             List<AOEBlastDef> ambushBlasts, Team team) : base(combat)
         {
             this.AmbushTeam = team;
@@ -80,7 +77,7 @@ namespace ConcreteJungle.Sequence
 
             this.state = newState;
             this.timeInCurrentState = 0f;
-            switch(newState)
+            switch (newState)
             {
                 case AmbushExplosionSequenceState.Attacking:
                     Mod.Log.Debug?.Write("Invoking CAC for blast effects");
@@ -118,9 +115,9 @@ namespace ConcreteJungle.Sequence
                 Mod.Log.Info?.Write($"Spawning blast at position: {blastOrigin} that does {blastDef.Damage} damage, {blastDef.Heat} heat, and {blastDef.Stability} stability.");
 
                 // Publish the floatie first
-                string floatieText = new Text(Mod.Config.LocalizedText[blastDef.FloatieTextKey]).ToString();                
+                string floatieText = new Text(Mod.Config.LocalizedText[blastDef.FloatieTextKey]).ToString();
                 ModState.Combat.MessageCenter.PublishMessage(
-                    new FloatieMessage(null, null, floatieText, 16.0f, FloatieMessage.MessageNature.CriticalHit, 
+                    new FloatieMessage(null, null, floatieText, 16.0f, FloatieMessage.MessageNature.CriticalHit,
                     blastOrigin.x, blastOrigin.y, blastOrigin.z)
                     );
                 Mod.Log.Debug?.Write($"Sent floatie with text: '{floatieText}'");
@@ -129,7 +126,7 @@ namespace ConcreteJungle.Sequence
                 ExplosionAPIHelper.AoEExplode(
                     Mod.Config.ExplosionAmbush.VFX, Vector3.one * this.explosionVFXScale, this.explosionVFXDuration, Mod.Config.ExplosionAmbush.SFX,
                     blastOrigin, blastDef.Radius, blastDef.Damage, blastDef.Heat, blastDef.Stability,
-                    new List<EffectData>(), false, 
+                    new List<EffectData>(), false,
                     blastDef.FireRadius, blastDef.FireStrength, blastDef.FireChance, blastDef.FireDurationNoForest,
                     string.Empty, Vector3.zero, string.Empty, 0, 0);
                 Mod.Log.Debug?.Write($"Asked CAC for AoE explosion");
@@ -140,7 +137,7 @@ namespace ConcreteJungle.Sequence
         }
 
         private float timeInCurrentState;
-        
+
         private bool hasTaunted = false;
         private readonly float timeToTaunt = 1.5f;
 
@@ -150,7 +147,7 @@ namespace ConcreteJungle.Sequence
         private readonly float explosionVFXScale = 2f;
         private readonly float explosionVFXDuration = 0.5f;
 
-        
+
         private AmbushExplosionSequenceState state;
 
         private enum AmbushExplosionSequenceState

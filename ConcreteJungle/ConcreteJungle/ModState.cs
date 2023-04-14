@@ -1,12 +1,12 @@
-﻿
-using BattleTech;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using static ConcreteJungle.Helper.DataLoadHelper;
 
-namespace ConcreteJungle {
+namespace ConcreteJungle
+{
 
-    public static class ModState {
+    public static class ModState
+    {
 
         // -- General spawn state        
         public static List<BattleTech.Building> CandidateBuildings = new List<BattleTech.Building>();
@@ -33,17 +33,18 @@ namespace ConcreteJungle {
         public static Lance CurrentSpawningLance = null;
 
         // -- General state
-        public static CombatGameState Combat = null;        
+        public static CombatGameState Combat = null;
         public static bool IsUrbanBiome = false;
         public static int ContractDifficulty = 0;
-        
+
         public static ExplosionAmbushDef ExplosionAmbushDefForContract = null;
         public static InfantryAmbushDef InfantryAmbushDefForContract = null;
         public static MechAmbushDef BattleArmorAmbushDefForContract = null;
         public static MechAmbushDef MechAmbushDefForContract = null;
         public static VehicleAmbushDef VehicleAmbushDefForContract = null;
 
-        public static void Reset() {
+        public static void Reset()
+        {
             // Reinitialize state
             CandidateBuildings.Clear();
             LoadedResources.Clear();
@@ -73,7 +74,7 @@ namespace ConcreteJungle {
             BattleArmorAmbushDefForContract = null;
             MechAmbushDefForContract = null;
             VehicleAmbushDefForContract = null;
-    }
+        }
 
     }
 

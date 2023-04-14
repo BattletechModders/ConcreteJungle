@@ -1,7 +1,4 @@
-﻿using BattleTech;
-using Harmony;
-using System.Linq;
-using us.frostraptor.modUtils;
+﻿using us.frostraptor.modUtils;
 
 namespace ConcreteJungle.Patches
 {

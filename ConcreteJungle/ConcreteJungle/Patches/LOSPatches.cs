@@ -1,6 +1,4 @@
-﻿using BattleTech;
-using Harmony;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -34,7 +32,7 @@ namespace ConcreteJungle.Patches
 
     // When a trap turret's line of sight is calculated, give it 'x-ray' vision to see through the shell building.
     [HarmonyPatch(typeof(LineOfSight), "GetVisibilityToTargetWithPositionsAndRotations")]
-    [HarmonyPatch(new Type[] {  typeof(AbstractActor), typeof(Vector3), typeof(ICombatant), typeof(Vector3), typeof(Quaternion)})]
+    [HarmonyPatch(new Type[] { typeof(AbstractActor), typeof(Vector3), typeof(ICombatant), typeof(Vector3), typeof(Quaternion) })]
     static class LineOfSight_GetVisibilityToTargetWithPositionsAndRotations
     {
         static void Prefix(AbstractActor source, Vector3 sourcePosition, ICombatant target, Vector3 targetPosition, Quaternion targetRotation)
@@ -152,7 +150,8 @@ namespace ConcreteJungle.Patches
 
     // When a trap turret's line of fire is calculated, give it 'x-ray' vision to see through the shell building.
     [HarmonyPatch(typeof(LOFCache), "GetLineOfFire")]
-    static class LOFCache_GetLineOfFire { 
+    static class LOFCache_GetLineOfFire
+    {
 
         static void Prefix(AbstractActor source, ICombatant target, LineOfFireLevel __result)
         {
@@ -187,7 +186,7 @@ namespace ConcreteJungle.Patches
     static class LineOfSight_bresenhamHeightTest
     {
 
-        static void Postfix(LineOfSight __instance, Point p0, float height0, Point p1, float height1, string targetedBuildingGuid, ref Point collisionWorldPos, 
+        static void Postfix(LineOfSight __instance, Point p0, float height0, Point p1, float height1, string targetedBuildingGuid, ref Point collisionWorldPos,
             ref bool __result, CombatGameState ___Combat)
         {
 
@@ -250,7 +249,7 @@ namespace ConcreteJungle.Patches
                 }
             }
 
-            Mod.Log.Trace?.Write($"No collision detected, changing LoF to true. CollisonWorldPos => x ={ collisionWorldPos.X} z ={ collisionWorldPos.Z}");
+            Mod.Log.Trace?.Write($"No collision detected, changing LoF to true. CollisonWorldPos => x ={collisionWorldPos.X} z ={collisionWorldPos.Z}");
 
             __result = true;
             return;

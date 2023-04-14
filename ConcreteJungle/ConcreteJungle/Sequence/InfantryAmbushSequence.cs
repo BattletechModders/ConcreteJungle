@@ -1,5 +1,4 @@
-﻿using BattleTech;
-using ConcreteJungle.Helper;
+﻿using ConcreteJungle.Helper;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -19,15 +18,15 @@ namespace ConcreteJungle.Sequence
 
         private bool ApplyAttacks { get; set; }
 
-        public override bool IsValidMultiSequenceChild {  get { return false;  } }
+        public override bool IsValidMultiSequenceChild { get { return false; } }
 
         public override bool IsParallelInterruptable { get { return false; } }
-        
+
         public override bool IsCancelable { get { return false; } }
-        
+
         public override bool IsComplete { get { return this.state == InfantryAmbushSequenceState.Finished; } }
 
-        public InfantryAmbushSequence(CombatGameState combat, Vector3 ambushPos, List<AbstractActor> spawnedActors, 
+        public InfantryAmbushSequence(CombatGameState combat, Vector3 ambushPos, List<AbstractActor> spawnedActors,
             List<BattleTech.Building> shellBuildings, List<ICombatant> targets, bool applyAttacks) : base(combat)
         {
             this.AmbushPos = ambushPos;
@@ -107,7 +106,7 @@ namespace ConcreteJungle.Sequence
                             selectedWeapons.Add(weapon);
                         }
                     }
-                    
+
                     Mod.Log.Debug?.Write($"Ambush attack from actor: {CombatantUtils.Label(actor)}");
                     AttackStackSequence attackSequence = new AttackStackSequence(actor, closestTarget, actor.CurrentPosition, actor.CurrentRotation,
                         selectedWeapons);
@@ -122,7 +121,7 @@ namespace ConcreteJungle.Sequence
 
             this.state = newState;
             this.timeInCurrentState = 0f;
-            switch(newState)
+            switch (newState)
             {
                 case InfantryAmbushSequenceState.Taunting:
                     Mod.Log.Debug?.Write("Actors are taunting targets");
@@ -147,7 +146,7 @@ namespace ConcreteJungle.Sequence
                 Mod.Log.Debug?.Write("Taunting player.");
                 // Create a quip
                 Guid g = Guid.NewGuid();
-                QuipHelper.PlayQuip(ModState.Combat, g.ToString(),AttackingActors[0].team,
+                QuipHelper.PlayQuip(ModState.Combat, g.ToString(), AttackingActors[0].team,
                     "Infantry Ambush", Mod.Config.Quips.InfantryAmbush, this.timeToTaunt * 3f);
                 hasTaunted = true;
             }

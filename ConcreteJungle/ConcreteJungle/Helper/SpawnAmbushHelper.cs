@@ -1,8 +1,6 @@
-﻿using BattleTech;
-using ConcreteJungle.Sequence;
+﻿using ConcreteJungle.Sequence;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using us.frostraptor.modUtils;
 
@@ -51,14 +49,14 @@ namespace ConcreteJungle.Helper
             EncounterLayerData encounterLayerData = ModState.Combat.EncounterLayerData;
             List<BattleTech.Building> buildingsToLevel = new List<BattleTech.Building>();
             List<AbstractActor> spawnedActors = new List<AbstractActor>();
-            foreach(BattleTech.Building building in candidates)
+            foreach (BattleTech.Building building in candidates)
             {
                 if (actorsToSpawn == 0) break; // nothing more to do, end processing.
 
                 // Spawn one unit at the origin of the building
                 buildingsToLevel.Add(building);
                 Mod.Log.Debug?.Write("Spawning actor at building origin.");
-                
+
                 AbstractActor spawnedActor = null;
                 if (ambushType == AmbushType.BattleArmor)
                     spawnedActor = SpawnAmbushMech(ModState.AmbushTeam, ambushLance, ambushOrigin, building.CurrentPosition, building.CurrentRotation, ModState.BattleArmorAmbushDefForContract.SpawnPool);
@@ -106,7 +104,7 @@ namespace ConcreteJungle.Helper
             List<ICombatant> targets = new List<ICombatant>();
             foreach (ICombatant combatant in ModState.Combat.GetAllCombatants())
             {
-                if (!combatant.IsDead && !combatant.IsFlaggedForDeath && 
+                if (!combatant.IsDead && !combatant.IsFlaggedForDeath &&
                     combatant.team != null &&
                     ModState.Combat.HostilityMatrix.IsLocalPlayerFriendly(combatant.team))
                 {

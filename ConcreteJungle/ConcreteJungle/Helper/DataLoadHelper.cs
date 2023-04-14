@@ -1,5 +1,4 @@
-﻿using BattleTech;
-using BattleTech.Data;
+﻿using BattleTech.Data;
 using System.Collections.Generic;
 
 namespace ConcreteJungle.Helper

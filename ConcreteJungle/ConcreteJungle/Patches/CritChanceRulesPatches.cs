@@ -1,7 +1,4 @@
-﻿using BattleTech;
-using Harmony;
-
-namespace ConcreteJungle.Patches
+﻿namespace ConcreteJungle.Patches
 {
     [HarmonyPatch(typeof(CritChanceRules), "GetCritMultiplier")]
     static class CritChanceRules_GetCritMultiplier
@@ -15,7 +12,7 @@ namespace ConcreteJungle.Patches
                 float weaponMultiplier = __instance.GetWeaponMultiplier(weapon);
                 float targetEffectMutliplier = __instance.GetTargetEffectMutliplier(target);
                 float totalCritChance = baseCritChance * weaponMultiplier * targetEffectMutliplier;
-                
+
                 if (CritChanceRules.attackLogger.IsDebugEnabled && shouldLog)
                 {
                     CritChanceRules.attackLogger.LogDebug(string.Format("[GetCritMultiplier]baseMultiplier = {0}, weaponModier = {1}, targetEffectModifier = {2}", baseCritChance, weaponMultiplier, targetEffectMutliplier));

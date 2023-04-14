@@ -1,6 +1,4 @@
-﻿using BattleTech;
-using ConcreteJungle.Helper;
-using Harmony;
+﻿using ConcreteJungle.Helper;
 using System;
 
 namespace ConcreteJungle.Patches
@@ -19,7 +17,7 @@ namespace ConcreteJungle.Patches
 
         }
 
-        
+
     }
 
     [HarmonyPatch(typeof(CombatGameState), "OnCombatGameDestroyed")]
@@ -28,7 +26,7 @@ namespace ConcreteJungle.Patches
         static void Postfix(CombatGameState __instance)
         {
             Mod.Log.Trace?.Write("CGS:OCGD - entered.");
-            
+
             // Remove any trap turrets for salvage
 
             try

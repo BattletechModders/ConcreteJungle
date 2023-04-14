@@ -1,5 +1,4 @@
-﻿using BattleTech;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using us.frostraptor.modUtils;
@@ -17,14 +16,14 @@ namespace ConcreteJungle.Helper
 
             List<BattleTech.Building> shuffledBuildings = new List<BattleTech.Building>();
             shuffledBuildings.AddRange(ModState.CandidateBuildings);
-            
+
             // Randomize the buildings by shuffling them
             shuffledBuildings.Shuffle();
 
             int minNum = (int)(Mod.Config.Devastation.DefaultRange.MinDevastation * 100f);
             int maxNum = (int)(Mod.Config.Devastation.DefaultRange.MaxDevastation * 100f);
             int destroyPercentile = Mod.Random.Next(minNum, maxNum);
-            float destroyPercent = (float) destroyPercentile / 100f;
+            float destroyPercent = (float)destroyPercentile / 100f;
             int destroyedBuildings = (int)Math.Floor(shuffledBuildings.Count * destroyPercent);
             Mod.Log.Debug?.Write($"Destruction percentile: {destroyPercent} applied to {shuffledBuildings.Count} buildings = {destroyedBuildings} destroyed buildings.");
 

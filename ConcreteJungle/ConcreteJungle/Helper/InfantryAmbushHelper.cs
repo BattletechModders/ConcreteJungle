@@ -1,5 +1,4 @@
-﻿using BattleTech;
-using ConcreteJungle.Sequence;
+﻿using ConcreteJungle.Sequence;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -64,7 +63,7 @@ namespace ConcreteJungle.Helper
             Mod.Log.Info?.Write($"Adding InfantryAmbushSequence for {spawnedActors.Count} actors.");
             try
             {
-                InfantryAmbushSequence ambushSequence = 
+                InfantryAmbushSequence ambushSequence =
                     new InfantryAmbushSequence(ModState.Combat, ambushOrigin, spawnedActors, spawnBuildings, targets, Mod.Config.InfantryAmbush.FreeAttackEnabled);
                 ModState.Combat.MessageCenter.PublishMessage(new AddSequenceToStackMessage(ambushSequence));
             }

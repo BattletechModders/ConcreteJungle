@@ -1,7 +1,4 @@
-﻿using BattleTech;
-using Harmony;
-using System;
-using UnityEngine;
+﻿using UnityEngine;
 using us.frostraptor.modUtils;
 
 namespace ConcreteJungle.Patches
@@ -12,9 +9,10 @@ namespace ConcreteJungle.Patches
         static void Postfix(AbstractActor __instance)
         {
             // TODO: Allow spawn on ally as well
-            if (ModState.IsUrbanBiome && 
-                __instance.team.IsLocalPlayer && 
-                !__instance.Combat.TurnDirector.IsInterleaved && 
+            //if (ModState.IsUrbanBiome && 
+            if (
+                __instance.team.IsLocalPlayer &&
+                !__instance.Combat.TurnDirector.IsInterleaved &&
                 !__instance.Combat.TurnDirector.IsInterleavePending)
             {
                 // Check that we haven't exhausted the max traps for this mission
@@ -36,7 +34,7 @@ namespace ConcreteJungle.Patches
                 ModState.PotentialAmbushOrigins.Add(__instance.CurrentPosition);
 
             }
-            
+
         }
     }
 
@@ -61,7 +59,7 @@ namespace ConcreteJungle.Patches
                     // Replay displacement w/o effects 
                     Vector3 vector = __instance.CurrentPosition;
                     vector.y = __instance.Combat.MapMetaData.GetLerpedHeightAt(__instance.CurrentPosition, false);
-                    
+
                     if (__instance.GameRep != null)
                     {
                         __instance.GameRep.transform.position = vector;

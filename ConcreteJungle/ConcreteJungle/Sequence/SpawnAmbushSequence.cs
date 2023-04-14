@@ -1,5 +1,4 @@
-﻿using BattleTech;
-using ConcreteJungle.Helper;
+﻿using ConcreteJungle.Helper;
 using IRBTModUtils.Extension;
 using System;
 using System.Collections.Generic;
@@ -20,15 +19,15 @@ namespace ConcreteJungle.Sequence
 
         private bool ApplyAttacks { get; set; }
 
-        public override bool IsValidMultiSequenceChild {  get { return false;  } }
+        public override bool IsValidMultiSequenceChild { get { return false; } }
 
         public override bool IsParallelInterruptable { get { return false; } }
-        
+
         public override bool IsCancelable { get { return false; } }
-        
+
         public override bool IsComplete { get { return this.state == SpawnAmbushSequenceState.Finished; } }
 
-        public SpawnAmbushSequence(CombatGameState combat, Vector3 ambushPos, List<AbstractActor> spawnedActors, 
+        public SpawnAmbushSequence(CombatGameState combat, Vector3 ambushPos, List<AbstractActor> spawnedActors,
             List<BattleTech.Building> buildingsToLevel, List<ICombatant> targets, bool applyAttacks) : base(combat)
         {
             this.AmbushPosition = ambushPos;
@@ -79,7 +78,7 @@ namespace ConcreteJungle.Sequence
                     }
                     break;
                 case SpawnAmbushSequenceState.Finished:
-                    ModState.CurrentSpawningLance = null; 
+                    ModState.CurrentSpawningLance = null;
                     break;
                 default:
                     return;
@@ -89,7 +88,7 @@ namespace ConcreteJungle.Sequence
         private void CollapseNextBuilding()
         {
             this.timeSinceLastCollapse += Time.deltaTime;
-            if (this.timeSinceLastCollapse> this.timeBetweenBuildingCollapses)
+            if (this.timeSinceLastCollapse > this.timeBetweenBuildingCollapses)
             {
                 if (this.BuildingsToCollapse.Count > 0)
                 {
@@ -138,7 +137,7 @@ namespace ConcreteJungle.Sequence
                             Mod.Log.Info?.Write($" -- ambush weapon: {weapon.UIName}");
                         }
                     }
-                    
+
                     AttackStackSequence attackSequence = new AttackStackSequence(actor, closestTarget, actor.CurrentPosition, actor.CurrentRotation,
                         selectedWeapons);
                     ModState.Combat.MessageCenter.PublishMessage(new AddSequenceToStackMessage(attackSequence));
@@ -153,7 +152,7 @@ namespace ConcreteJungle.Sequence
 
             this.state = newState;
             this.timeInCurrentState = 0f;
-            switch(newState)
+            switch (newState)
             {
                 case SpawnAmbushSequenceState.Collapsing:
                     Mod.Log.Debug?.Write("Destroying ambush buildings");
@@ -178,7 +177,7 @@ namespace ConcreteJungle.Sequence
                 Mod.Log.Debug?.Write("Taunting player.");
                 // Create a quip
                 Guid g = Guid.NewGuid();
-                QuipHelper.PlayQuip(ModState.Combat, g.ToString(), 
+                QuipHelper.PlayQuip(ModState.Combat, g.ToString(),
                     AttackingActors[0].team,
                     "Vehicle Ambush", Mod.Config.Quips.SpawnAmbush, this.timeToTaunt * 3f);
                 hasTaunted = true;

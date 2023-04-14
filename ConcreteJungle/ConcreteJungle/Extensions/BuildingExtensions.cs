@@ -1,5 +1,4 @@
-﻿using BattleTech;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace ConcreteJungle.Extensions
 {
