@@ -15,8 +15,7 @@ namespace ConcreteJungle.Patches
         {
             Mod.Log.Trace?.Write("PAR:OPVC entered.");
 
-            Traverse parentT = Traverse.Create(__instance).Property("parentActor");
-            AbstractActor parentActor = parentT.GetValue<AbstractActor>();
+            AbstractActor parentActor = __instance.parentActor;
             if (ModState.AmbushTurretGUIDtoBuilding.Keys.Contains(parentActor.GUID))
             {
                 Turret turret = parentActor as Turret;
@@ -39,8 +38,7 @@ namespace ConcreteJungle.Patches
             {
                 Mod.Log.Debug?.Write($"Building {CombatantUtils.Label(__instance.parentCombatant)} contains a trap, marking it as hostile.");
 
-                Traverse edgeHighlightT = Traverse.Create(__instance).Property("edgeHighlight");
-                MechEdgeSelection edgeHighlight = edgeHighlightT.GetValue<MechEdgeSelection>();
+                MechEdgeSelection edgeHighlight = __instance.edgeHighlight;
                 edgeHighlight.SetTeam(3);
             }
         }

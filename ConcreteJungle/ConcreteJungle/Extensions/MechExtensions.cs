@@ -23,8 +23,7 @@ namespace ConcreteJungle.Extensions
                     ChassisLocations chassisLocationFromArmorLocation = MechStructureRules.GetChassisLocationFromArmorLocation((ArmorLocation)keyValuePair.Key);
                     if (!mech.IsLocationDestroyed(chassisLocationFromArmorLocation))
                     {
-                        Traverse checkForCritT = Traverse.Create(mech).Method("CheckForCrit", new Type[] { typeof(WeaponHitInfo), typeof(ChassisLocations), typeof(Weapon) });
-                        checkForCritT.GetValue(new object[] { hitInfo, chassisLocationFromArmorLocation, weapon });
+                        mech.CheckForCrit(hitInfo, chassisLocationFromArmorLocation, weapon);
                     }
                 }
             }

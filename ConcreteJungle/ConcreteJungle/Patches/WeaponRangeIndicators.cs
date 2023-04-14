@@ -17,24 +17,21 @@ namespace ConcreteJungle.Patches
             {
                 Mod.Log.Trace?.Write("Drawing line for building-as-target.");
                 // Replicate WeaponRangeIndicators.ShowLineToTarget, because it only supports AbstractActors
-                Traverse drawLineT = Traverse.Create(__instance).Method("DrawLine", new object[] { position, rotation, true, selectedActor, targetedActor, false, false, isMelee });
-                drawLineT.GetValue();
+                __instance.DrawLine(position, rotation, true, selectedActor, targetedActor, false, false, isMelee);
 
                 targetedActor.GameRep.IsTargeted = true;
 
                 //this.HUD.InWorldMgr.ShowAttackDirection(this.HUD.SelectedActor, targetedActor, this.HUD.Combat.HitLocation.GetAttackDirection(position, targetedActor), 0f, 
                 //    isMelee ? MeleeAttackType.Punch : MeleeAttackType.NotSet, this.HUD.InWorldMgr.NumWeaponsTargeting(targetedActor));
 
-                Traverse hideLinesT = Traverse.Create(__instance).Method("hideLines", new object[] { 1 });
-                hideLinesT.GetValue();
+                __instance.hideLines(1);
 
-                Traverse setEnemyTargetableT = Traverse.Create(__instance).Method("SetEnemyTargetable", new Type[] { typeof(ICombatant), typeof(bool) });
                 List<AbstractActor> allEnemies = selectedActor.Combat.AllEnemies;
                 for (int i = 0; i < allEnemies.Count; i++)
                 {
                     if (allEnemies[i] != targetedActor)
                     {
-                        setEnemyTargetableT.GetValue(new object[] { allEnemies[i], false });
+                        __instance.SetEnemyTargetable(allEnemies[i], false);
                     }
                 }
             }

@@ -95,8 +95,6 @@ namespace ConcreteJungle.Patches
             float stepHeight = (height1 - height0) / greatestDivisor;
             float sumVisionCost = 0f;
 
-            Traverse projectedHeightAtT = Traverse.Create(__instance).Method("getProjectedHeightAt", new Type[] { typeof(Point), typeof(float), typeof(Point), typeof(float) });
-            Traverse visCostOfCellT = Traverse.Create(__instance).Method("visCostOfCell", new Type[] { typeof(MapTerrainDataCell), typeof(float) });
             string shellBuildingGUID = ModState.AmbushTurretGUIDtoBuilding[ModState.CurrentTurretForLOS.GUID].GUID;
             EncounterLayerData encounterLayerData = ___Combat.EncounterLayerData;
 
@@ -121,7 +119,7 @@ namespace ConcreteJungle.Patches
                 }
                 else
                 {
-                    float projectedHeightAt = projectedHeightAtT.GetValue<float>(new object[] { p0, height0, list[i], stepHeight });
+                    float projectedHeightAt = __instance.getProjectedHeightAt(p0, height0, list[i], stepHeight);
                     MapTerrainDataCell mapTerrainDataCell = ___Combat.MapMetaData.mapTerrainDataCells[list[i].Z, list[i].X];
                     if (mapTerrainDataCell.cachedHeight > projectedHeightAt)
                     {
@@ -141,7 +139,7 @@ namespace ConcreteJungle.Patches
                         return;
                     }
 
-                    sumVisionCost += visCostOfCellT.GetValue<float>(new object[] { mapTerrainDataCell, projectedHeightAt }) * stepDelta;
+                    sumVisionCost += __instance.visCostOfCell(mapTerrainDataCell, projectedHeightAt) * stepDelta;
                 }
             }
 
