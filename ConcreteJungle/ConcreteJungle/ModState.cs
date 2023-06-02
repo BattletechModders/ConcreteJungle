@@ -34,7 +34,7 @@ namespace ConcreteJungle
 
         // -- General state
         public static CombatGameState Combat = null;
-        public static bool IsUrbanBiome = false;
+        public static bool ProcessAmbushes = false;
         public static int ContractDifficulty = 0;
 
         public static ExplosionAmbushDef ExplosionAmbushDefForContract = null;
@@ -66,7 +66,7 @@ namespace ConcreteJungle
             CurrentSpawningLance = null;
 
             Combat = null;
-            IsUrbanBiome = false;
+            ProcessAmbushes = false;
             ContractDifficulty = 0;
 
             ExplosionAmbushDefForContract = null;

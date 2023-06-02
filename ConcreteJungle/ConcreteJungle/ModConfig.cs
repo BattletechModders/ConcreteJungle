@@ -1,6 +1,7 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace ConcreteJungle
@@ -255,6 +256,9 @@ namespace ConcreteJungle
             this.BuildWeightTable();
             this.ValidateWeights();
 
+            Mod.Log.Debug?.Write("  -- Validating factions");
+            this.ValidateBlacklistedFactions();
+
             Mod.Log.Debug?.Write(" == Configuration Initialized");
         }
 
@@ -265,6 +269,20 @@ namespace ConcreteJungle
             {
                 AmbushType enumVal = (AmbushType)Enum.Parse(typeof(AmbushType), weightS);
                 this.Ambush.AmbushTypes.Add(enumVal);
+            }
+        }
+
+        private void ValidateBlacklistedFactions()
+        {
+            List<FactionValue> allFactions = FactionEnumeration.FactionList.Where(fv => fv.DoesGainReputation).ToList();
+            foreach (FactionValue faction in allFactions)
+            {
+                if (this.Ambush.BlacklistedFactionIds.Contains(faction.FactionDefID))
+                {
+                    Mod.Log.Info?.Write($"Excluding faction {faction.Name} with id: {faction.FactionDefID} from ambushes.");
+                    this.Ambush.BlacklistedFactions.Add(faction);
+                }
+
             }
         }
 

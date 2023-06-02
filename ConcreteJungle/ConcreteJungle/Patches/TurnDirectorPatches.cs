@@ -14,11 +14,6 @@ namespace ConcreteJungle.Patches
         {
             if (!__runOriginal) return;
 
-            //if (!__instance.IsInterleaved && ! __instance.IsInterleavePending &&
-            //    __instance.CurrentRound >= Mod.Config.Ambush.EnableOnRound &&
-            //    ModState.PotentialAmbushOrigins.Count != 0 &&
-            //    __instance.ActiveTurnActor is Team activeTeam && activeTeam.IsLocalPlayer)
-            //{
             if (
                 __instance.CurrentRound >= Mod.Config.Ambush.EnableOnRound &&
                 ModState.PotentialAmbushOrigins.Count != 0)
@@ -116,11 +111,12 @@ namespace ConcreteJungle.Patches
         {
             Mod.Log.Trace?.Write("TD:OICC - entered.");
 
-            ModState.IsUrbanBiome = ModState.Combat.ActiveContract.ContractBiome == Biome.BIOMESKIN.urbanHighTech;
-            if (!ModState.IsUrbanBiome)
+            ModState.ProcessAmbushes = ModState.Combat.ActiveContract.ContractBiome == Biome.BIOMESKIN.urbanHighTech;
+            if (!ModState.ProcessAmbushes)
             {
                 Mod.Log.Info?.Write($"Contract has non-urban biome ({ModState.Combat.ActiveContract.ContractBiome}). Skipping processing.");
-                //return;
+                ModState.ProcessAmbushes = false;
+                return;
             }
             Mod.Log.Info?.Write($"Contract has Urban High Tech biome, enabling mod features.");
 
@@ -130,7 +126,7 @@ namespace ConcreteJungle.Patches
                 if (overrrideId.Equals(ModState.Combat.ActiveContract.Override.ID, StringComparison.InvariantCultureIgnoreCase))
                 {
                     Mod.Log.Info?.Write($"Contract with override ID '{overrrideId}' is excluded, skipping processing.");
-                    ModState.IsUrbanBiome = false;
+                    ModState.ProcessAmbushes = false;
                     return;
                 }
             }
@@ -154,13 +150,24 @@ namespace ConcreteJungle.Patches
             ModState.AmbushTeam = ModState.TargetTeam;
             Mod.Log.Info?.Write($"Using team: {ModState.AmbushTeam.DisplayName} as Ambush team.");
 
+            // Check faction exclusions
+            foreach (FactionValue faction in Mod.Config.Ambush.BlacklistedFactions)
+            {
+                if (ModState.AmbushTeam.factionValue.Equals(faction))
+                {
+                    Mod.Log.Info?.Write($"Ambushing team has blacklisted factionId: {faction.FactionDefID}, skipping ambush processing.");
+                    ModState.ProcessAmbushes = false;
+                    return;
+                }
+            }
+
             // Filter the AmbushDefs by contract difficulty. If we don't have ambushes for our contract difficulty,
             //   there's a configuration error - abort! This has to come before data loading as it sets
             //   the AmbushDefs for the current contract
             bool haveAmbushes = FilterAmbushes();
             if (!haveAmbushes)
             {
-                ModState.IsUrbanBiome = false;
+                ModState.ProcessAmbushes = false;
                 Mod.Log.Warn?.Write("Incorrect filter configuration - disabling ambushes!");
                 return;
             }
@@ -173,7 +180,7 @@ namespace ConcreteJungle.Patches
             catch (Exception e)
             {
                 Mod.Log.Error?.Write(e, "Failed to load ambush resources due to exception!");
-                ModState.IsUrbanBiome = false;
+                ModState.ProcessAmbushes = false;
             }
 
             // Find candidate buildings

@@ -8,7 +8,7 @@ namespace ConcreteJungle.Patches
     {
         static void Postfix(BattleTech.Building __instance, ref bool __result)
         {
-            if (ModState.IsUrbanBiome && ModState.AmbushBuildingGUIDToTurrets.ContainsKey(__instance.GUID))
+            if (ModState.ProcessAmbushes && ModState.AmbushBuildingGUIDToTurrets.ContainsKey(__instance.GUID))
             {
                 __result = true;
             }
@@ -20,7 +20,7 @@ namespace ConcreteJungle.Patches
     {
         static void Postfix(BattleTech.Building __instance, ref bool __result)
         {
-            if (ModState.IsUrbanBiome && ModState.AmbushBuildingGUIDToTurrets.ContainsKey(__instance.GUID))
+            if (ModState.ProcessAmbushes && ModState.AmbushBuildingGUIDToTurrets.ContainsKey(__instance.GUID))
             {
                 __result = true;
             }
@@ -36,7 +36,7 @@ namespace ConcreteJungle.Patches
             if (!__runOriginal) return;
 
             // Skip if we aren't enabled or we're not placed on a building
-            if (__instance == null || !ModState.IsUrbanBiome) return;
+            if (__instance == null || !ModState.ProcessAmbushes) return;
 
             Mod.Log.Debug?.Write("Current ambush building shells");
             foreach (string guid in ModState.AmbushBuildingGUIDToTurrets.Keys)

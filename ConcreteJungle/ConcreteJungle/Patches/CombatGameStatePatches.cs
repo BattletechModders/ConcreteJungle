@@ -36,24 +36,11 @@ namespace ConcreteJungle.Patches
             catch (Exception e)
             {
                 Mod.Log.Error?.Write(e, "Failed to unload ambush resources due to exception!");
-                ModState.IsUrbanBiome = false;
+                ModState.ProcessAmbushes = false;
             }
 
             ModState.Reset();
         }
     }
-
-    // Remove any trap turrets as possible tab targets
-    //static class CombatGameState_GetAllTabTargets
-    //{
-    //    static void Postfix(CombatGameState __instance, List<ICombatant> __result)
-    //    {
-    //        if (__result != null && __result.Count > 0)
-    //        {
-    //            __result.RemoveAll(x => ModState.TrapTurretToBuildingIds.ContainsKey(x.GUID));
-    //        }
-    //    }
-    //}
-
 
 }

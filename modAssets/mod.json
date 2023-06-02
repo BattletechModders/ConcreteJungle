@@ -29,7 +29,9 @@
             ],
             "EnableOnRound" : 2,
             "BlacklistedContracts" : [
-            ]
+            ],
+			"BlacklistedFactionIds" : [
+			]
         },
 
         "Devastation" : {

@@ -9,8 +9,7 @@ namespace ConcreteJungle.Patches
         static void Postfix(AbstractActor __instance)
         {
             // TODO: Allow spawn on ally as well
-            //if (ModState.IsUrbanBiome && 
-            if (
+            if (ModState.ProcessAmbushes &&
                 __instance.team.IsLocalPlayer &&
                 !__instance.Combat.TurnDirector.IsInterleaved &&
                 !__instance.Combat.TurnDirector.IsInterleavePending)

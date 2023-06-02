@@ -39,7 +39,7 @@ namespace ConcreteJungle.Patches
         {
             if (!__runOriginal) return;
 
-            if (source != null && ModState.IsUrbanBiome && ModState.AmbushTurretGUIDtoBuilding.ContainsKey(source.GUID) && !(target is BattleTech.Building))
+            if (source != null && ModState.ProcessAmbushes && ModState.AmbushTurretGUIDtoBuilding.ContainsKey(source.GUID) && !(target is BattleTech.Building))
             {
                 Mod.Log.Trace?.Write($"___VISIBILITY: SOURCE {CombatantUtils.Label(source)} TO TARGET {CombatantUtils.Label(target)}");
             }
@@ -54,7 +54,7 @@ namespace ConcreteJungle.Patches
 
         static void Postfix(AbstractActor source, Vector3 sourcePosition, ICombatant target, Vector3 targetPosition, Quaternion targetRotation, VisibilityLevel __result)
         {
-            if (source != null && ModState.IsUrbanBiome && ModState.AmbushTurretGUIDtoBuilding.ContainsKey(source.GUID) && !(target is BattleTech.Building))
+            if (source != null && ModState.ProcessAmbushes && ModState.AmbushTurretGUIDtoBuilding.ContainsKey(source.GUID) && !(target is BattleTech.Building))
             {
                 Mod.Log.Trace?.Write($"___VISIBILITY RESULT: {__result}");
             }
@@ -162,7 +162,7 @@ namespace ConcreteJungle.Patches
                 Mod.Log.Trace?.Write($"== CALCULATING LOF FROM {CombatantUtils.Label(source)} TO TARGET: {CombatantUtils.Label(source)}");
             }
 
-            if (source is Turret turret && ModState.IsUrbanBiome && ModState.AmbushTurretGUIDtoBuilding.Keys.Contains(turret.GUID))
+            if (source is Turret turret && ModState.ProcessAmbushes && ModState.AmbushTurretGUIDtoBuilding.Keys.Contains(turret.GUID))
             {
                 Mod.Log.Trace?.Write($"Turret {CombatantUtils.Label(turret)} is calculating it's LOF");
                 ModState.CurrentTurretForLOF = turret;
