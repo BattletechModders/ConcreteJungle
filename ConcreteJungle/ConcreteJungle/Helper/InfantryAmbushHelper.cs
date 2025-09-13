@@ -37,6 +37,8 @@ namespace ConcreteJungle.Helper
 
                 // Spawn a turret trap
                 AbstractActor ambushTurret = SpawnAmbushTurret(ModState.AmbushTeam, ambushLance, spawnBuildingShell, ambushOrigin);
+                if (ambushTurret == null) continue;
+
                 spawnedActors.Add(ambushTurret);
                 spawnBuildings.Add(spawnBuildingShell);
                 Mod.Log.Info?.Write($"Spawned turret: {ambushTurret.DisplayName} in building: {spawnBuildingShell.DisplayName}");
@@ -79,11 +81,19 @@ namespace ConcreteJungle.Helper
             // Randomly determine one of the spawnpairs from the current ambushdef
             List<TurretAndPilotDef> shuffledSpawns = new List<TurretAndPilotDef>();
             shuffledSpawns.AddRange(ModState.InfantryAmbushDefForContract.SpawnPool);
+            if (shuffledSpawns.Count < 1)
+            {
+                Mod.Log.Warn?.Write($"Spawn counts were less than 1, aborting spawn!");
+                return null;
+            }
+
             shuffledSpawns.Shuffle();
+            Mod.Log.Info?.Write($"Shuffling {shuffledSpawns.Count} defs for this contract.");
             TurretAndPilotDef ambushDef = shuffledSpawns[0];
 
             PilotDef pilotDef = ModState.Combat.DataManager.PilotDefs.Get(ambushDef.PilotDefId);
             TurretDef turretDef = ModState.Combat.DataManager.TurretDefs.GetOrCreate(ambushDef.TurretDefId);
+            Mod.Log.Info?.Write($"Loading TuretDef with pilotDef: {pilotDef} turretDef: {turretDef}");
             turretDef.Refresh();
 
             // determine a position somewhere up the building's axis

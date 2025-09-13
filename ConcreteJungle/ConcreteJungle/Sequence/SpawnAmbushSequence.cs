@@ -50,19 +50,23 @@ namespace ConcreteJungle.Sequence
             this.timeInCurrentState += Time.deltaTime;
             switch (this.state)
             {
-                case SpawnAmbushSequenceState.Taunting:
-                    this.Taunt();
-                    if (this.timeInCurrentState > this.timeToTaunt)
-                    {
-                        this.SetState(SpawnAmbushSequenceState.Collapsing);
-                    }
-                    break;
                 case SpawnAmbushSequenceState.Collapsing:
                     this.CollapseNextBuilding();
                     if (this.BuildingsToCollapse.Count < 1)
                     {
-                        this.SetState(SpawnAmbushSequenceState.Attacking);
+                        this.SetState(SpawnAmbushSequenceState.Taunting);
                     }
+                    break;
+                case SpawnAmbushSequenceState.Taunting:
+                    this.Taunt();
+                    if (this.timeInCurrentState > this.timeToTaunt)
+                    {
+                        this.SetState(SpawnAmbushSequenceState.Spawning);
+                    }
+                    break;
+                case SpawnAmbushSequenceState.Spawning:
+                    this.UpdateSpawnedActors();
+                    this.SetState(SpawnAmbushSequenceState.Attacking);
                     break;
                 case SpawnAmbushSequenceState.Attacking:
                     if (!ApplyAttacks)
@@ -82,6 +86,16 @@ namespace ConcreteJungle.Sequence
                     break;
                 default:
                     return;
+            }
+        }
+
+        private void UpdateSpawnedActors()
+        {
+            // Attempt to solve the underground issues
+            foreach (AbstractActor actor in this.AttackingActors)
+            {
+                UnitSpawnPointGameLogic uspgl = Combat.ItemRegistry.GetItemByGUID<UnitSpawnPointGameLogic>(actor.spawnerGUID);
+                uspgl.UpdateHexPosition();
             }
         }
 
@@ -157,6 +171,12 @@ namespace ConcreteJungle.Sequence
                 case SpawnAmbushSequenceState.Collapsing:
                     Mod.Log.Debug?.Write("Destroying ambush buildings");
                     return;
+                case SpawnAmbushSequenceState.Taunting:
+                    Mod.Log.Debug?.Write("Playing taunt for player");
+                    break;
+                case SpawnAmbushSequenceState.Spawning:
+                    Mod.Log.Debug?.Write("Creating attacking units");
+                    break;
                 case SpawnAmbushSequenceState.Attacking:
                     Mod.Log.Debug?.Write("Actors are attacking targets");
                     break;
@@ -201,8 +221,9 @@ namespace ConcreteJungle.Sequence
         private enum SpawnAmbushSequenceState
         {
             NotSet,
-            Taunting,
             Collapsing,
+            Taunting,
+            Spawning,
             Attacking,
             Finished
         }

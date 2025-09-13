@@ -55,7 +55,7 @@ namespace ConcreteJungle.Helper
 
                 // Spawn one unit at the origin of the building
                 buildingsToLevel.Add(building);
-                Mod.Log.Debug?.Write("Spawning actor at building origin.");
+                Mod.Log.Debug?.Write($"Spawning actor at building: {CombatantUtils.Label(building)} with position: {building.CurrentPosition}");
 
                 AbstractActor spawnedActor = null;
                 if (ambushType == AmbushType.BattleArmor)
@@ -146,7 +146,7 @@ namespace ConcreteJungle.Helper
             vehicleDef.Refresh();
 
             // Adjust position so we don't spawn in the ground.
-            spawnPos.y = ModState.Combat.MapMetaData.GetLerpedHeightAt(spawnPos, true);
+            spawnPos.y = CalculateSpawnHeight(spawnPos, true);
 
             // Rotate to face the ambush origin
             Vector3 spawnDirection = Vector3.RotateTowards(spawnRot.eulerAngles, ambushOrigin, 1f, 0f);
@@ -170,6 +170,9 @@ namespace ConcreteJungle.Helper
             UnitSpawnedMessage message = new UnitSpawnedMessage("CJ_VEHICLE", vehicle.GUID);
             ModState.Combat.MessageCenter.PublishMessage(message);
 
+            // Attempting to force an update to fix underground issues
+            vehicle.OnPositionUpdate(spawnPos, spawnRotation, -1, true, null, false);
+
             return vehicle;
         }
 
@@ -188,7 +191,7 @@ namespace ConcreteJungle.Helper
             mechDef.Refresh();
 
             // Adjust position so we don't spawn in the ground.
-            spawnPos.y = ModState.Combat.MapMetaData.GetLerpedHeightAt(spawnPos, true);
+            spawnPos.y = CalculateSpawnHeight(spawnPos, true);
 
             // Rotate to face the ambush origin
             Vector3 spawnDirection = Vector3.RotateTowards(spawnRot.eulerAngles, ambushOrigin, 1f, 0f);
@@ -212,7 +215,67 @@ namespace ConcreteJungle.Helper
             UnitSpawnedMessage message = new UnitSpawnedMessage("CJ_MECH", mech.GUID);
             ModState.Combat.MessageCenter.PublishMessage(message);
 
+            // Attempting to force an update to fix underground issues
+            mech.OnPositionUpdate(spawnPos, spawnRotation, -1, true, null, false);
+
             return mech;
+        }
+
+        private static float CalculateSpawnHeight(Vector3 worldPos, bool terrainOnly = false)
+        {
+            // Following the same logic as MapMetaData.GetLerpedHeightAt
+            Vector3 vector = new Vector3((float)MapMetaDataExporter.cellSize * 0.5f, 0f, (float)MapMetaDataExporter.cellSize * 0.5f);
+            Point index = ModState.Combat.MapMetaData.GetIndex(worldPos - vector);
+            
+            // Clamp indices to valid bounds (same as GetLerpedHeightAt)
+            if (index.Z < 0)
+            {
+                index.Z = 0;
+            }
+            else if (index.Z >= ModState.Combat.MapMetaData.mapTerrainDataCells.GetLength(0) - 1)
+            {
+                index.Z = ModState.Combat.MapMetaData.mapTerrainDataCells.GetLength(0) - 2;
+            }
+            if (index.X < 0)
+            {
+                index.X = 0;
+            }
+            else if (index.X >= ModState.Combat.MapMetaData.mapTerrainDataCells.GetLength(1) - 1)
+            {
+                index.X = ModState.Combat.MapMetaData.mapTerrainDataCells.GetLength(1) - 2;
+            }
+
+            // Get the four corner cells used for interpolation
+            MapTerrainDataCell mapTerrainDataCell = ModState.Combat.MapMetaData.mapTerrainDataCells[index.Z, index.X];
+            MapTerrainDataCell mapTerrainDataCell2 = ModState.Combat.MapMetaData.mapTerrainDataCells[index.Z, index.X + 1];
+            MapTerrainDataCell mapTerrainDataCell3 = ModState.Combat.MapMetaData.mapTerrainDataCells[index.Z + 1, index.X];
+            MapTerrainDataCell mapTerrainDataCell4 = ModState.Combat.MapMetaData.mapTerrainDataCells[index.Z + 1, index.X + 1];
+
+            // Log terrain heights for each cell
+            Mod.Log.Debug?.Write($"Height calculation for position {worldPos}:");
+            Mod.Log.Debug?.Write($"  Cell [{index.Z},{index.X}] - terrainHeight: {mapTerrainDataCell.terrainHeight:F2}, cachedHeight: {mapTerrainDataCell.cachedHeight:F2}");
+            Mod.Log.Debug?.Write($"  Cell [{index.Z},{index.X + 1}] - terrainHeight: {mapTerrainDataCell2.terrainHeight:F2}, cachedHeight: {mapTerrainDataCell2.cachedHeight:F2}");
+            Mod.Log.Debug?.Write($"  Cell [{index.Z + 1},{index.X}] - terrainHeight: {mapTerrainDataCell3.terrainHeight:F2}, cachedHeight: {mapTerrainDataCell3.cachedHeight:F2}");
+            Mod.Log.Debug?.Write($"  Cell [{index.Z + 1},{index.X + 1}] - terrainHeight: {mapTerrainDataCell4.terrainHeight:F2}, cachedHeight: {mapTerrainDataCell4.cachedHeight:F2}");
+            Mod.Log.Debug?.Write($"  terrainOnly parameter: {terrainOnly}");
+
+            // Calculate interpolation factors (same as GetLerpedHeightAt)
+            Vector3 worldPos2 = ModState.Combat.MapMetaData.getWorldPos(index);
+            float t = (worldPos.x - worldPos2.x) / (float)MapMetaDataExporter.cellSize;
+            float t2 = (worldPos.z - worldPos2.z) / (float)MapMetaDataExporter.cellSize;
+
+            // Perform bilinear interpolation (same as GetLerpedHeightAt)
+            float a = Mathf.Lerp(terrainOnly ? mapTerrainDataCell.terrainHeight : mapTerrainDataCell.cachedHeight, 
+                                terrainOnly ? mapTerrainDataCell2.terrainHeight : mapTerrainDataCell2.cachedHeight, t);
+            float b = Mathf.Lerp(terrainOnly ? mapTerrainDataCell3.terrainHeight : mapTerrainDataCell3.cachedHeight, 
+                                terrainOnly ? mapTerrainDataCell4.terrainHeight : mapTerrainDataCell4.cachedHeight, t);
+            float finalHeight = Mathf.Lerp(a, b, t2);
+
+            Mod.Log.Debug?.Write($"  Interpolation factors - t: {t:F3}, t2: {t2:F3}");
+            Mod.Log.Debug?.Write($"  Intermediate values - a: {a:F2}, b: {b:F2}");
+            Mod.Log.Debug?.Write($"  Final calculated height: {finalHeight:F2}");
+
+            return finalHeight;
         }
     }
 }

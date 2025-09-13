@@ -14,6 +14,12 @@ namespace ConcreteJungle.Patches
         {
             if (!__runOriginal) return;
 
+            if (!ModState.ProcessAmbushes) 
+            {
+                Mod.Log.Info?.Write("Ambushes disabled by configuration, skipping.");
+                return;
+            }
+
             if (
                 __instance.CurrentRound >= Mod.Config.Ambush.EnableOnRound &&
                 ModState.PotentialAmbushOrigins.Count != 0)
