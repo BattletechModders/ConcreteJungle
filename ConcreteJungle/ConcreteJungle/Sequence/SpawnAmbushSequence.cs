@@ -1,7 +1,9 @@
 ﻿using ConcreteJungle.Helper;
 using IRBTModUtils.Extension;
+using MonsterMashup.UI;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using us.frostraptor.modUtils;
 
@@ -11,7 +13,9 @@ namespace ConcreteJungle.Sequence
     {
         private Vector3 AmbushPosition { get; set; }
 
-        private List<AbstractActor> AttackingActors { get; set; }
+        private OriginVisualization OriginVisualization { get; set; }
+
+        private List<(AbstractActor actor, Vector3 spawnPos, Quaternion spawnRot)> AttackingActors { get; set; }
 
         private List<BattleTech.Building> BuildingsToCollapse { get; set; }
 
@@ -27,7 +31,7 @@ namespace ConcreteJungle.Sequence
 
         public override bool IsComplete { get { return this.state == SpawnAmbushSequenceState.Finished; } }
 
-        public SpawnAmbushSequence(CombatGameState combat, Vector3 ambushPos, List<AbstractActor> spawnedActors,
+        public SpawnAmbushSequence(CombatGameState combat, Vector3 ambushPos, List<(AbstractActor, Vector3, Quaternion)> spawnedActors,
             List<BattleTech.Building> buildingsToLevel, List<ICombatant> targets, bool applyAttacks) : base(combat)
         {
             this.AmbushPosition = ambushPos;
@@ -40,7 +44,7 @@ namespace ConcreteJungle.Sequence
         public override void OnAdded()
         {
             base.OnAdded();
-            this.SetState(SpawnAmbushSequenceState.Taunting);
+            this.SetState(SpawnAmbushSequenceState.Collapsing);
             Mod.Log.Debug?.Write($"Starting new SpawnAmbushSequence in state: {this.state}");
         }
 
@@ -50,6 +54,10 @@ namespace ConcreteJungle.Sequence
             this.timeInCurrentState += Time.deltaTime;
             switch (this.state)
             {
+                case SpawnAmbushSequenceState.DebugVisuals:
+                    this.CreateOriginVisuals();
+                    this.SetState(SpawnAmbushSequenceState.Collapsing);
+                    break;
                 case SpawnAmbushSequenceState.Collapsing:
                     this.CollapseNextBuilding();
                     if (this.BuildingsToCollapse.Count < 1)
@@ -83,35 +91,74 @@ namespace ConcreteJungle.Sequence
                     break;
                 case SpawnAmbushSequenceState.Finished:
                     ModState.CurrentSpawningLance = null;
+                    //if (originVisualization != null) originVisualization.Destroy();
                     break;
                 default:
                     return;
             }
         }
 
+        private void CreateOriginVisuals()
+        {
+            Mod.Log.Debug?.Write($"Creating origin visualization at vector: {this.AmbushPosition}");
+            this.OriginVisualization = new OriginVisualization(this.AmbushPosition);
+            this.OriginVisualization.Init();
+            this.OriginVisualization.Show();
+        }
+
         private void UpdateSpawnedActors()
         {
             // Attempt to solve the underground issues
-            foreach (AbstractActor actor in this.AttackingActors)
+            foreach ((AbstractActor actor, Vector3 spawnPos, Quaternion spawnRot) t in this.AttackingActors)
             {
-                UnitSpawnPointGameLogic uspgl = Combat.ItemRegistry.GetItemByGUID<UnitSpawnPointGameLogic>(actor.spawnerGUID);
-                uspgl.UpdateHexPosition();
+                Mod.Log.Debug?.Write($"Aligning spawn position to nearest hex for actor: {t.actor.DistinctId()}");
+                Vector3 hexPosition = Combat.HexGrid.GetClosestPointOnGrid(t.spawnPos);
+                RaycastHit[] array = Physics.RaycastAll(hexPosition + SnapToTerrain.aboveTerrainOffset, Vector3.down, SnapToTerrain.terrainDistance * 2f);
+                Vector3? vector = null;
+                for (int i = 0; i < array.Length; i++)
+                {
+                    RaycastHit raycastHit = array[i];
+                    if ((raycastHit.collider.GetComponent<ObstructionGameLogic>() != null || raycastHit.collider.GetComponent<Terrain>() != null) && (!vector.HasValue || vector.Value.y < raycastHit.point.y))
+                    {
+                        vector = raycastHit.point;
+                    }
+                }
+                if (vector.HasValue)
+                {
+                    hexPosition.y = vector.Value.y;
+                }
+                hexPosition.y = Combat.MapMetaData.GetLerpedHeightAt(hexPosition);
+
+                t.actor.TeleportActor(hexPosition);
+                Mod.Log.Debug?.Write($"  Teleported actor to position: {hexPosition}");
+
+                //t.actor.CurrentRotation.SetLookRotation(targetDir, Vector3.up);
+                t.actor.GameRep.transform.LookAt(this.AmbushPosition);
+                t.actor.CurrentRotation = t.actor.GameRep.transform.localRotation;
+                t.actor.OnPositionUpdate(t.actor.CurrentPosition, t.actor.CurrentRotation, -1, updateDesignMask: true, null);
+
+                Mod.Log.Debug?.Write($"  Set rotation {t.actor.CurrentRotation} to face position {this.AmbushPosition}");
+
+                t.actor.GameRep.FadeIn(1f);
             }
         }
 
         private void CollapseNextBuilding()
         {
+            Mod.Log.Debug?.Write($"Collapsing ambush buildings: {this.BuildingsToCollapse.Count}");
             this.timeSinceLastCollapse += Time.deltaTime;
             if (this.timeSinceLastCollapse > this.timeBetweenBuildingCollapses)
             {
                 if (this.BuildingsToCollapse.Count > 0)
                 {
-                    BattleTech.Building buildingToCollapse = this.BuildingsToCollapse[0];
+                    BattleTech.Building toCollapse = this.BuildingsToCollapse.First();
+
+                    Mod.Log.Debug?.Write($"Collapsing ambush building: {CombatantUtils.Label(toCollapse)}");
+                    toCollapse.FlagForDeath("Ambush Collapse", DeathMethod.Unknown, DamageType.Artillery, 0, -1, "0", false);
+                    toCollapse.HandleDeath("0");
+
                     this.BuildingsToCollapse.RemoveAt(0);
 
-                    Mod.Log.Debug?.Write($"Collapsing ambush building: {CombatantUtils.Label(buildingToCollapse)}");
-                    buildingToCollapse.FlagForDeath("Ambush Collapse", DeathMethod.Unknown, DamageType.Artillery, 0, -1, "0", false);
-                    buildingToCollapse.HandleDeath("0");
                 }
                 this.timeSinceLastCollapse = 0f;
             }
@@ -124,7 +171,7 @@ namespace ConcreteJungle.Sequence
             {
                 if (this.AttackingActors.Count > 0)
                 {
-                    AbstractActor actor = this.AttackingActors[0];
+                    AbstractActor actor = this.AttackingActors.First().actor;
                     this.AttackingActors.RemoveAt(0);
                     Mod.Log.Info?.Write($"Ambush attack from actor: {actor.DistinctId()}");
 
@@ -197,8 +244,8 @@ namespace ConcreteJungle.Sequence
                 Mod.Log.Debug?.Write("Taunting player.");
                 // Create a quip
                 Guid g = Guid.NewGuid();
-                QuipHelper.PlayQuip(ModState.Combat, g.ToString(),
-                    AttackingActors[0].team,
+                Team t = this.AttackingActors.First().actor.team;
+                QuipHelper.PlayQuip(ModState.Combat, g.ToString(), t,
                     "Vehicle Ambush", Mod.Config.Quips.SpawnAmbush, this.timeToTaunt * 3f);
                 hasTaunted = true;
             }
@@ -221,6 +268,7 @@ namespace ConcreteJungle.Sequence
         private enum SpawnAmbushSequenceState
         {
             NotSet,
+            DebugVisuals,
             Collapsing,
             Taunting,
             Spawning,

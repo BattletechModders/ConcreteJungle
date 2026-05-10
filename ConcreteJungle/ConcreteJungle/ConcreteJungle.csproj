@@ -28,8 +28,8 @@
     <AssemblyTitle>ConcreteJungle</AssemblyTitle>
     <Product>ConcreteJungle</Product>
     <Copyright>Copyright © 2023</Copyright>
-    <AssemblyVersion>2.3.1</AssemblyVersion>
-    <FileVersion>2.3.1</FileVersion>
+    <AssemblyVersion>2.4.0</AssemblyVersion>
+    <FileVersion>2.4.0</FileVersion>
     <LangVersion>11</LangVersion>
   </PropertyGroup>
 
@@ -44,12 +44,12 @@
     <PublicizerRuntimeStrategies>Unsafe</PublicizerRuntimeStrategies>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Krafs.Publicizer" Version="2.2.1" />
+    <PackageReference Include="Krafs.Publicizer" Version="2.3.0" />
     <Publicize Include="Assembly-CSharp;UnityEngine.UI" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="HarmonyX" Version="2.10.1">
+    <PackageReference Include="HarmonyX" Version="2.16.1">
       <PrivateAssets>all</PrivateAssets>
       <ExcludeAssets>runtime</ExcludeAssets>
     </PackageReference>
@@ -90,6 +90,9 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.PhysicsModule">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TerrainModule">
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UI">
